@@ -12,22 +12,38 @@ namespace OC2Haptic.Core
         private StarFeedbackMode mode=StarFeedbackMode.HapticsAndAudio;
         public RewardOutput(HapticEngine engine,IRewardAudioBackend audio,Action<string> log=null,Func<int,int> audioDurationMs=null)
         {this.engine=engine;this.audio=audio;this.log=log;this.audioDurationMs=audioDurationMs??(star=>0);}
-        public StarFeedbackMode Mode {get{return mode;}set{if(mode!=value){Stop();mode=value;}}}
+        public StarFeedbackMode Mode
+        {
+            get{return mode;}
+            set
+            {
+                if(mode==value)return;
+                if(HasHaptics(mode) && !HasHaptics(value))engine.StopAll();
+                if(HasAudio(mode) && !HasAudio(value))Interrupt();
+                mode=value;
+            }
+        }
+        private static bool HasHaptics(StarFeedbackMode value){return value==StarFeedbackMode.HapticsAndAudio || value==StarFeedbackMode.HapticsOnly;}
+        private static bool HasAudio(StarFeedbackMode value){return value==StarFeedbackMode.HapticsAndAudio || value==StarFeedbackMode.AudioOnly;}
         public bool Emit(int index,string key,GameEventType type,HapticPattern pattern,double now,float intensity,float volume,bool useDefaultPattern=true,
             StarFeedbackMode? previewMode=null)
         {
             EventFeedback feedback=EventFeedback.For(type);bool star=GameEventTypes.IsStar(type);
-            StarFeedbackMode effectiveMode=previewMode??mode;
-            if(star && effectiveMode==StarFeedbackMode.Disabled)return false;
+            StarFeedbackMode requested=previewMode??StarFeedbackMode.HapticsAndAudio;
+            bool haptics=HasHaptics(mode) && (!star || HasHaptics(requested));
+            bool sound=star && HasAudio(mode) && HasAudio(requested);
+            StarFeedbackMode effectiveMode=haptics?(sound?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly)
+                :(sound?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);
+            if(star && !haptics && !sound)return false;
+            if(mode==StarFeedbackMode.Disabled)return false;
             if(star && now<audioUntil && feedback.Priority<=audioPriority)return false;
             if(star && engine.IsBusyAtOrAbove(index,feedback.Priority,now))return false;
             if(star)engine.Cancel(index);
             if((star && now<audioUntil) || (!star && feedback.Priority>=55))Interrupt();
-            bool haptics=!star || effectiveMode!=StarFeedbackMode.AudioOnly;
             if(pattern==null && useDefaultPattern)pattern=star && type==GameEventType.StarMilestone1 && effectiveMode==StarFeedbackMode.HapticsOnly
                 ?EventFeedback.OneStarHapticsOnly:feedback.Pattern;
             bool accepted=haptics && engine.Play(index,key,pattern,feedback.Priority,feedback.CooldownMs,now,intensity);
-            if(star && (effectiveMode==StarFeedbackMode.HapticsAndAudio || effectiveMode==StarFeedbackMode.AudioOnly))
+            if(sound)
             {
                 float gain=SafeVolume(volume);
                 if(gain>0 && !audioFaulted)

@@ -1,0 +1,49 @@
+[Info   :OC2 Haptic] Reward audio prepared | pack=champion_fanfare star=1 durationMs=1130 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=champion_fanfare star=2 durationMs=1700 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=champion_fanfare star=3 durationMs=2480 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=champion_fanfare star=4 durationMs=4050 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=kitchen_rock star=1 durationMs=1010 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=kitchen_rock star=2 durationMs=1530 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=kitchen_rock star=3 durationMs=2350 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=kitchen_rock star=4 durationMs=3800 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=turbo_swing star=1 durationMs=1050 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=turbo_swing star=2 durationMs=1570 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=turbo_swing star=3 durationMs=2300 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=turbo_swing star=4 durationMs=3850 rate=48000 channels=2
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.4.1-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Menu layout | width=520 height=800 noteHeight=43 rowHeight=40
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=1 durationMs=1050 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=1 startMs=10067.0862 motorWindowMs=180 mode=HapticsAndAudio plannedAudioEndMs=11117.0862
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone1 mode=HapticsAndAudio accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=2 durationMs=1570 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=2 startMs=11383.0593 motorWindowMs=285 mode=HapticsAndAudio plannedAudioEndMs=12953.0593
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone2 mode=HapticsAndAudio accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=3 durationMs=2300 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=3 startMs=12971.9165 motorWindowMs=425 mode=HapticsAndAudio plannedAudioEndMs=15271.9165
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone3 mode=HapticsAndAudio accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=4 durationMs=3850 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=4 startMs=15353.7263 motorWindowMs=660 mode=HapticsAndAudio plannedAudioEndMs=19203.7263
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone4 mode=HapticsAndAudio accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=1 durationMs=1050 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=1 startMs=21003.8819 motorWindowMs=180 mode=HapticsAndAudio plannedAudioEndMs=22053.8819
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone1 mode=HapticsAndAudio accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=ThrowSuccess mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=CatchSuccess mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=DeliveryOrdered mode=Automatic accepted=True XInput=0 master=1 gain=0.97
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] Menu preview | type=DeliveryOutOfOrder mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=DeliveryFailure mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=OrderExpired mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=Generic80ms mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=Generic80ms mode=Automatic accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=0 scheduled=0

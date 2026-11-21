@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2-alpha — 2026-11-21
+
+- Simplify F6 to independent haptic/audio masters with master intensity/relative volume. Keep pack selection and all event/star previews; remove per-event toggles/gains and the redundant four-mode selector.
+- Both automatic feedback and explicit previews respect the channel masters. Disabling one channel stops only that channel; enabling does not replay. F10 remains all-off/all-on, including mixed channel states.
+- Retire old per-event keys and extra gains; migrate legacy combined switch/mode once, honoring explicit new keys. Preserve custom patterns, binding, master intensity, relative volume and selected pack. Keep original Combo baseline and all waveform timing/priorities.
+- User confirms G star feedback/music works; record the actual0.4.1 TurboSwing1–4 preview log separately from unobserved real NGP milestones. Roadmap now maps every A–G stage and later optional scope.
+
 ## 0.4.1-alpha — 2026-11-21
 
 - Remove both rejected shipped sound sets and generated-tone fallback. AddUltra Victory v3: TurboSwing(default), ChampionFanfare and KitchenRock,12uneditedPCM WAVs with sourceMIDI/scripts/credits.

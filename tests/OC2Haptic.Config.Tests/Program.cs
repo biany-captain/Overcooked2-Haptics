@@ -27,27 +27,26 @@ internal static class Program
         {
             string path=Path.Combine(root,"delivery-"+i+".cfg");File.WriteAllText(path,deliveryConfigs[i]);
             var settings=new HapticConfig(new ConfigFile(path,false));
-            bool correct=settings.DeliveryOrdered.Value==(i==1)&&!settings.DeliveryOutOfOrder.Value&&!settings.DeliveryUnclassified.Value;
-            correct=correct&&!File.ReadAllText(path).Contains("DeliverySuccess =");
-            if(!correct){failed++;Console.WriteLine("FAIL delivery preference migration "+i);}else Console.WriteLine("PASS delivery preference migration "+i);
+            bool correct=!File.ReadAllText(path).Contains("[Events]") && settings.HapticsEnabled.Value && settings.AudioEnabled.Value;
+            if(!correct){failed++;Console.WriteLine("FAIL retired event switches removed "+i);}else Console.WriteLine("PASS retired event switches removed "+i);
         }
         string gainPath=Path.Combine(root,"gain-preserve.cfg");
         File.WriteAllText(gainPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nMode = AudioOnly\nSoundVolume = 0.7\n[EventStrength]\nStarMilestone1 = 1.5\n");
         var gains=new HapticConfig(new ConfigFile(gainPath,false));
         bool gainCorrect=Math.Abs(gains.Intensity-.4f)<.0001 && Math.Abs(gains.SoundVolume.Value-.7f)<.0001 &&
-            Math.Abs(gains.EventGains[GameEventType.StarMilestone1].Value-1.5f)<.0001;
+            !File.ReadAllText(gainPath).Contains("[EventStrength]");
         gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 &&
-            Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.33f)<.0001 &&
-            gains.FeedbackMode==StarFeedbackMode.AudioOnly && gains.EventGains[GameEventType.CatchSuccess].Value==1;
-        if(!gainCorrect){failed++;Console.WriteLine("FAIL event gains and independent preview configuration");}
-        else Console.WriteLine("PASS event gains and independent preview configuration");
+            Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.22f)<.0001 &&
+            gains.FeedbackMode==StarFeedbackMode.AudioOnly && !gains.HapticsEnabled.Value && gains.AudioEnabled.Value;
+        if(!gainCorrect){failed++;Console.WriteLine("FAIL retired gains reset while master volume and mode migrate");}
+        else Console.WriteLine("PASS retired gains reset while master volume and mode migrate");
         string invalidPath=Path.Combine(root,"gain-infinity.cfg");
         File.WriteAllText(invalidPath,"[EventStrength]\nThrowSuccess = Infinity\n");
         var clamped=new HapticConfig(new ConfigFile(invalidPath,false));
-        bool clampCorrect=clamped.EventGains[GameEventType.ThrowSuccess].Value==2 &&
-            clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right<=1;
-        if(!clampCorrect){failed++;Console.WriteLine("FAIL configured nonfinite gain range clamp");}
-        else Console.WriteLine("PASS configured nonfinite gain range clamp");
+        bool clampCorrect=!File.ReadAllText(invalidPath).Contains("[EventStrength]") &&
+            clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right==.32f;
+        if(!clampCorrect){failed++;Console.WriteLine("FAIL retired nonfinite gain cannot affect output");}
+        else Console.WriteLine("PASS retired nonfinite gain cannot affect output");
         string musicPath=Path.Combine(root,"v14-preserve.cfg");
         File.WriteAllText(musicPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nSoundPackId = future-pack\nSoundVolume = 0.7006757\nMaxSoundDurationMs = 700\n[Patterns]\nStarMilestone1 = 0.05,0.22,75\nStarMilestone2 = 0.9,0.1,123\nStarMilestone1HapticsOnly = 0.05,0.22,75;0,0,45;0.03,0.13,25\n");
         var music=new HapticConfig(new ConfigFile(musicPath,false));
@@ -77,7 +76,36 @@ internal static class Program
         retiredCorrect=retiredCorrect && defaults.SoundPackId.Value=="turbo_swing" && defaults.SoundVolume.Value==1;
         if(!retiredCorrect){failed++;Console.WriteLine("FAIL retired selections migrate and relative gameSFX gain defaults100percent");}
         else Console.WriteLine("PASS retired selections migrate and relative gameSFX gain defaults100percent");
-        Console.WriteLine("RESULT " + (content.Length+7 - failed) + "/" + (content.Length+7) + " config migration passed");
+        bool channelsCorrect=defaults.HapticsEnabled.Value && defaults.AudioEnabled.Value;
+        foreach(string mode in new[]{"HapticsAndAudio","HapticsOnly","AudioOnly","Disabled","BadMode"})
+        {
+            string path=Path.Combine(root,"channels-"+mode+".cfg");
+            File.WriteAllText(path,"[General]\nEnabled = true\n[StarFeedback]\nMode = "+mode+"\n");
+            var migrated=new HapticConfig(new ConfigFile(path,false));
+            // Invalid enum text is rejected by BepInEx and falls back to the legacy default.
+            bool h=mode=="HapticsAndAudio" || mode=="HapticsOnly" || mode=="BadMode";
+            bool a=mode=="HapticsAndAudio" || mode=="AudioOnly" || mode=="BadMode";
+            channelsCorrect=channelsCorrect && migrated.HapticsEnabled.Value==h && migrated.AudioEnabled.Value==a &&
+                !File.ReadAllText(path).Contains("\nMode =") && !File.ReadAllText(path).Contains("\nEnabled =");
+        }
+        string offPath=Path.Combine(root,"channels-off.cfg");
+        File.WriteAllText(offPath,"[General]\nEnabled = false\n[StarFeedback]\nMode = HapticsAndAudio\n");
+        var off=new HapticConfig(new ConfigFile(offPath,false));channelsCorrect=channelsCorrect && !off.AnyOutputEnabled;
+        if(!channelsCorrect){failed++;Console.WriteLine("FAIL legacy modes migrate to independent master channels");}
+        else Console.WriteLine("PASS legacy modes migrate to independent master channels");
+        string explicitPath=Path.Combine(root,"channels-explicit.cfg");
+        File.WriteAllText(explicitPath,"[General]\nEnabled = false\nHapticsEnabled = false\nAudioEnabled = true\nMasterIntensity = 0.42\n[Combo]\nEnabled = false\n[Stars]\nEnabled = false\n[StarFeedback]\nMode = Disabled\nSoundVolume = 0.37\nSoundPackId = kitchen_rock\n");
+        var explicitChannels=new HapticConfig(new ConfigFile(explicitPath,false));
+        bool explicitCorrect=!explicitChannels.HapticsEnabled.Value && explicitChannels.AudioEnabled.Value && explicitChannels.FeedbackMode==StarFeedbackMode.AudioOnly;
+        explicitChannels.ToggleAllOutput();explicitCorrect=explicitCorrect && !explicitChannels.AnyOutputEnabled;
+        explicitChannels.ToggleAllOutput();explicitCorrect=explicitCorrect && explicitChannels.HapticsEnabled.Value && explicitChannels.AudioEnabled.Value &&
+            explicitChannels.Intensity==.42f && explicitChannels.SoundVolume.Value==.37f && explicitChannels.SoundPackId.Value=="kitchen_rock";
+        var reloaded=new HapticConfig(new ConfigFile(explicitPath,false));
+        explicitCorrect=explicitCorrect && reloaded.HapticsEnabled.Value && reloaded.AudioEnabled.Value &&
+            !File.ReadAllText(explicitPath).Contains("\nEnabled =");
+        if(!explicitCorrect){failed++;Console.WriteLine("FAIL explicit channel precedence F10 and persistence");}
+        else Console.WriteLine("PASS explicit channel precedence F10 and persistence");
+        Console.WriteLine("RESULT " + (content.Length+9 - failed) + "/" + (content.Length+9) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }

@@ -8,16 +8,13 @@ namespace OC2Haptic.Config
 {
     internal sealed class HapticConfig
     {
-        internal readonly ConfigEntry<bool> Enabled, ThrowSuccess, CatchSuccess, DeliveryOrdered, DeliveryOutOfOrder,
-            DeliveryUnclassified, DeliveryFailure, OrderExpired, ComboEnabled, StarsEnabled, RespectGameFocus;
+        internal readonly ConfigEntry<bool> HapticsEnabled, AudioEnabled, RespectGameFocus;
         internal readonly ConfigEntry<bool> DebugLogEvents, ScoreSourceProbe;
-        internal readonly ConfigEntry<float> MasterIntensity, ComboIntensity, SoundVolume;
+        internal readonly ConfigEntry<float> MasterIntensity, SoundVolume;
         internal readonly ConfigEntry<int> XInputIndex, LocalPadSlot, MaxHapticTier;
         internal readonly ConfigEntry<KeyCode> MenuKey, ToggleKey;
         internal readonly ConfigEntry<ComboTriggerMode> ComboMode;
-        internal readonly ConfigEntry<StarFeedbackMode> StarMode;
         internal readonly Dictionary<GameEventType, ConfigEntry<string>> Patterns = new Dictionary<GameEventType, ConfigEntry<string>>();
-        internal readonly Dictionary<GameEventType, ConfigEntry<float>> EventGains = new Dictionary<GameEventType, ConfigEntry<float>>();
         internal readonly ConfigEntry<string> OneStarTail;
         internal readonly ConfigEntry<string> SoundPackId;
         private readonly Dictionary<GameEventType, HapticPattern> parsed = new Dictionary<GameEventType, HapticPattern>();
@@ -27,7 +24,15 @@ namespace OC2Haptic.Config
 
         internal HapticConfig(ConfigFile config)
         {
-            Enabled = Output(config.Bind("General", "Enabled", true, "Global switch for this plugin's haptics and reward audio."));
+            var legacyEnabled=config.Bind("General","Enabled",true,"Retired combined output switch.");
+            var legacyMode=config.Bind("StarFeedback","Mode",StarFeedbackMode.HapticsAndAudio,"Retired star output mode.");
+            HapticsEnabled=Output(config.Bind("General","HapticsEnabled",legacyEnabled.Value &&
+                (legacyMode.Value==StarFeedbackMode.HapticsAndAudio || legacyMode.Value==StarFeedbackMode.HapticsOnly),
+                "Master switch for all haptics, including explicit tests. Independent of audio."));
+            AudioEnabled=Output(config.Bind("General","AudioEnabled",legacyEnabled.Value &&
+                (legacyMode.Value==StarFeedbackMode.HapticsAndAudio || legacyMode.Value==StarFeedbackMode.AudioOnly),
+                "Master switch for reward audio, including explicit tests. Follows game master/SFX volume."));
+            config.Remove(legacyEnabled.Definition);config.Remove(legacyMode.Definition);
             MasterIntensity = Output(config.Bind("General", "MasterIntensity", .75f,
                 new ConfigDescription("Haptic motor multiplier, independent of audio gain.", new AcceptableValueRange<float>(0, 1))));
             DebugLogEvents = config.Bind("General", "DebugLogEvents", false, "Log real event routing, classification and reward decisions.");
@@ -36,23 +41,15 @@ namespace OC2Haptic.Config
                 new ConfigDescription("Explicit Windows output slot, -1 unbound.", new AcceptableValueRange<int>(-1, 3))));
             LocalPadSlot = Output(config.Bind("Devices", "LocalGamePadSlot", -1,
                 new ConfigDescription("Actual game pad number, independent of XInput. -1 unbound.", new AcceptableValueRange<int>(-1, 14))));
-            ThrowSuccess = Output(config.Bind("Events", "ThrowSuccess", true, "Confirmed local throw feedback."));
-            CatchSuccess = Output(config.Bind("Events", "CatchSuccess", true, "Candidate two-part catch feedback; current local/host Hook."));
-            var legacySuccess = config.Bind("Events", "DeliverySuccess", true, "Legacy success switch, migrated to the three categories.");
-            DeliveryOrdered = Output(config.Bind("Events", "DeliveryOrdered", legacySuccess.Value, "Ordered delivery and its permitted Combo feedback."));
-            DeliveryOutOfOrder = Output(config.Bind("Events", "DeliveryOutOfOrder", legacySuccess.Value, "Successful out-of-order delivery, distinct from failure."));
-            DeliveryUnclassified = Output(config.Bind("Events", "DeliveryUnclassified", legacySuccess.Value, "Conservative light success feedback when classification is unavailable."));
-            config.Remove(legacySuccess.Definition);
-            DeliveryFailure = Output(config.Bind("Events", "DeliveryFailure", true, "Rejected delivery, low-motor feedback."));
-            OrderExpired = Output(config.Bind("Events", "OrderExpired", true, "Actual expiry feedback, no advance warning."));
-            ComboEnabled = Output(config.Bind("Combo", "Enabled", true, "Enable trusted tier feedback; disabling retains ordered/out-of-order classification."));
+            foreach(string key in new[]{"ThrowSuccess","CatchSuccess","DeliverySuccess","DeliveryOrdered","DeliveryOutOfOrder",
+                "DeliveryUnclassified","DeliveryFailure","OrderExpired"})
+                config.Remove(config.Bind("Events",key,true,"Retired per-event switch; use the channel masters.").Definition);
+            config.Remove(config.Bind("Combo","Enabled",true,"Retired per-event switch.").Definition);
+            config.Remove(config.Bind("Stars","Enabled",true,"Retired per-event switch.").Definition);
             ComboMode = Output(config.Bind("Combo", "TriggerMode", ComboTriggerMode.EveryOrderedDelivery, "EveryOrderedDelivery or OnLevelUp; authoritative game state only."));
             MaxHapticTier = Output(config.Bind("Combo", "MaxHapticTier", 4,
                 new ConfigDescription("Haptic ceiling only; raw streak is never truncated.", new AcceptableValueRange<int>(1, 4))));
-            ComboIntensity = Output(config.Bind("Combo", "ComboMasterIntensity", .85f,
-                new ConfigDescription("Additional Combo motor multiplier.", new AcceptableValueRange<float>(0, 1))));
-            StarsEnabled = Output(config.Bind("Stars", "Enabled", true, "First committed-score threshold crossing; no retroactive or final-star guarantee."));
-            StarMode = Output(config.Bind("StarFeedback", "Mode", StarFeedbackMode.HapticsAndAudio, "HapticsAndAudio, HapticsOnly, AudioOnly or Disabled."));
+            config.Remove(config.Bind("Combo","ComboMasterIntensity",.85f,"Retired adjustable multiplier; keep the original Combo baseline.").Definition);
             SoundVolume = Output(config.Bind("StarFeedback", "SoundVolume", 1f,
                 new ConfigDescription("Relative to game master/SFX volume: 1=100%, lower values attenuate. Applied once; respects game mute.", new AcceptableValueRange<float>(0, 1))));
             var legacyDuration=config.Bind("StarFeedback","MaxSoundDurationMs",1000,"Removed with generated crisp sound.");
@@ -63,9 +60,8 @@ namespace OC2Haptic.Config
             RespectGameFocus = Output(config.Bind("Audio", "RespectGameFocus", true, "Stop this plugin's feedback on focus loss. Recommended true."));
             foreach (GameEventType type in Enum.GetValues(typeof(GameEventType)))
             {
+                config.Remove(config.Bind("EventStrength",type.ToString(),1f,"Retired extra event multiplier; use master intensity.").Definition);
                 if (type == GameEventType.DeliverySuccess) continue;
-                EventGains[type]=Output(config.Bind("EventStrength",type.ToString(),1f,
-                    new ConfigDescription("Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.",new AcceptableValueRange<float>(0,2))));
                 Patterns[type] = Output(config.Bind("Patterns", type.ToString(), PatternCodec.Format(EventFeedback.For(type).Pattern),
                     "Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics."));
                 if(GameEventTypes.IsStar(type))MigrateDefault(Patterns[type],LegacyStars[GameEventTypes.StarLevel(type)-1],EventFeedback.For(type).Pattern);
@@ -76,7 +72,7 @@ namespace OC2Haptic.Config
             var legacyTestKey = config.Bind("Hotkeys", "TestRumble", KeyCode.F6, "Legacy key, migrated to OpenMenu.");
             MenuKey = config.Bind("Hotkeys", "OpenMenu", legacyTestKey.Value, "F6 management menu. None disables the key.");
             config.Remove(legacyTestKey.Definition);
-            ToggleKey = config.Bind("Hotkeys", "ToggleMod", KeyCode.F10, "Global feedback switch, same setting as the F6 page.");
+            ToggleKey = config.Bind("Hotkeys", "ToggleMod", KeyCode.F10, "All-off if either channel is on; all-on when both are off. F6 channel switches remain independent.");
             RefreshPatterns();
             config.Save();
         }
@@ -107,7 +103,15 @@ namespace OC2Haptic.Config
         internal void WatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, true); }
         internal void UnwatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, false); }
         internal float Intensity { get { return RewardOutput.SafeVolume(MasterIntensity.Value); } }
-        internal StarFeedbackMode FeedbackMode { get { return Enum.IsDefined(typeof(StarFeedbackMode), StarMode.Value) ? StarMode.Value : StarFeedbackMode.Disabled; } }
+        internal bool AnyOutputEnabled { get { return HapticsEnabled.Value || AudioEnabled.Value; } }
+        internal StarFeedbackMode FeedbackMode { get { return HapticsEnabled.Value
+            ?(AudioEnabled.Value?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly)
+            :(AudioEnabled.Value?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled); } }
+        internal void ToggleAllOutput()
+        {
+            bool next=!AnyOutputEnabled;
+            HapticsEnabled.Value=next;AudioEnabled.Value=next;
+        }
         internal void RefreshPatterns()
         {
             InvalidPatterns = "";
@@ -115,48 +119,15 @@ namespace OC2Haptic.Config
             {
                 HapticPattern pattern;
                 if (!PatternCodec.TryParse(pair.Value.Value, GameEventTypes.IsStar(pair.Key), out pattern)) InvalidPatterns += pair.Key + " ";
-                parsed[pair.Key] = pattern==null?null:pattern.WithGain(EventGains[pair.Key].Value);
+                parsed[pair.Key] = pattern;
             }
             if (!PatternCodec.TryParse(OneStarTail.Value, true, out tailPattern)) InvalidPatterns += "StarMilestone1HapticsOnly";
-            if(tailPattern!=null)tailPattern=tailPattern.WithGain(EventGains[GameEventType.StarMilestone1].Value);
         }
         internal HapticPattern PatternFor(GameEventType type,StarFeedbackMode? previewMode=null)
         {
             if (type == GameEventType.StarMilestone1 && (previewMode??FeedbackMode) == StarFeedbackMode.HapticsOnly) return tailPattern;
             HapticPattern pattern;
             return parsed.TryGetValue(type, out pattern) ? pattern : null;
-        }
-        internal bool IsEventEnabled(GameEventType type)
-        {
-            switch (type)
-            {
-                case GameEventType.ThrowSuccess: return ThrowSuccess.Value;
-                case GameEventType.CatchSuccess: return CatchSuccess.Value;
-                case GameEventType.DeliverySuccess: return DeliveryOrdered.Value || DeliveryOutOfOrder.Value || DeliveryUnclassified.Value;
-                case GameEventType.DeliveryOrdered: return DeliveryOrdered.Value;
-                case GameEventType.DeliveryOutOfOrder: return DeliveryOutOfOrder.Value;
-                case GameEventType.DeliveryUnclassified: return DeliveryUnclassified.Value;
-                case GameEventType.DeliveryFailure: return DeliveryFailure.Value;
-                case GameEventType.OrderExpired: return OrderExpired.Value;
-                default: return GameEventTypes.IsStar(type) ? StarsEnabled.Value : GameEventTypes.IsCombo(type) && ComboEnabled.Value && DeliveryOrdered.Value;
-            }
-        }
-        internal void SetEventEnabled(GameEventType type, bool enabled)
-        {
-            switch (type)
-            {
-                case GameEventType.ThrowSuccess: ThrowSuccess.Value = enabled; break;
-                case GameEventType.CatchSuccess: CatchSuccess.Value = enabled; break;
-                case GameEventType.DeliveryOrdered: DeliveryOrdered.Value = enabled; break;
-                case GameEventType.DeliveryOutOfOrder: DeliveryOutOfOrder.Value = enabled; break;
-                case GameEventType.DeliveryUnclassified: DeliveryUnclassified.Value = enabled; break;
-                case GameEventType.DeliveryFailure: DeliveryFailure.Value = enabled; break;
-                case GameEventType.OrderExpired: OrderExpired.Value = enabled; break;
-                default:
-                    if (GameEventTypes.IsStar(type)) StarsEnabled.Value = enabled;
-                    else if (GameEventTypes.IsCombo(type)) ComboEnabled.Value = enabled;
-                    break;
-            }
         }
     }
 }

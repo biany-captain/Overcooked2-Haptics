@@ -1,30 +1,28 @@
-# Test report — 0.4.1-alpha Ultra Victory v3
+# Test report — 0.4.2-alpha simplified controls
 
-2026-11-21. User rejected both old shipped sound sets; approved three whole new packs,12uneditedWAV, defaultturbo_swing, full3.80–4.05s four-star files, unchanged short haptics. No mixed-star or crowd-layer feature. User approved game master/SFX following with default relativegain1 and custom slider, and localvolume.7006757->1; preserve currentHapticsOnly/master1/ordergain.97.
+2026-11-21. User approved two independent master switches plus master intensity/relative volume, removal of individual event switches/gains and four-mode UI, retention of all previews/packs, and F10 all-off/all-on. No new Hook, waveform timing, priority, music edit or multiplayer feature.
 
-## Software verification
+## Verification
 
-- Core80/80 PASS. Sound-pack focused5/5: retired IDs/case variants excluded, absent root produces empty catalog, all12actual files decode at exact approved millisecond lengths,4050/5000ms accepted and5001ms rejected. Focused firstRED2/5 before implementation. Obsolete synthetic-tone-only test removed with that explicitly removed feature; gameplay/output regressions retained.
-- Actual BepInEx config11/11 PASS. Retired selections migrate, unknown custom pack/volume/profile precision/mode/master remain; new relativeSoundVolume defaults1, obsolete MaxSoundDurationMs is removed. FirstRED9/11 thenGREEN11/11.
-- Actual game-managed-data probe5/5 PASS. No scoreHook, threshold,Combo or dedup change.
-- Actual Unity2017.4/net35/x86 references build0warnings/errors, assembly0.4.1.0. No runtime dependency added.
+- Core83/83 PASS, including three new regressions first observed RED0/3: actions/explicit previews cannot bypass channel masters; haptics-off leaves current music playing; audio-off leaves current motor task running. Re-enabling does not replay. Existing routing, cooldown, queue, milestone and replacement tests remain green.
+- Actual BepInEx config13/13 PASS. New keys initially caused expected missing-API RED. Check legacy modes/global-off, explicit new-key precedence, F10 from a mixed state then all-on, persistence, retired event switches and gains removed, custom precise patterns/master/relative volume/pack/binding/hotkeys retained. An intermediate test oracle mistakenly matched TriggerMode when checking retired Mode; correcting the match to the complete key line fixed that test, with no production change.
+- Actual game-managed-data probe5/5 PASS; score/classification/threshold sources unchanged.
+- Actual Unity2017.4/net35/x86 build0 warnings/errors, assembly0.4.2.0; no new dependency.
 
-Evidence: evidence/core-tests-0.4.1.txt,config-tests-0.4.1.txt,probe-tests-0.4.1.txt,build-0.4.1.txt and audio-assets-0.4.1.json. Sourceprovenance/author notices and exact originalWAV hashes: assets/audio/SOURCES.md.
+Evidence: evidence/core-tests-0.4.2.txt, config-tests-0.4.2.txt, probe-tests-0.4.2.txt, build-0.4.2.txt. These checks do not execute the Unity menu or prove device behavior.
 
-## Audio and scope
+## Behavior and migration
 
-Three presets: TurboSwing1050/1570/2300/3850ms; ChampionFanfare1130/1700/2480/4050ms; KitchenRock1010/1530/2350/3800ms. All12WAV48kHz/PCM16/stereo, clipped samples0, final samples0or1/32768; total5,149,960bytes. Mapping JSON and actual frame length agree within one48kHz sample. No file was trimmed, re-encoded or amplified. Digital peaks/RMS do not establish human comfort or equal perceived loudness.
+General.HapticsEnabled and AudioEnabled control both automatic and explicit output. Existing internal enum is derived from these flags, not an editable third control. Disabling one flag stops only that channel, clears pending feedback and does not re-poll/reset the device into stopping the other channel. Both disabled suppress output while score snapshots continue consuming crossed milestones. F10 turns all-off if either channel is on, otherwise all-on. Old combined Enabled and star Mode migrate once; explicit new keys win. Extra EventStrength and per-event switches are removed; custom waveform values remain. Original fixed0.85 Combo baseline is retained, not an extra user multiplier.
 
-Oldjazz WAV/source assets are removed except the sharedoffline build_music helper required by the new generator; no old generatedtone is compiled or used asfallback. No thirdparty crowd audio/OGG/previews/HTML player/SoundFont/cache is shipped. New material's declaredSoundFont source/license records are preserved without claiming independent ownership clearance orCC0.
+Menu retains two tabs, all event/star previews and the whole-pack dropdown; corresponding disabled-channel buttons are unavailable. Existing pause/focus/menu-close/scene/device cleanup remains. No arbitrary external programs, native UI automation or game mechanism changes.
 
-Volume continues through the existing gameSFX group and one relative gain; default100% removes extra default attenuation. Game settings/mute and independentcustom slider require focused native acceptance. Existing current modeHapticsOnly intentionally persists; explicitAudioOnly/combined preview works independently, actualautomatic music requires user choosing a mode containingaudio.
+## Existing acceptance and remaining work
 
-## Real runtime evidence and remaining acceptance
+User now explicitly confirms G star/music system works. Native0.4.1 log shows12 clips prepared and TurboSwing1–4 combined previews, with clean shutdown; see test-report-0.4.1.md and evidence/runtime-feedback-0.4.1.txt. Prior0.3 real-event evidence remains valid for recorded cases. Do not infer realNGP4, every style, blind-listening accuracy, hardware synchronization or all compatibility cases from manual previews.
 
-Prior0.4 user reported tested menu features normal/distinguishable, then rejected both audio styles. Priorlog only records fourHapticsOnly star levels and oneAudioOnly one-star jazz preview plus clean shutdown, real-event countersall0 (evidence/runtime-menu-0.4.txt). It does not verify everymode, three new styles or actualgame milestones.
+Current0.4.2 menu layout, independent controls and physical behavior: pending user test via batch-test-0.4.2.md. D cooking/burning/advance warnings unimplemented; E multi-controller/online deferred. Known startup invalid-pattern warning omission remains; rejected waveform still mutes.
 
-Allnew0.4.1 native playback/dropdown/volumefollowing/comfort and hardware synchronization: UNTESTED. Followbatch-test-0.4.1.md. Realstars2/4/NGP and previously unobserved expiry samples remain unverified. FireHooks/multi-controller/online remain later scope. No human blindtest or physical≤50ms assertion. Knownstartup invalid-pattern warning omission unchanged.
+## Delivery
 
-## Delivery verification
-
-Freshread-only review found no newCritical/Important/Minor issues (review-ultra-v3.md). Coldbackup completed whilegame stopped; installed0.4.1.0 ownDLL and12source-identicalWAV/source/license files. Verified retiredownfolders absent; onlylocalcfgSoundVolume1 andSoundPackIdturbo_swing changed. ModeHapticsOnly/master1/ordergain.97 and allothercfgtext preserved. The newDLL has noRewardTone type. Native0.4.1 playback and gamevolume acceptance remain pending; software checks do not replace them.
+Candidate review, ZIP inspection, installation and remote push will be recorded after their actual checks. Original requirement snapshot remains unchanged; docs/roadmap.md maps A–G progress and later confirmed overrides.

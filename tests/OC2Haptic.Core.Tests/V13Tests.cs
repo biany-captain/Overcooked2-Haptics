@@ -119,7 +119,7 @@ internal static class V13Tests
     {
         var b=new Motors(); var e=new HapticEngine(b); var a=new Sound { Fail=true }; var o=new RewardOutput(e,a);
         Check(o.Emit(0,"s",GameEventType.StarMilestone1,null,0,.75f,.65f)); e.Tick(0); Check(b.Nonzero>0);
-        o.Mode=StarFeedbackMode.AudioOnly; Check(a.Stops>0); a.Fail=false;
+        o.Mode=StarFeedbackMode.AudioOnly; Check(a.Stops==0 && b.LastZero); a.Fail=false;
         int previous=b.Nonzero; Check(o.Emit(0,"a",GameEventType.StarMilestone2,null,1000,.75f,.65f)); e.Tick(1000);
         Check(b.Nonzero==previous && Math.Abs(a.Volume-.65f)<.00001);
         o.Mode=StarFeedbackMode.Disabled; Check(!o.Emit(0,"off",GameEventType.StarMilestone3,null,2000,.75f,1));

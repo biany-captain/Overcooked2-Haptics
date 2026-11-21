@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.4.1")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.4.2")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -69,7 +69,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, () => clock.Elapsed.TotalMilliseconds, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.4.1-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.4.2-alpha | x86/net35 | F6 management menu / F10 all-off/all-on (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -122,12 +122,12 @@ namespace OC2Haptic
 
                 if (settings.ToggleKey.Value != KeyCode.None && Input.GetKeyDown(settings.ToggleKey.Value))
                 {
-                    settings.Enabled.Value = !settings.Enabled.Value;
-                    Logger.LogInfo("Haptics " + (settings.Enabled.Value ? "enabled" : "disabled"));
+                    settings.ToggleAllOutput();
+                    Logger.LogInfo("All feedback " + (settings.AnyOutputEnabled ? "enabled" : "disabled"));
                 }
                 if (now >= nextPollMs) { PollSelectedDevice(); nextPollMs = now + 250; }
                 pendingFeedback.Drain(DispatchNow);
-                if (!settings.Enabled.Value) return;
+                if (!settings.HapticsEnabled.Value) return;
                 // Explicit menu previews must reach zero even while the game's own time is paused.
                 // Actual game events still pass through the pause gate in Dispatch.
                 engine.Tick(clock.Elapsed.TotalMilliseconds);
@@ -223,14 +223,14 @@ namespace OC2Haptic
             var thresholds=observation.Context.Thresholds;
             if(observation.Before!=null)stars.Prime(new ScoreSnapshot(round,team,observation.Before.Score,thresholds,trusted,observation.Timestamp));
             int milestone=stars.Observe(new ScoreSnapshot(round,team,after==null?0:after.Score,thresholds,trusted,observation.Timestamp),
-                settings.StarsEnabled.Value && settings.FeedbackMode!=StarFeedbackMode.Disabled && GameplayOutputAllowed(observation.Timestamp));
+                GameplayOutputAllowed(observation.Timestamp));
             GameEventType? delivery=null;string key=round+":"+team+":score:"+observation.Sequence;
             ComboResult result=null;
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && observation.Success)
             {
                 var payload=new DeliveryPayload(comboRound,team,unchecked((int)observation.OrderId),after==null?-1:after.Deliveries,
                     observation.WasCombo,after==null?0:after.Multiplier,after==null?0:after.Combo,trusted,observation.Timestamp);
-                result=combos.Resolve(payload,settings.ComboEnabled.Value,settings.ComboMode.Value,settings.MaxHapticTier.Value);
+                result=combos.Resolve(payload,true,settings.ComboMode.Value,settings.MaxHapticTier.Value);
                 if(result.Duplicate)return;
                 delivery=result.Type;key=payload.Key;
             }
@@ -256,7 +256,7 @@ namespace OC2Haptic
 
         private bool GameplayOutputAllowed(double now)
         {
-            return settings.Enabled.Value && !applicationPaused && (!settings.RespectGameFocus.Value || focused) &&
+            return settings.AnyOutputEnabled && !applicationPaused && (!settings.RespectGameFocus.Value || focused) &&
                 !TimeManager.IsPaused(TimeManager.PauseLayer.Main) && IsInRound(now) && (menu==null || !menu.IsOpen);
         }
         private void Dispatch(GameEvent gameEvent,string correlation=null)
@@ -267,10 +267,10 @@ namespace OC2Haptic
             int eventIndex = (int)gameEvent.EventType;
             observedEvents[eventIndex]++;
             int output = EventRouter.Resolve(gameEvent, new ControllerBinding(settings.LocalPadSlot.Value, settings.XInputIndex.Value));
-            bool allowed = settings.IsEventEnabled(gameEvent.EventType) && GameplayOutputAllowed(now) &&
+            bool allowed = GameplayOutputAllowed(now) &&
                 EventRouter.IsLocalTarget(gameEvent,settings.LocalPadSlot.Value);
             EventFeedback feedback = EventFeedback.For(gameEvent.EventType);
-            float intensity=settings.Intensity*(GameEventTypes.IsCombo(gameEvent.EventType)?RewardOutput.SafeVolume(settings.ComboIntensity.Value):1);
+            float intensity=settings.Intensity*(GameEventTypes.IsCombo(gameEvent.EventType)?.85f:1);
             bool accepted = allowed && rewards.Emit(output,correlation??feedback.Key(gameEvent),gameEvent.EventType,
                 settings.PatternFor(gameEvent.EventType),now,intensity,settings.SoundVolume.Value,false);
             if (accepted) scheduledEvents[eventIndex]++;
@@ -336,10 +336,16 @@ namespace OC2Haptic
 
         private void OnOutputSettingsChanged(object sender, EventArgs args)
         {
+            if(sender==settings.HapticsEnabled || sender==settings.AudioEnabled)
+            {
+                pendingFeedback.Clear();rewards.Mode=settings.FeedbackMode;
+                if(!settings.AnyOutputEnabled)SuspendRewardState();
+                return;
+            }
             Stop("output settings changed");
             settings.RefreshPatterns();rewards.Mode=settings.FeedbackMode;
             if(settings.InvalidPatterns.Length>0)Logger.LogWarning("Invalid haptic patterns muted: "+settings.InvalidPatterns);
-            if(sender==settings.Enabled || sender==settings.XInputIndex || sender==settings.LocalPadSlot)SuspendRewardState();
+            if(sender==settings.XInputIndex || sender==settings.LocalPadSlot)SuspendRewardState();
             if (sender == settings.XInputIndex || sender == settings.LocalPadSlot) CloseMenuSafely();
             deviceConnected = null; nextPollMs = 0; Array.Clear(lastProbeIdentity, 0, lastProbeIdentity.Length);
             if (float.IsNaN(settings.MasterIntensity.Value) || float.IsInfinity(settings.MasterIntensity.Value))
@@ -401,12 +407,12 @@ namespace OC2Haptic
         private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();}
         private bool PreviewEvent(GameEventType type,StarFeedbackMode? previewMode)
         {
-            if(!ready || !settings.Enabled.Value || (!focused && settings.RespectGameFocus.Value))return false;
+            if(!ready || !settings.AnyOutputEnabled || (!focused && settings.RespectGameFocus.Value))return false;
             manualPreview=true;
             try
             {
                 if(previewMode.HasValue)rewards.Stop();
-                float intensity=settings.Intensity*(GameEventTypes.IsCombo(type)?RewardOutput.SafeVolume(settings.ComboIntensity.Value):1);
+                float intensity=settings.Intensity*(GameEventTypes.IsCombo(type)?.85f:1);
                 return rewards.Emit(settings.XInputIndex.Value,"preview:"+type,type,settings.PatternFor(type,previewMode),clock.Elapsed.TotalMilliseconds,
                     intensity,settings.SoundVolume.Value,false,previewMode);
             }
