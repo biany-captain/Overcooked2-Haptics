@@ -25,4 +25,4 @@ Current0.4.2 menu layout, independent controls and physical behavior: pending us
 
 ## Delivery
 
-Candidate review, ZIP inspection, installation and remote push will be recorded after their actual checks. Original requirement snapshot remains unchanged; docs/roadmap.md maps A–G progress and later confirmed overrides.
+Fresh read-only final review of7e2ced2..9ace5bb found no Critical/Important/Minor issues (review-simple-controls.md). Runtime/source ZIP inspection confirms12 unchangedWAV/12MIDI/credits; only ownDLL in runtime, zeroDLL in source; no retiredaudio/cache/game assemblies. Installed0.4.2.0 after a fresh game-stopped check and cold backup. Candidate/installedDLL match, personalcfg bytes unchanged, audio files untouched; tested cfg migration runs on next launch. Native0.4.2 acceptance remains pending. Original requirement snapshot remains unchanged; docs/roadmap.md maps A–G progress and later confirmed overrides. Delivery commits go to the existing feature branch/draftPR; no main merge.
