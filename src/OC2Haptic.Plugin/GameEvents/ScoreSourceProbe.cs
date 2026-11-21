@@ -46,7 +46,8 @@ namespace OC2Haptic.GameEvents
                 throw new InvalidOperationException("Score probe completion is not on the Unity main thread.");
             ClientTeamMonitor monitor = flow.GetMonitorForTeam(observation.Team);
             Sample after = Sample.Read(monitor == null ? null : monitor.Score);
-            if (observation.Kind == KitchenFlowMessage.MsgType.ScoreOnly && Same(observation.Before, after)) return;
+            if (!ShouldLog(observation.Kind == KitchenFlowMessage.MsgType.ScoreOnly,
+                Same(observation.Before, after), Same(observation.Payload, after))) return;
             string result = after == null || observation.Payload == null ? "Unavailable" :
                 Same(observation.Payload, after) ? "AppliedClientState" : "PayloadClientMismatch";
             log("Score source probe | observation=" + observation.Sequence +
@@ -73,9 +74,9 @@ namespace OC2Haptic.GameEvents
             if (session == null || session.LevelSettings == null || session.LevelSettings.SceneDirectoryVarientEntry == null)
                 return "thresholdCandidate=Unavailable reason=missing-current-session-or-variant";
             var variant = session.LevelSettings.SceneDirectoryVarientEntry;
-            int levelId = GameUtils.GetLevelID();
             GameProgress progress = session.Progress;
             SceneDirectoryData directory = progress == null ? null : progress.GetSceneDirectory();
+            int levelId = ScoreProbeMetadata.FindLevelId(directory == null ? null : directory.Scenes, variant);
             bool hasBoundaries = directory != null && directory.Scenes != null && levelId >= 0 &&
                 levelId < directory.Scenes.Length && directory.Scenes[levelId] != null && directory.Scenes[levelId].HasScoreBoundaries;
             var save = progress == null ? null : progress.SaveData;
@@ -85,9 +86,9 @@ namespace OC2Haptic.GameEvents
             bool fourthAvailable = ngpForLevel && ngpDialogShown;
             bool contextMatches = hasBoundaries && variant.LevelConfig != null && variant.LevelConfig == flow.GetLevelConfig() &&
                 flow is ClientCampaignFlowController && session.GameModeKind == GameModes.Kind.Campaign && variant.PlayerCount > 0;
-            int one = variant.OneStarScore, two = variant.TwoStarScore, three = variant.ThreeStarScore, four = variant.FourStarScore;
             ScoreThresholds thresholds;
-            bool usable = ScoreThresholds.TryForLevel(one, two, three, four, fourthAvailable, out thresholds) && contextMatches;
+            string raw;
+            bool usable = ScoreProbeMetadata.TryReadThresholds(variant, fourthAvailable, out thresholds, out raw) && contextMatches;
             string selected = "Unavailable";
             if (usable)
             {
@@ -99,8 +100,13 @@ namespace OC2Haptic.GameEvents
                 " flow=" + flow.GetType().Name + " scene=" + variant.SceneName + " playerCount=" + variant.PlayerCount +
                 " hasScoreBoundaries=" + hasBoundaries + " contextMatches=" + contextMatches +
                 " ngpForLevel=" + ngpForLevel + " ngpDialogShown=" + ngpDialogShown + " fourthAvailable=" + fourthAvailable +
-                " rawThresholds=" + one + "," + two + "," + three + "," + four +
+                " rawThresholds=" + raw +
                 " thresholdCandidate=" + selected + " thresholdSource=GameSession.LevelSettings.SceneDirectoryVarientEntry";
+        }
+
+        internal static bool ShouldLog(bool scoreOnly, bool beforeMatchesAfter, bool payloadMatchesAfter)
+        {
+            return !scoreOnly || !beforeMatchesAfter || !payloadMatchesAfter;
         }
 
         private static bool Same(Sample first, Sample second)

@@ -1,0 +1,6 @@
+PASS missing progress/directory produces unavailable level without game lookup
+PASS selected variant resolves actual level by identity
+PASS missing PC star boundaries remain unavailable
+PASS actual PC score getters retain NGP gate
+PASS unchanged client state cannot hide a differing payload
+RESULT 5/5 probe integration passed

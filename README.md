@@ -137,6 +137,7 @@ Set-Location Overcooked2-Haptics
 ```powershell
 ./scripts/test.ps1
 ./scripts/test-config.ps1
+./scripts/test-probe.ps1
 ./scripts/build.ps1 -GameRoot 'E:\SteamLibrary\steamapps\common\Overcooked! 2'
 ./scripts/package.ps1 -SkipBuild
 ```
@@ -144,6 +145,8 @@ Set-Location Overcooked2-Haptics
 不传 GameRoot 时从 Steam 库查找，也可设置 `OC2_GAME_DIR`。脚本的输出、构建缓存和 NuGet 配置隔离都留在工作区。
 
 `test-config.ps1` 使用本机游戏/加载器程序集测试真实配置迁移，不启动游戏或触发震动；这些程序集仅作为开发依赖，不打包分发。
+
+`test-probe.ps1` 使用本机游戏的纯数据类型及实际 PC 分数属性做探针回归测试，不启动 Unity、不输出震动。它覆盖缺失门槛/目录和同步不一致，不能代替实际 HUD 校准。
 
 - DLL：`artifacts/OC2Haptic.dll`
 - 安装包：`artifacts/OC2Haptic-0.2.3-alpha.zip`
