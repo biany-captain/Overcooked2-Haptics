@@ -13,7 +13,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.3.0")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.3.1")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -66,7 +66,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, () => clock.Elapsed.TotalMilliseconds, message => Logger.LogInfo(message),PreviewEvent,rewards.Stop);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.3.0-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.3.1-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -388,15 +388,16 @@ namespace OC2Haptic
         }
         private void SuspendRewardState(){combos.Reset();stars.Suspend();captures.Clear();}
         private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();}
-        private bool PreviewEvent(GameEventType type)
+        private bool PreviewEvent(GameEventType type,StarFeedbackMode? previewMode)
         {
             if(!ready || !settings.Enabled.Value || (!focused && settings.RespectGameFocus.Value))return false;
             manualPreview=true;
             try
             {
+                if(previewMode.HasValue)rewards.Stop();
                 float intensity=settings.Intensity*(GameEventTypes.IsCombo(type)?RewardOutput.SafeVolume(settings.ComboIntensity.Value):1);
-                return rewards.Emit(settings.XInputIndex.Value,"preview:"+type,type,settings.PatternFor(type),clock.Elapsed.TotalMilliseconds,
-                    intensity,settings.SoundVolume.Value,false);
+                return rewards.Emit(settings.XInputIndex.Value,"preview:"+type,type,settings.PatternFor(type,previewMode),clock.Elapsed.TotalMilliseconds,
+                    intensity,settings.SoundVolume.Value,false,previewMode);
             }
             finally {manualPreview=false;}
         }

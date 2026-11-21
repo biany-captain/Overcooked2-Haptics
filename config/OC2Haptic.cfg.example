@@ -88,6 +88,92 @@ DeliveryUnclassified = true
 # Default value: true
 OrderExpired = true
 
+[EventStrength]
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+ThrowSuccess = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+CatchSuccess = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+DeliveryFailure = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+OrderExpired = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+DeliveryOrdered = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+DeliveryOutOfOrder = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+DeliveryUnclassified = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+ComboLevel2 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+ComboLevel3 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+ComboLevel4 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+StarMilestone1 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+StarMilestone2 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+StarMilestone3 = 1
+
+## Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 2
+StarMilestone4 = 1
+
 [General]
 
 ## Global switch for this plugin's haptics and reward audio.

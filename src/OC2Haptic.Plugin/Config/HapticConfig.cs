@@ -17,6 +17,7 @@ namespace OC2Haptic.Config
         internal readonly ConfigEntry<ComboTriggerMode> ComboMode;
         internal readonly ConfigEntry<StarFeedbackMode> StarMode;
         internal readonly Dictionary<GameEventType, ConfigEntry<string>> Patterns = new Dictionary<GameEventType, ConfigEntry<string>>();
+        internal readonly Dictionary<GameEventType, ConfigEntry<float>> EventGains = new Dictionary<GameEventType, ConfigEntry<float>>();
         internal readonly ConfigEntry<string> OneStarTail;
         private readonly Dictionary<GameEventType, HapticPattern> parsed = new Dictionary<GameEventType, HapticPattern>();
         private readonly List<Action<EventHandler, bool>> watchers = new List<Action<EventHandler, bool>>();
@@ -59,6 +60,8 @@ namespace OC2Haptic.Config
             foreach (GameEventType type in Enum.GetValues(typeof(GameEventType)))
             {
                 if (type == GameEventType.DeliverySuccess) continue;
+                EventGains[type]=Output(config.Bind("EventStrength",type.ToString(),1f,
+                    new ConfigDescription("Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.",new AcceptableValueRange<float>(0,2))));
                 Patterns[type] = Output(config.Bind("Patterns", type.ToString(), PatternCodec.Format(EventFeedback.For(type).Pattern),
                     "Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics."));
             }
@@ -92,13 +95,14 @@ namespace OC2Haptic.Config
             {
                 HapticPattern pattern;
                 if (!PatternCodec.TryParse(pair.Value.Value, GameEventTypes.IsStar(pair.Key), out pattern)) InvalidPatterns += pair.Key + " ";
-                parsed[pair.Key] = pattern;
+                parsed[pair.Key] = pattern==null?null:pattern.WithGain(EventGains[pair.Key].Value);
             }
             if (!PatternCodec.TryParse(OneStarTail.Value, true, out tailPattern)) InvalidPatterns += "StarMilestone1HapticsOnly";
+            if(tailPattern!=null)tailPattern=tailPattern.WithGain(EventGains[GameEventType.StarMilestone1].Value);
         }
-        internal HapticPattern PatternFor(GameEventType type)
+        internal HapticPattern PatternFor(GameEventType type,StarFeedbackMode? previewMode=null)
         {
-            if (type == GameEventType.StarMilestone1 && FeedbackMode == StarFeedbackMode.HapticsOnly) return tailPattern;
+            if (type == GameEventType.StarMilestone1 && (previewMode??FeedbackMode) == StarFeedbackMode.HapticsOnly) return tailPattern;
             HapticPattern pattern;
             return parsed.TryGetValue(type, out pattern) ? pattern : null;
         }

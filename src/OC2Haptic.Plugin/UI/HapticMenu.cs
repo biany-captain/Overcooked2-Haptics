@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using OC2Haptic.Config;
 using OC2Haptic.Core;
 using UnityEngine;
+using BepInEx.Configuration;
 
 namespace OC2Haptic.UI
 {
@@ -10,11 +11,11 @@ namespace OC2Haptic.UI
     {
         private static readonly GameEventType[] Types = { GameEventType.ThrowSuccess, GameEventType.CatchSuccess,
             GameEventType.DeliveryOrdered,GameEventType.DeliveryOutOfOrder,GameEventType.DeliveryUnclassified,
-            GameEventType.DeliveryFailure,GameEventType.OrderExpired,GameEventType.ComboLevel2,GameEventType.ComboLevel3,GameEventType.ComboLevel4,
-            GameEventType.StarMilestone1,GameEventType.StarMilestone2,GameEventType.StarMilestone3,GameEventType.StarMilestone4 };
+            GameEventType.DeliveryFailure,GameEventType.OrderExpired,GameEventType.ComboLevel2,GameEventType.ComboLevel3,GameEventType.ComboLevel4 };
         private static readonly string[] Names = { "投掷成功", "接住食材 · 双段", "顺序上菜 / Combo ×1", "乱序成功上菜", "成功上菜 · 未分类",
-            "上菜失败", "订单超时", "Combo ×2", "Combo ×3", "Combo ×4+", "星级达标 · 1 星", "星级达标 · 2 星", "星级达标 · 3 星", "星级达标 · 4 星" };
-        private const string TopNote = "开关控制自动事件；主菜单 / 暂停中可手动试听。\n下方模式仅控制星级；失焦停止所有反馈。";
+            "上菜失败", "订单超时", "Combo ×2", "Combo ×3", "Combo ×4+" };
+        private static readonly GameEventType[] StarTypes={GameEventType.StarMilestone1,GameEventType.StarMilestone2,GameEventType.StarMilestone3,GameEventType.StarMilestone4};
+        private static readonly string[] StarNames={"一星","二星","三星","四星"};
         private const string BottomNote = "菜单打开时只屏蔽当前绑定厨师的操作。\n关卡仍会运行；F6 或右上角 × 关闭菜单。";
         private const string Footer = "修改即时保存  ·  手动试震不计入真实游戏事件";
         private readonly UnityEngine.Object owner;
@@ -22,7 +23,7 @@ namespace OC2Haptic.UI
         private readonly HapticMenuState state;
         private readonly Func<double> now;
         private readonly Action<string> log;
-        private readonly Func<GameEventType,bool> previewEvent;
+        private readonly Func<GameEventType,StarFeedbackMode?,bool> previewEvent;
         private readonly Action stopPreviews;
         private readonly MenuInputScope<PlayerControls> inputs = new MenuInputScope<PlayerControls>();
         private readonly HashSet<PlayerControls> eligible = new HashSet<PlayerControls>();
@@ -31,6 +32,7 @@ namespace OC2Haptic.UI
         private CursorLockMode previousCursorLock;
         private Rect rectangle;
         private Vector2 scroll;
+        private int tab;
         private int screenWidth, screenHeight;
         private Font font;
         private Texture2D background;
@@ -38,7 +40,7 @@ namespace OC2Haptic.UI
         private string status = "点击试震，可直接比较现有触觉节奏。";
 
         internal HapticMenu(UnityEngine.Object owner, HapticConfig settings, HapticEngine engine,
-            Func<double> now, Action<string> log, Func<GameEventType,bool> previewEvent, Action stopPreviews)
+            Func<double> now, Action<string> log, Func<GameEventType,StarFeedbackMode?,bool> previewEvent, Action stopPreviews)
         {
             this.owner = owner; this.settings = settings; this.now = now; this.log = log;
             this.previewEvent=previewEvent;this.stopPreviews=stopPreviews;
@@ -162,41 +164,23 @@ namespace OC2Haptic.UI
             if (GUI.Button(new Rect(width - 206, y, 188, metrics.MainRow), "通用试震 · 80ms", buttonStyle)) Preview(null, "通用测试");
             GUI.enabled = originalEnabled;
             y += metrics.MainRow + 10;
-            GUI.Label(new Rect(18, y, width - 36, metrics.Top), TopNote, noteStyle);
+            DrawStrength(18,y,width-36,metrics.Master,"总震动强度",settings.MasterIntensity,1);
+            y+=metrics.Master+8;
+            int nextTab=GUI.SelectionGrid(new Rect(18,y,width-36,metrics.Tabs),tab,new[]{"事件设置","星级测试"},2,buttonStyle);
+            if(nextTab!=tab){stopPreviews();tab=nextTab;scroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"可分别调整每类事件的震动倍率。";}
+            y+=metrics.Tabs+8;
+            GUI.Label(new Rect(18, y, width - 36, metrics.Top), TopText(), noteStyle);
             y += metrics.Top + 10;
 
             float contentWidth = width - 52;
             float footerHeight = metrics.Bottom + 8 + metrics.Status + 6 + metrics.Footer + 16;
             float listHeight = Mathf.Max(48, height - y - 12 - footerHeight);
             scroll = GUI.BeginScrollView(new Rect(14, y, width - 28, listHeight), scroll,
-                new Rect(0, 0, contentWidth, (Types.Length+3) * metrics.Row));
+                new Rect(0, 0, contentWidth, ContentRows() * metrics.Row));
             try
             {
-                bool combo=GUI.Toggle(new Rect(4,0,contentWidth/2-8,metrics.Row-8),settings.ComboEnabled.Value,"Combo 分级",toggleStyle);
-                if(combo!=settings.ComboEnabled.Value)settings.ComboEnabled.Value=combo;
-                bool stars=GUI.Toggle(new Rect(contentWidth/2,0,contentWidth/2-4,metrics.Row-8),settings.StarsEnabled.Value,"星级庆祝",toggleStyle);
-                if(stars!=settings.StarsEnabled.Value)settings.StarsEnabled.Value=stars;
-                int mode=GUI.SelectionGrid(new Rect(4,metrics.Row,contentWidth-8,metrics.Row-8),(int)settings.FeedbackMode,
-                    new[]{"震动＋音效","仅震动","仅音效","关闭"},4,buttonStyle);
-                if(mode!=(int)settings.FeedbackMode)settings.StarMode.Value=(StarFeedbackMode)mode;
-                GUI.Label(new Rect(4,metrics.Row*2,138,metrics.Row-8),"庆祝音量 "+Math.Round(RewardOutput.SafeVolume(settings.SoundVolume.Value)*100)+"%",noteStyle);
-                float volume=GUI.HorizontalSlider(new Rect(148,metrics.Row*2+10,contentWidth-160,metrics.Row-8),RewardOutput.SafeVolume(settings.SoundVolume.Value),0,1);
-                if(Math.Abs(volume-RewardOutput.SafeVolume(settings.SoundVolume.Value))>.001f)settings.SoundVolume.Value=volume;
-                for (int index = 0; index < Types.Length; index++)
-                {
-                    float rowY = (index+3) * metrics.Row;
-                    if(GameEventTypes.IsCombo(Types[index]) || GameEventTypes.IsStar(Types[index]))
-                        GUI.Label(new Rect(4,rowY,contentWidth-112,metrics.Row-8),Names[index],labelStyle);
-                    else
-                    {
-                        bool current = settings.IsEventEnabled(Types[index]);
-                        bool next = GUI.Toggle(new Rect(4, rowY, contentWidth - 112, metrics.Row - 8), current, Names[index], toggleStyle);
-                        if (next != current) settings.SetEventEnabled(Types[index], next);
-                    }
-                    GUI.enabled = originalEnabled && CanPreview(Types[index]);
-                    if (GUI.Button(new Rect(contentWidth - 96, rowY, 92, metrics.Row - 8), GameEventTypes.IsStar(Types[index])?"试听":"试震", buttonStyle)) Preview(Types[index], Names[index]);
-                    GUI.enabled = originalEnabled;
-                }
+                if(tab==0)DrawEventSettings(contentWidth,metrics.Row,originalEnabled);
+                else DrawStarTests(contentWidth,metrics.Row,originalEnabled);
             }
             finally { GUI.EndScrollView(); GUI.enabled = originalEnabled; }
 
@@ -212,10 +196,75 @@ namespace OC2Haptic.UI
                 new Rect(0, 0, width, height).Contains(input.mousePosition)) input.Use();
         }
 
+        private string TopText()
+        {
+            return tab==0?"单项倍率叠加总强度，不改变节奏；列表可滚动。\n0%不震动；星级试听请点击上方「星级测试」。"
+                :"四档可独立试音、试震或同时测试。\n测试不改自动模式；主菜单 / 暂停中也可试听。";
+        }
+        private int ContentRows(){return tab==0?1+Types.Length*2:3+StarTypes.Length*2;}
+        private void DrawEventSettings(float width,float row,bool originalEnabled)
+        {
+            bool combo=GUI.Toggle(new Rect(4,0,width/2-8,row-8),settings.ComboEnabled.Value,"Combo 分级",toggleStyle);
+            if(combo!=settings.ComboEnabled.Value)settings.ComboEnabled.Value=combo;
+            bool stars=GUI.Toggle(new Rect(width/2,0,width/2-4,row-8),settings.StarsEnabled.Value,"星级自动反馈",toggleStyle);
+            if(stars!=settings.StarsEnabled.Value)settings.StarsEnabled.Value=stars;
+            for(int i=0;i<Types.Length;i++)
+            {
+                float y=(1+i*2)*row;
+                if(GameEventTypes.IsCombo(Types[i]))GUI.Label(new Rect(4,y,width-112,row-8),Names[i],labelStyle);
+                else
+                {
+                    bool current=settings.IsEventEnabled(Types[i]);
+                    bool next=GUI.Toggle(new Rect(4,y,width-112,row-8),current,Names[i],toggleStyle);
+                    if(next!=current)settings.SetEventEnabled(Types[i],next);
+                }
+                GUI.enabled=originalEnabled && CanPreview(Types[i]);
+                if(GUI.Button(new Rect(width-96,y,92,row-8),"试震",buttonStyle))Preview(Types[i],Names[i]);
+                GUI.enabled=originalEnabled;
+                DrawStrength(4,y+row,width-8,row-8,"事件倍率",settings.EventGains[Types[i]],2);
+            }
+        }
+        private void DrawStarTests(float width,float row,bool originalEnabled)
+        {
+            bool enabled=GUI.Toggle(new Rect(4,0,width/2,row-8),settings.StarsEnabled.Value,"星级自动反馈",toggleStyle);
+            if(enabled!=settings.StarsEnabled.Value)settings.StarsEnabled.Value=enabled;
+            GUI.Label(new Rect(width/2,0,width/2-4,row-8),"下方为自动输出模式",noteStyle);
+            int mode=GUI.SelectionGrid(new Rect(4,row,width-8,row-8),(int)settings.FeedbackMode,
+                new[]{"震动＋音效","仅震动","仅音效","关闭"},4,buttonStyle);
+            if(mode!=(int)settings.FeedbackMode)settings.StarMode.Value=(StarFeedbackMode)mode;
+            DrawStrength(4,row*2,width-8,row-8,"庆祝音量",settings.SoundVolume,1);
+            var modes=new[]{StarFeedbackMode.AudioOnly,StarFeedbackMode.HapticsOnly,StarFeedbackMode.HapticsAndAudio};
+            var labels=new[]{"试音","试震","同时测试"};
+            for(int i=0;i<StarTypes.Length;i++)
+            {
+                float y=(3+i*2)*row;
+                GUI.Label(new Rect(4,y,84,row-8),StarNames[i],labelStyle);
+                float buttonWidth=(width-100)/3;
+                for(int j=0;j<modes.Length;j++)
+                {
+                    GUI.enabled=originalEnabled && CanPreview(StarTypes[i],modes[j]);
+                    if(GUI.Button(new Rect(96+j*buttonWidth,y,buttonWidth-4,row-8),labels[j],buttonStyle))Preview(StarTypes[i],StarNames[i],modes[j]);
+                }
+                GUI.enabled=originalEnabled;
+                DrawStrength(4,y+row,width-8,row-8,"星级倍率",settings.EventGains[StarTypes[i]],2);
+            }
+        }
+        private void DrawStrength(float x,float y,float width,float height,string name,ConfigEntry<float> entry,float maximum)
+        {
+            float current=maximum==2?HapticPattern.ClampGain(entry.Value):RewardOutput.SafeVolume(entry.Value);
+            GUI.Label(new Rect(x,y,142,height),name+" "+Math.Round(current*100)+"%",noteStyle);
+            float next=GUI.HorizontalSlider(new Rect(x+148,y+10,width-160,20),current,0,maximum);
+            if(Math.Abs(next-current)>.0001f)
+            {
+                next=(float)Math.Round(next*100)/100;
+                if(next!=entry.Value)entry.Value=next;
+            }
+        }
+
         private string DeviceText()
         {
             return "手柄 XInput " + settings.XInputIndex.Value + "  ·  游戏 Pad " + settings.LocalPadSlot.Value +
-                "  ·  震动强度 " + Math.Round(settings.Intensity * 100) + "%";
+                "  ·  可在下方调整震动强度";
         }
 
         private MenuMetrics Measure(float width)
@@ -226,15 +275,16 @@ namespace OC2Haptic.UI
                 Device = TextHeight(labelStyle, DeviceText(), body),
                 MainRow = Mathf.Max(36, Mathf.Max(TextHeight(toggleStyle, "总震动开关（F10）", width - 225),
                     TextHeight(buttonStyle, "通用试震 · 80ms", 188))),
-                Top = TextHeight(noteStyle, TopNote, body),
+                Master=36,Tabs=36,
+                Top = TextHeight(noteStyle, TopText(), body),
                 Row = Mathf.Max(32, TextHeight(buttonStyle, "试震", 92)) + 8,
                 Bottom = TextHeight(noteStyle, BottomNote, body),
                 Status = TextHeight(noteStyle, status, body),
                 Footer = TextHeight(noteStyle, Footer, body)
             };
             foreach (string name in Names) result.Row = Mathf.Max(result.Row, TextHeight(toggleStyle, name, width - 164) + 8);
-            result.TotalHeight = 42 + result.Device + 8 + result.MainRow + 10 + result.Top + 10 +
-                Math.Min(Types.Length+3,10) * result.Row + 12 + result.Bottom + 8 + result.Status + 6 + result.Footer + 16;
+            result.TotalHeight = 42 + result.Device + 8 + result.MainRow + 10 + result.Master+8+result.Tabs+8+result.Top + 10 +
+                (tab==0?Math.Min(ContentRows(),10):ContentRows()) * result.Row + 12 + result.Bottom + 8 + result.Status + 6 + result.Footer + 16;
             return result;
         }
 
@@ -245,23 +295,24 @@ namespace OC2Haptic.UI
 
         private struct MenuMetrics
         {
-            internal float Device, MainRow, Top, Row, Bottom, Status, Footer, TotalHeight;
+            internal float Device, MainRow, Master, Tabs, Top, Row, Bottom, Status, Footer, TotalHeight;
         }
 
-        private bool CanPreview(GameEventType? type=null)
+        private bool CanPreview(GameEventType? type=null,StarFeedbackMode? previewMode=null)
         {
             if(type.HasValue && GameEventTypes.IsStar(type.Value))
-                return settings.Enabled.Value && settings.FeedbackMode!=StarFeedbackMode.Disabled &&
-                    (settings.FeedbackMode!=StarFeedbackMode.HapticsOnly || (settings.XInputIndex.Value>=0 && settings.XInputIndex.Value<=3));
+                return settings.Enabled.Value && (previewMode??settings.FeedbackMode)!=StarFeedbackMode.Disabled &&
+                    ((previewMode??settings.FeedbackMode)!=StarFeedbackMode.HapticsOnly || (settings.XInputIndex.Value>=0 && settings.XInputIndex.Value<=3));
             return settings.Enabled.Value && settings.XInputIndex.Value >= 0 && settings.XInputIndex.Value <= 3;
         }
 
-        private void Preview(GameEventType? type, string name)
+        private void Preview(GameEventType? type, string name,StarFeedbackMode? previewMode=null)
         {
-            bool accepted = type.HasValue?previewEvent(type.Value):state.Preview(type, settings.XInputIndex.Value, settings.Enabled.Value, settings.Intensity, now());
+            bool accepted = type.HasValue?previewEvent(type.Value,previewMode):state.Preview(type, settings.XInputIndex.Value, settings.Enabled.Value, settings.Intensity, now());
             status = accepted ? "已安排「" + name + "」手动预览。" : "未播放：检查连接、模式，或等待当前反馈结束。";
             log("Menu preview | type=" + (type.HasValue ? type.Value.ToString() : "Generic80ms") +
-                " accepted=" + accepted + " XInput=" + settings.XInputIndex.Value + " master=" + settings.Intensity);
+                " mode="+(previewMode.HasValue?previewMode.Value.ToString():"Automatic")+" accepted=" + accepted + " XInput=" + settings.XInputIndex.Value + " master=" + settings.Intensity+
+                " gain="+(type.HasValue?HapticPattern.ClampGain(settings.EventGains[type.Value].Value):1));
         }
 
         private void EnsureStyles()

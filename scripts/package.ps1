@@ -15,7 +15,7 @@ Copy-Item -LiteralPath (Join-Path $projectRoot 'config\OC2Haptic.cfg.example') -
 foreach ($file in @('README.md', 'CHANGELOG.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $staging }
 $docsDir = Join-Path $staging 'docs'
 New-Item -ItemType Directory -Path $docsDir -Force | Out-Null
-foreach ($file in @('test-report.md','test-report-0.1.md','test-report-0.2.md','test-report-0.2.1.md','test-report-0.2.2.md','test-report-0.2.3.md','hook-research.md','compatibility-matrix.md','decisions.md','review-ab-alpha.md','review-stage-c.md','review-menu.md','review-score-probe.md','review-v13.md','batch-test-0.2.md','batch-test-0.3.md','menu-test-0.2.1.md','menu-layout-0.2.2.md','design-v1.3.md','calibration-0.2.3.md','requirements-v1.0.md','requirements-v1.3.md')) {
+foreach ($file in @('test-report.md','test-report-0.1.md','test-report-0.2.md','test-report-0.2.1.md','test-report-0.2.2.md','test-report-0.2.3.md','test-report-0.3.md','hook-research.md','compatibility-matrix.md','decisions.md','review-ab-alpha.md','review-stage-c.md','review-menu.md','review-score-probe.md','review-v13.md','batch-test-0.2.md','batch-test-0.3.md','menu-test-0.2.1.md','menu-layout-0.2.2.md','design-v1.3.md','calibration-0.2.3.md','requirements-v1.0.md','requirements-v1.3.md')) {
     Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\' + $file)) -Destination $docsDir
 }
 $evidenceDir = Join-Path $projectRoot 'docs\evidence'

@@ -1,8 +1,8 @@
-# OC2 Haptic — 0.3.0-alpha
+# OC2 Haptic — 0.3.1-alpha
 
 Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、接住、顺序/乱序上菜、Combo ×1～×4、订单过期，以及实时星级门槛庆祝与原创短音效。F6 打开中文管理页，F10 控制总开关。
 
-**状态：0.3.0 已编译并通过软件测试，新增触感、声音、菜单与真实星级触发仍待整批游戏验收。** 已验证基线0.2.2、0.2.3数据校准和新功能的验证分别记录，不能相互替代。需求文档v1.3是需求版本，插件版本为0.3.0-alpha。
+**状态：0.3.0用户报告单套反馈正常，日志确认分类、Combo及一星/三星音效；0.3.1新增菜单强度与星级测试页已通过软件检查，界面仍待实测。** 未观察到的二星/四星、超时及其他兼容场景保留未验收。需求文档v1.3是需求版本，当前插件版本为0.3.1-alpha。
 
 [源码仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式需求](docs/requirements-v1.3.md) · [测试报告](docs/test-report.md) · [本轮实机清单](docs/batch-test-0.3.md)
 
@@ -20,7 +20,7 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 
 1. 退出游戏，使用匹配游戏架构的BepInEx 5。当前开发环境为Steam默认分支、x86、BepInEx5.4.22.0；保留已有加载器及其他MOD。
 2. 将安装包的 `BepInEx/plugins/OC2Haptic/OC2Haptic.dll` 放到游戏目录同一位置。
-3. 启动后检查 `BepInEx/LogOutput.log` 中的 `OC2Haptic initialized | 0.3.0-alpha` 和各Hook安装信息。加载成功不等于事件验收通过。
+3. 启动后检查 `BepInEx/LogOutput.log` 中的 `OC2Haptic initialized | 0.3.1-alpha` 和各Hook安装信息。加载成功不等于事件验收通过。
 4. 配置位于 `BepInEx/config/dev.oc2haptic.feedback.cfg`；示例 `config/OC2Haptic.cfg.example` 不应覆盖个人配置。旧上菜成功开关自动迁移，原有禁用偏好、强度、绑定和快捷键保留。
 
 ## 首次手柄绑定
@@ -37,9 +37,11 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 ## F6管理页
 
 - F6开关页面，右上角×关闭；F10和页面总反馈开关控制同一设置。关闭总开关后仍可打开F6。
+- 顶部总震动强度0–100%。「事件设置」中每项倍率0–200%，默认100%保留原手感；与总强度及既有Combo倍率叠加，保持节奏，达到上限时统一限制峰值以维持左右比例。
+- 「星级测试」集中显示一到四星，每档有试音、试震、同时测试按钮和单独倍率。明确点击测试会替换前一次星级预览，不改变星级自动输出模式，也不计真实事件。
 - 页面不自动暂停，只屏蔽当前绑定厨师操作并显示鼠标，关闭后恢复。关卡时间继续，调试可先手动暂停。
 - 事件开关控制自动反馈；Combo和星级各有总开关。各档预览独立于自动事件开关，仍受总开关和星级输出模式约束。
-- 星级模式：震动＋音效、仅震动、仅音效、关闭；音量滑杆只改MOD奖励音的线性增益。
+- 星级自动模式：震动＋音效、仅震动、仅音效、关闭；音量滑杆只改MOD奖励音的线性增益。独立试音/试震按钮不受此自动模式及自动事件开关限制，但仍受总开关、焦点、相应强度/音量和设备条件限制。
 - 用户已批准在主菜单/暂停中点击试听；自动反馈在菜单/暂停中静音。失焦、关闭菜单、F10关闭、切场景会停止本插件输出。
 - 设置即时保存。手动预览单独记录，不计真实游戏事件。优先级较低的预览可能被拒绝，等当前反馈结束再点。
 
@@ -82,7 +84,7 @@ CrispReward是本项目生成的原创短PCM铃音，不含商业歌曲或其他
 - Events：ThrowSuccess、CatchSuccess、DeliveryOrdered、DeliveryOutOfOrder、DeliveryUnclassified、DeliveryFailure、OrderExpired。
 - Combo：Enabled、TriggerMode=EveryOrderedDelivery、MaxHapticTier=4、ComboMasterIntensity=0.85。OnLevelUp只在已知的真实等级提升时分级；关闭分级仍保留分类反馈。
 - Stars.Enabled与StarFeedback.Mode；SoundVolume=0.65，MaxSoundDurationMs=1000。
-- Patterns：各事件片段及StarMilestone1HapticsOnly。非有限强度、越界数值、负时长、超长模式均拒绝。
+- Patterns：各事件片段及StarMilestone1HapticsOnly。EventStrength为各事件额外倍率0–2，默认1；0不创建马达任务。非有限倍率安全静音，非法片段/负时长/超长模式拒绝。
 - Diagnostics.ScoreSourceProbe控制详细快照日志；新功能所需的只读采集不依赖详细日志开关。
 - Hotkeys：OpenMenu=F6、ToggleMod=F10，None禁用。F8/F9已被本机其他MOD占用。
 
@@ -102,7 +104,7 @@ Set-Location Overcooked2-Haptics
 ./scripts/package.ps1 -SkipBuild
 ```
 
-不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.3.0-alpha安装/源码ZIP。
+不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.3.1-alpha安装/源码ZIP。
 
 Git只跟踪必要源码、脚本、配置示例和需求/验证文档。`.gitignore`排除bin/obj/artifacts/.cache、游戏文件、二进制、日志及个人配置。经筛选的docs/evidence文本为验证记录。
 
@@ -110,6 +112,6 @@ Git只跟踪必要源码、脚本、配置示例和需求/验证文档。`.gitig
 
 本地已保留历史安装包和升级前DLL/配置。使用MOD管理器时，某些关闭操作仅影响下次加载；F10是即时总开关。退出游戏后删除本插件目录即可卸载，不改原版DLL/存档/其他MOD。
 
-历史实测：[0.2.2菜单](docs/test-report-0.2.2.md)、[0.2.3数据校准](docs/test-report-0.2.3.md)。本地多人、在线客机、实际NGP四星、跨平台、其他版本和完整MOD兼容矩阵仍未验收。
+历史实测：[0.2.2菜单](docs/test-report-0.2.2.md)、[0.2.3数据校准](docs/test-report-0.2.3.md)、[0.3反馈](docs/test-report-0.3.md)。本地多人、在线客机、实际NGP四星、跨平台、其他版本和完整MOD兼容矩阵仍未验收。
 
 技术参考：[BepInEx](https://docs.bepinex.dev/)、[XInput](https://learn.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputsetstate)、[hpmv研究](https://hpmv.dev/docs/tech/kitchen_flow_controller/)、[Unity2017.4 PlayOneShot](https://docs.unity3d.com/2017.4/Documentation/ScriptReference/AudioSource.PlayOneShot.html)。项目许可证尚待负责人选择；不附带原版游戏或第三方库。

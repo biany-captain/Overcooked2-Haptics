@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1-alpha — 2026-11-21
+
+- Add F6 master intensity0–100% and individual event gain0–200%, default100% retaining existing profiles. Scale uniformly within motor limits, preserving timings/balance; zero gain never owns a motor task.
+- Split the existing panel into event settings and explicit star tests. Each star has audio-only/haptics-only/combined manual buttons and its own gain; auto mode is not mutated.
+- Preserve existing user intensity/audio/binding values and source/counters/input/cursor behavior. New gain/mode tests and actual config integration pass; new layout awaits game acceptance.
+- 0.3 actual user report/log confirms one selected feedback per delivery, Combo progression/out-of-order/recovery, star1/3 audio. Unobserved cases remain pending.
+
 ## 0.3.0-alpha — candidate delivery/Combo/star feedback
 
 - Implement runtime-calibrated client delivery classification and authoritative ×1–×4 feedback, preserving raw streak and per-team/session state. Retain disabled legacy success preference during configuration migration.

@@ -9,16 +9,18 @@ namespace OC2Haptic.Core
         private StarFeedbackMode mode=StarFeedbackMode.HapticsAndAudio;
         public RewardOutput(HapticEngine engine,IRewardAudioBackend audio,Action<string> log=null){this.engine=engine;this.audio=audio;this.log=log;}
         public StarFeedbackMode Mode {get{return mode;}set{if(mode!=value){Stop();mode=value;}}}
-        public bool Emit(int index,string key,GameEventType type,HapticPattern pattern,double now,float intensity,float volume,bool useDefaultPattern=true)
+        public bool Emit(int index,string key,GameEventType type,HapticPattern pattern,double now,float intensity,float volume,bool useDefaultPattern=true,
+            StarFeedbackMode? previewMode=null)
         {
             EventFeedback feedback=EventFeedback.For(type);bool star=GameEventTypes.IsStar(type);
-            if(star && mode==StarFeedbackMode.Disabled)return false;
+            StarFeedbackMode effectiveMode=previewMode??mode;
+            if(star && effectiveMode==StarFeedbackMode.Disabled)return false;
             if(star && engine.IsBusyAtOrAbove(index,feedback.Priority,now))return false;
-            bool haptics=!star || mode!=StarFeedbackMode.AudioOnly;
-            if(pattern==null && useDefaultPattern)pattern=star && type==GameEventType.StarMilestone1 && mode==StarFeedbackMode.HapticsOnly
+            bool haptics=!star || effectiveMode!=StarFeedbackMode.AudioOnly;
+            if(pattern==null && useDefaultPattern)pattern=star && type==GameEventType.StarMilestone1 && effectiveMode==StarFeedbackMode.HapticsOnly
                 ?EventFeedback.OneStarHapticsOnly:feedback.Pattern;
             bool accepted=haptics && engine.Play(index,key,pattern,feedback.Priority,feedback.CooldownMs,now,intensity);
-            if(star && (mode==StarFeedbackMode.HapticsAndAudio || mode==StarFeedbackMode.AudioOnly))
+            if(star && (effectiveMode==StarFeedbackMode.HapticsAndAudio || effectiveMode==StarFeedbackMode.AudioOnly))
             {
                 float gain=SafeVolume(volume);
                 if(gain>0 && !audioFaulted)

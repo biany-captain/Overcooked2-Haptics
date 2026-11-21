@@ -19,7 +19,7 @@ namespace OC2Haptic.Core
         public bool Play(int index, string eventKey, HapticPattern pattern, int priority,
             int cooldownMs, double nowMs, float masterIntensity)
         {
-            if (index < 0 || index > 3 || string.IsNullOrEmpty(eventKey) || pattern == null ||
+            if (index < 0 || index > 3 || string.IsNullOrEmpty(eventKey) || pattern == null || !pattern.HasMotorOutput ||
                 cooldownMs < 0 || double.IsNaN(nowMs) || double.IsInfinity(nowMs) || nowMs < 0 ||
                 float.IsNaN(masterIntensity) || float.IsInfinity(masterIntensity) || masterIntensity <= 0 || masterIntensity > 1)
                 return false;

@@ -31,7 +31,17 @@ internal static class Program
             correct=correct&&!File.ReadAllText(path).Contains("DeliverySuccess =");
             if(!correct){failed++;Console.WriteLine("FAIL delivery preference migration "+i);}else Console.WriteLine("PASS delivery preference migration "+i);
         }
-        Console.WriteLine("RESULT " + (content.Length+2 - failed) + "/" + (content.Length+2) + " config migration passed");
+        string gainPath=Path.Combine(root,"gain-preserve.cfg");
+        File.WriteAllText(gainPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nMode = AudioOnly\nSoundVolume = 0.7\n[EventStrength]\nStarMilestone1 = 1.5\n");
+        var gains=new HapticConfig(new ConfigFile(gainPath,false));
+        bool gainCorrect=Math.Abs(gains.Intensity-.4f)<.0001 && Math.Abs(gains.SoundVolume.Value-.7f)<.0001 &&
+            Math.Abs(gains.EventGains[GameEventType.StarMilestone1].Value-1.5f)<.0001;
+        gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==145 &&
+            Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.33f)<.0001 &&
+            gains.FeedbackMode==StarFeedbackMode.AudioOnly && gains.EventGains[GameEventType.CatchSuccess].Value==1;
+        if(!gainCorrect){failed++;Console.WriteLine("FAIL event gains and independent preview configuration");}
+        else Console.WriteLine("PASS event gains and independent preview configuration");
+        Console.WriteLine("RESULT " + (content.Length+3 - failed) + "/" + (content.Length+3) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }

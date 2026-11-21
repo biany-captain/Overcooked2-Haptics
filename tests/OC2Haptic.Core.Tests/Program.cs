@@ -62,6 +62,7 @@ internal static class Program
             { "score probe requires explicit four-star availability", ProbeFourStarGate }
         };
         V13Tests.Add(tests);
+        MenuStrengthTests.Add(tests);
         int failed = 0;
         int run = 0;
         foreach (var test in tests)
