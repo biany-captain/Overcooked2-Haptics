@@ -4,7 +4,7 @@ Date:2026-11-21. Current Steam default build20236421, x86/net35, existing BepInE
 
 ## Software verification
 
-- Shared core62/62 passes. New cases cover authoritative Combo, raw streak/ceiling, duplicates/reused IDs, pre/post state and mode behavior; exact star crossings/midjoin/restart/team/threshold changes; single-result arbitration; editable patterns; bounded original PCM; audio modes/failure isolation; owned capture cleanup and interruption.
+- Shared core65/65 passes. New cases cover authoritative Combo, raw streak/ceiling, duplicates/reused IDs, pre/post state and mode behavior; exact star crossings/midjoin/restart/team/threshold changes; single-result arbitration; editable patterns; bounded original PCM; audio modes/failure isolation; owned capture cleanup and interruption.
 - Actual BepInEx configuration integration6/6 passes, preserving legacy disabled success preferences and explicit category overrides alongside shortcut migration.
 - Actual managed game-data integration5/5 passes. Uses synthetic data and real data types/getters, no Unity session.
 - Actual net35/x86 build0 warnings/errors, assembly0.3.0.0. References existing local Unity AudioModule; no new runtime dependency.
@@ -28,3 +28,7 @@ The pure tracker replays that actual score sequence as star1 then star3 because 
 - Actual four-star NGP context, multiplayer/online, other branches/devices/MODs and blind-test matrix remain unverified.
 
 Joint steps: batch-test-0.3.md. Historic five-event/menu real acceptance remains in the0.1/0.2/0.2.1/0.2.2 reports. Candidate hand-feel is not fixed as final and will change only after discussion.
+
+## Final review correction
+
+Same-round history-loss combinations were reproduced and corrected (0/2→2/2); round-boundary continuity also passed. History survives F10/binding/distrust/threshold changes and clears at true round boundaries. See review-v13.md. Deferred Minor: startup-invalid pattern text is safely muted but lacks its initial warning until an output setting changes.

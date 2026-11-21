@@ -60,4 +60,7 @@ PASS v13 nested capture finalizers release only their own frame
 PASS v13 thrown audio failures cannot break rumble or cleanup
 PASS v13 real calibration replay selects first and third star only
 PASS v13 level-up reads reliable pre-commit and reset snapshots
-RESULT 62/62 passed
+PASS v13 star history survives loss toggle rebind and recovery
+PASS v13 star history survives threshold changes and distrust
+PASS v13 round identity survives toggles but changes at actual boundaries
+RESULT 65/65 passed

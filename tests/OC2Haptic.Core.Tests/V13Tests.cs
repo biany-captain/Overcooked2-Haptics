@@ -24,6 +24,9 @@ internal static class V13Tests
         tests.Add("v13 thrown audio failures cannot break rumble or cleanup", AudioExceptions);
         tests.Add("v13 real calibration replay selects first and third star only", CalibrationReplay);
         tests.Add("v13 level-up reads reliable pre-commit and reset snapshots", ComboSnapshots);
+        tests.Add("v13 star history survives loss toggle rebind and recovery", StarHistoryRecovery);
+        tests.Add("v13 star history survives threshold changes and distrust", StarHistoryThresholds);
+        tests.Add("v13 round identity survives toggles but changes at actual boundaries", RoundBoundaries);
     }
     private static DeliveryPayload P(int n, bool combo=true, int mult=1, int streak=1, string round="r", int team=0, bool trusted=true, int order=1)
     { return new DeliveryPayload(round,team,order,n,combo,mult,streak,trusted,n*10); }
@@ -170,6 +173,30 @@ internal static class V13Tests
         Check(t.Resolve(P(2,true,1,1),true,ComboTriggerMode.OnLevelUp,4).Type==GameEventType.DeliveryOrdered);
         t.ObserveState("r",0,1,false);
         Check(t.Resolve(P(3,true,3,3),true,ComboTriggerMode.OnLevelUp,4).Type==GameEventType.DeliveryOrdered);
+    }
+    private static void StarHistoryRecovery()
+    {
+        var t=new StarMilestoneTracker();t.Prime(S(0));Check(t.Observe(S(220))==2);Check(t.Observe(S(50))==0);
+        t.Suspend();t.Prime(S(50));Check(t.Observe(S(100))==0);Check(t.Observe(S(220))==0);Check(t.Observe(S(300))==3);
+        t.Suspend();t.Prime(S(20));Check(t.Observe(S(300))==0);
+    }
+    private static void StarHistoryThresholds()
+    {
+        var t=new StarMilestoneTracker();t.Prime(S(0));Check(t.Observe(S(220))==2);Check(t.Observe(S(50))==0);
+        Check(t.Observe(S(50,thresholds:new[]{80,180,280}))==0);
+        Check(t.Observe(S(90,thresholds:new[]{80,180,280}))==0);
+        Check(t.Observe(S(190,thresholds:new[]{80,180,280}))==0);
+        Check(t.Observe(S(190,trusted:false,thresholds:new[]{80,180,280}))==0);
+        t.Prime(S(20,thresholds:new[]{80,180,280}));
+        Check(t.Observe(S(90,thresholds:new[]{80,180,280}))==0);
+        Check(t.Observe(S(300,thresholds:new[]{80,180,280}))==3);
+    }
+    private static void RoundBoundaries()
+    {
+        var r=new RoundSession();Check(r.Observe(1,10,true));string key=r.Key;
+        Check(!r.Observe(1,10,true)&&r.Key==key);Check(!r.Observe(1,10,false)&&r.Key==key);
+        r.End();Check(r.Observe(1,10,true)&&r.Key!=key);key=r.Key;
+        Check(r.Observe(2,11,true)&&r.Key!=key);
     }
     private static void Check(bool b) { if(!b) throw new Exception("v1.3 behavior mismatch"); }
     private sealed class Sound:IRewardAudioBackend { public bool Fail,ThrowOnPlay,ThrowOnStop; public int Plays,Stops; public float Volume;

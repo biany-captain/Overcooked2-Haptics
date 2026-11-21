@@ -31,6 +31,7 @@ namespace OC2Haptic
         private readonly CaptureStack<ScoreSourceProbe.Observation> captures=new CaptureStack<ScoreSourceProbe.Observation>();
         private readonly ComboTracker combos=new ComboTracker();
         private readonly StarMilestoneTracker stars=new StarMilestoneTracker();
+        private readonly RoundSession rewardRound=new RoundSession();
         private UnityRewardAudioBackend rewardAudio;
         private RewardOutput rewards;
         private bool focused=true, manualPreview;
@@ -78,7 +79,7 @@ namespace OC2Haptic
             Array.Clear(faultedEvents, 0, faultedEvents.Length);
             scoreProbeFaulted = false;
             scoreProbe.Reset("plugin enabled");
-            ResetRewardState();
+            SuspendRewardState();
             currentFlow = null; flowOwner = null; nextFlowLookupMs = 0;
             SceneManager.activeSceneChanged += OnSceneChanged;
             subscribed = true;
@@ -102,8 +103,8 @@ namespace OC2Haptic
                 double now = clock.Elapsed.TotalMilliseconds;
                 bool inRound = IsInRound(now);
                 bool paused = applicationPaused || TimeManager.IsPaused(TimeManager.PauseLayer.Main);
-                if (!wasInRound && inRound) {scoreProbe.Reset("round began");ResetRewardState();}
-                if (wasInRound && !inRound) {scoreProbe.Reset("round ended");ResetRewardState();}
+                if (!wasInRound && inRound) scoreProbe.Reset("round began");
+                if (wasInRound && !inRound) {scoreProbe.Reset("round ended");EndRewardRound();}
                 if ((wasInRound && !inRound) || (!wasPaused && paused)) Stop("round ended or game paused");
                 wasInRound = inRound; wasPaused = paused;
 
@@ -190,7 +191,11 @@ namespace OC2Haptic
         internal bool IsScoreCaptureEnabled { get { return ready && !scoreProbeFaulted; } }
         internal ScoreSourceProbe.Observation CaptureScoreProbe(ClientKitchenFlowControllerBase flow, KitchenFlowMessage message)
         {
-            var frame=scoreProbe.Before(flow,message);if(frame!=null)captures.Push(frame);return frame;
+            // In the installed Unity2017 assembly GetHashCode returns Scene.m_Handle; handle itself is internal.
+            if(rewardRound.Observe(SceneManager.GetActiveScene().GetHashCode(),flow.GetInstanceID(),flow.InRound))
+            {combos.Reset();stars.Reset();captures.Clear();}
+            var frame=scoreProbe.Before(flow,message);
+            if(frame!=null){frame.RoundKey=flow.InRound?rewardRound.Key:null;captures.Push(frame);}return frame;
         }
         internal void ReleaseScoreCapture(ScoreSourceProbe.Observation frame){captures.Release(frame);}
         internal bool OwnsSuccessCapture(ClientKitchenFlowControllerBase flow,int team,uint order)
@@ -202,13 +207,15 @@ namespace OC2Haptic
         internal void CompleteScoreProbe(ClientKitchenFlowControllerBase flow, ScoreSourceProbe.Observation observation)
         {
             if(settings.ScoreSourceProbe.Value)scoreProbe.After(flow, observation);
+            if(string.IsNullOrEmpty(observation.RoundKey) || observation.RoundKey!=rewardRound.Key)return;
             var monitor=flow.GetMonitorForTeam(observation.Team);
             var after=ScoreSourceProbe.Sample.Read(monitor==null?null:monitor.Score);
             bool trusted=observation.Context.Calibrated && observation.Before!=null &&
                 ScoreSourceProbe.Same(observation.Payload,after);
-            string round=observation.Generation+":"+observation.FlowId+":"+observation.Context.Key;
+            string round=observation.RoundKey??"";
+            string comboRound=round+":"+observation.Context.Key;
             int team=(int)observation.Team;
-            if(observation.Before!=null)combos.ObserveState(round,team,observation.Before.Multiplier,trusted);
+            if(observation.Before!=null)combos.ObserveState(comboRound,team,observation.Before.Multiplier,trusted);
             var thresholds=observation.Context.Thresholds;
             if(observation.Before!=null)stars.Prime(new ScoreSnapshot(round,team,observation.Before.Score,thresholds,trusted,observation.Timestamp));
             int milestone=stars.Observe(new ScoreSnapshot(round,team,after==null?0:after.Score,thresholds,trusted,observation.Timestamp),
@@ -217,13 +224,13 @@ namespace OC2Haptic
             ComboResult result=null;
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && observation.Success)
             {
-                var payload=new DeliveryPayload(round,team,unchecked((int)observation.OrderId),after==null?-1:after.Deliveries,
+                var payload=new DeliveryPayload(comboRound,team,unchecked((int)observation.OrderId),after==null?-1:after.Deliveries,
                     observation.WasCombo,after==null?0:after.Multiplier,after==null?0:after.Combo,trusted,observation.Timestamp);
                 result=combos.Resolve(payload,settings.ComboEnabled.Value,settings.ComboMode.Value,settings.MaxHapticTier.Value);
                 if(result.Duplicate)return;
                 delivery=result.Type;key=payload.Key;
             }
-            else if(after!=null)combos.ObserveState(round,team,after.Multiplier,trusted);
+            else if(after!=null)combos.ObserveState(comboRound,team,after.Multiplier,trusted);
             var selected=CelebrationCoordinator.Select(delivery,milestone);
             if(settings.DebugLogEvents.Value || !trusted)
                 Logger.LogInfo("Reward decision | session="+round+" team="+team+" order="+observation.OrderId+
@@ -326,7 +333,7 @@ namespace OC2Haptic
             Stop("output settings changed");
             settings.RefreshPatterns();rewards.Mode=settings.FeedbackMode;
             if(settings.InvalidPatterns.Length>0)Logger.LogWarning("Invalid haptic patterns muted: "+settings.InvalidPatterns);
-            if(sender==settings.Enabled || sender==settings.XInputIndex || sender==settings.LocalPadSlot)ResetRewardState();
+            if(sender==settings.Enabled || sender==settings.XInputIndex || sender==settings.LocalPadSlot)SuspendRewardState();
             if (sender == settings.XInputIndex || sender == settings.LocalPadSlot) CloseMenuSafely();
             deviceConnected = null; nextPollMs = 0; Array.Clear(lastProbeIdentity, 0, lastProbeIdentity.Length);
             if (float.IsNaN(settings.MasterIntensity.Value) || float.IsInfinity(settings.MasterIntensity.Value))
@@ -337,7 +344,7 @@ namespace OC2Haptic
         {
             Stop("scene changed");
             if (scoreProbe != null) scoreProbe.Reset("scene changed");
-            ResetRewardState();
+            EndRewardRound();
             CloseMenuSafely();
             Array.Clear(lastProbeIdentity, 0, lastProbeIdentity.Length); wasInRound = false;
             currentFlow = null; flowOwner = null; nextFlowLookupMs = 0;
@@ -360,7 +367,7 @@ namespace OC2Haptic
         {
             Stop("plugin disabled");
             if (scoreProbe != null) scoreProbe.Reset("plugin disabled");
-            ResetRewardState();
+            SuspendRewardState();
             CloseMenuSafely();
             if (Current == this) Current = null;
             if (subscribed) { SceneManager.activeSceneChanged -= OnSceneChanged; subscribed = false; }
@@ -379,7 +386,8 @@ namespace OC2Haptic
             focused=value;
             if(!value && settings!=null && settings.RespectGameFocus.Value){Stop("focus lost");CloseMenuSafely();}
         }
-        private void ResetRewardState(){combos.Reset();stars.Reset();captures.Clear();}
+        private void SuspendRewardState(){combos.Reset();stars.Suspend();captures.Clear();}
+        private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();}
         private bool PreviewEvent(GameEventType type)
         {
             if(!ready || !settings.Enabled.Value || (!focused && settings.RespectGameFocus.Value))return false;

@@ -1,3 +1,4 @@
+E:\Codex\厨房mod\src\OC2Haptic.Plugin\GameEvents\ScoreSourceProbe.cs(159,29): warning CS0649: 从未对字段“ScoreSourceProbe.Observation.RoundKey”赋值，字段将一直保持其默认值 null [E:\Codex\厨房mod\tests\OC2Haptic.Probe.Tests\OC2Haptic.Probe.Tests.csproj]
 PASS missing progress/directory produces unavailable level without game lookup
 PASS selected variant resolves actual level by identity
 PASS missing PC star boundaries remain unavailable
