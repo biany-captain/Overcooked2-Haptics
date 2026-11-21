@@ -12,7 +12,6 @@ namespace OC2Haptic.Audio
     internal sealed class UnityRewardAudioBackend : IRewardAudioBackend, IDisposable
     {
         private readonly Action<string> log;
-        private readonly Func<int> maxDuration;
         private readonly Func<bool> manualPreview;
         private readonly Func<string> selectedPack;
         private readonly int mainThread=Thread.CurrentThread.ManagedThreadId;
@@ -23,8 +22,8 @@ namespace OC2Haptic.Audio
         private AudioSource source;
         private bool faulted;
         internal RewardSoundPack[] Packs {get;private set;}
-        internal UnityRewardAudioBackend(Action<string> log,Func<int> maxDuration,Func<bool> manualPreview,Func<string> selectedPack)
-        {this.log=log;this.maxDuration=maxDuration;this.manualPreview=manualPreview;this.selectedPack=selectedPack;}
+        internal UnityRewardAudioBackend(Action<string> log,Func<bool> manualPreview,Func<string> selectedPack)
+        {this.log=log;this.manualPreview=manualPreview;this.selectedPack=selectedPack;}
 
         internal void Prepare(string root)
         {
@@ -32,7 +31,6 @@ namespace OC2Haptic.Audio
             foreach(var pack in Packs)
             {
                 var loaded=new PreparedPack();prepared.Add(pack.Id,loaded);
-                if(pack.Id==RewardSoundPack.BuiltinId){PrepareBuiltin();continue;}
                 for(int star=1;star<=4;star++)
                     try
                     {
@@ -44,18 +42,6 @@ namespace OC2Haptic.Audio
                     }
                     catch(Exception error){log("Reward audio asset unavailable; haptics continue | pack="+pack.Id+" star="+star+" reason="+error.Message);}
             }
-        }
-        internal void PrepareBuiltin()
-        {
-            PreparedPack pack=prepared[RewardSoundPack.BuiltinId];DestroyClips(pack);
-            int limit=Math.Max(100,Math.Min(1000,maxDuration()));
-            for(int star=1;star<=4;star++)
-                try
-                {
-                    pack.Clips[star-1]=Upload(RewardSoundPack.BuiltinId,star,RewardTone.Generate(star,limit),1,RewardTone.SampleRate);
-                    pack.Durations[star-1]=RewardTone.DurationMs(star,limit);
-                }
-                catch(Exception error){log("Generated reward audio unavailable; haptics continue: "+error.Message);}
         }
         private AudioClip Upload(string pack,int star,float[] pcm,int channels,int rate)
         {

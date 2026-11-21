@@ -6,21 +6,23 @@ namespace OC2Haptic.Core
 {
     public sealed class RewardSoundPack
     {
-        public const string BuiltinId="crisp-reward";
-        public const string DefaultId="joyful-cartoon-jazz";
+        public const string DefaultId="turbo_swing";
         public readonly string Id,Name;
         private readonly string[] files;
         private RewardSoundPack(string id,string name,string[] files){Id=id;Name=name;this.files=files;}
-        public string FileFor(int star){return files==null?null:files[star-1];}
+        public string FileFor(int star){return files[star-1];}
+        public static bool IsRetired(string id)
+        {return string.Equals(id,"joyful-cartoon-jazz",StringComparison.OrdinalIgnoreCase) || string.Equals(id,"crisp-reward",StringComparison.OrdinalIgnoreCase);}
         public static RewardSoundPack[] Discover(string root,Action<string> log)
         {
-            var packs=new List<RewardSoundPack>{new RewardSoundPack(BuiltinId,"清脆奖励音",null)};
+            var packs=new List<RewardSoundPack>();
             if(!Directory.Exists(root))return packs.ToArray();
             string[] directories;
             try{directories=Directory.GetDirectories(root);Array.Sort(directories,StringComparer.OrdinalIgnoreCase);}
             catch(Exception error){if(log!=null)log("Sound pack discovery unavailable: "+error.Message);return packs.ToArray();}
             foreach(string folder in directories)
             {
+                string id=Path.GetFileName(folder);if(IsRetired(id))continue;
                 string path=Path.Combine(folder,"pack.ini");if(!File.Exists(path))continue;
                 try
                 {
@@ -40,7 +42,6 @@ namespace OC2Haptic.Core
                             throw new FormatException("Star files must be same-folder WAV filenames.");
                         files[i]=Path.Combine(folder,file);
                     }
-                    string id=Path.GetFileName(folder);if(string.Equals(id,BuiltinId,StringComparison.OrdinalIgnoreCase))throw new FormatException("Reserved pack ID.");
                     packs.Add(new RewardSoundPack(id,name,files));
                 }
                 catch(Exception error){if(log!=null)log("Sound pack skipped | path="+path+" reason="+error.Message);}

@@ -14,7 +14,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.4.0")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.4.1")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -57,7 +57,7 @@ namespace OC2Haptic
                 settings = new HapticConfig(Config);
                 backend = new XInputBackend(message => Logger.LogError(message));
                 engine = new HapticEngine(backend);
-                rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>settings.MaxSoundDurationMs.Value,()=>manualPreview,()=>settings.SoundPackId.Value);
+                rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>manualPreview,()=>settings.SoundPackId.Value);
                 rewardAudio.Prepare(Path.Combine(Path.GetDirectoryName(Info.Location),"audio"));
                 rewards=new RewardOutput(engine,rewardAudio,message=>Logger.LogInfo(message),rewardAudio.DurationMs);
                 rewards.Mode=settings.FeedbackMode;
@@ -69,7 +69,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, () => clock.Elapsed.TotalMilliseconds, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.4.0-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.4.1-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -338,7 +338,6 @@ namespace OC2Haptic
         {
             Stop("output settings changed");
             settings.RefreshPatterns();rewards.Mode=settings.FeedbackMode;
-            if(sender==settings.MaxSoundDurationMs)rewardAudio.PrepareBuiltin();
             if(settings.InvalidPatterns.Length>0)Logger.LogWarning("Invalid haptic patterns muted: "+settings.InvalidPatterns);
             if(sender==settings.Enabled || sender==settings.XInputIndex || sender==settings.LocalPadSlot)SuspendRewardState();
             if (sender == settings.XInputIndex || sender == settings.LocalPadSlot) CloseMenuSafely();

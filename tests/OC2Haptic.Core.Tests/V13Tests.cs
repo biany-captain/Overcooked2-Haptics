@@ -16,7 +16,6 @@ internal static class V13Tests
         tests.Add("v13 synchronous delivery combo star arbitration chooses one", Arbitration);
         tests.Add("v13 profiles distinct rhythms and strict duration limits", Profiles);
         tests.Add("v13 editable patterns reject invalid unsafe values", EditablePatterns);
-        tests.Add("v13 original PCM has bounded peaks and silent boundaries", Pcm);
         tests.Add("v13 audio failure preserves rumble and modes stop output", OutputModes);
         tests.Add("v13 danger interrupts celebration without replay", Danger);
         tests.Add("v13 1000 duplicate delivery callbacks remain bounded in output", Burst);
@@ -115,12 +114,6 @@ internal static class V13Tests
             Check(!PatternCodec.TryParse(text,false,out p));
         Check(PatternCodec.TryParse("0.2,0.3,400;0.1,0.2,400",true,out p));
         Check(!PatternCodec.TryParse("0,1,500;0,1,400",true,out p));
-    }
-    private static void Pcm()
-    {
-        for(int star=1;star<=4;star++) { var pcm=RewardTone.Generate(star,1000); Check(pcm.Length<=44100 && pcm.Length>0);
-            Check(Math.Abs(pcm[0])<.0001 && Math.Abs(pcm[pcm.Length-1])<.0001);
-            foreach(float x in pcm) Check(!float.IsNaN(x) && !float.IsInfinity(x) && Math.Abs(x)<=.601); }
     }
     private static void OutputModes()
     {

@@ -291,22 +291,16 @@ StarMilestone1HapticsOnly = 0.1,0.22,55;0,0,90;0.05,0.17,35
 # Acceptable values: HapticsAndAudio, HapticsOnly, AudioOnly, Disabled
 Mode = HapticsAndAudio
 
-## MOD linear gain only, applied once; game SFX mixer and mute remain respected.
+## Relative to game master/SFX volume: 1=100%, lower values attenuate. Applied once; respects game mute.
 # Setting type: Single
-# Default value: 0.65
+# Default value: 1
 # Acceptable value range: From 0 to 1
-SoundVolume = 0.65
-
-## Original generated reward sounds only.
-# Setting type: Int32
-# Default value: 1000
-# Acceptable value range: From 100 to 1000
-MaxSoundDurationMs = 1000
+SoundVolume = 1
 
 ## One local sound pack for all four stars. Unknown/missing pack mutes audio only; restart to discover newly installed packs.
 # Setting type: String
-# Default value: joyful-cartoon-jazz
-SoundPackId = joyful-cartoon-jazz
+# Default value: turbo_swing
+SoundPackId = turbo_swing
 
 [Stars]
 

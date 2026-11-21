@@ -12,7 +12,7 @@ namespace OC2Haptic.Config
             DeliveryUnclassified, DeliveryFailure, OrderExpired, ComboEnabled, StarsEnabled, RespectGameFocus;
         internal readonly ConfigEntry<bool> DebugLogEvents, ScoreSourceProbe;
         internal readonly ConfigEntry<float> MasterIntensity, ComboIntensity, SoundVolume;
-        internal readonly ConfigEntry<int> XInputIndex, LocalPadSlot, MaxHapticTier, MaxSoundDurationMs;
+        internal readonly ConfigEntry<int> XInputIndex, LocalPadSlot, MaxHapticTier;
         internal readonly ConfigEntry<KeyCode> MenuKey, ToggleKey;
         internal readonly ConfigEntry<ComboTriggerMode> ComboMode;
         internal readonly ConfigEntry<StarFeedbackMode> StarMode;
@@ -53,12 +53,13 @@ namespace OC2Haptic.Config
                 new ConfigDescription("Additional Combo motor multiplier.", new AcceptableValueRange<float>(0, 1))));
             StarsEnabled = Output(config.Bind("Stars", "Enabled", true, "First committed-score threshold crossing; no retroactive or final-star guarantee."));
             StarMode = Output(config.Bind("StarFeedback", "Mode", StarFeedbackMode.HapticsAndAudio, "HapticsAndAudio, HapticsOnly, AudioOnly or Disabled."));
-            SoundVolume = Output(config.Bind("StarFeedback", "SoundVolume", .65f,
-                new ConfigDescription("MOD linear gain only, applied once; game SFX mixer and mute remain respected.", new AcceptableValueRange<float>(0, 1))));
-            MaxSoundDurationMs = Output(config.Bind("StarFeedback", "MaxSoundDurationMs", 1000,
-                new ConfigDescription("Original generated reward sounds only.", new AcceptableValueRange<int>(100, 1000))));
+            SoundVolume = Output(config.Bind("StarFeedback", "SoundVolume", 1f,
+                new ConfigDescription("Relative to game master/SFX volume: 1=100%, lower values attenuate. Applied once; respects game mute.", new AcceptableValueRange<float>(0, 1))));
+            var legacyDuration=config.Bind("StarFeedback","MaxSoundDurationMs",1000,"Removed with generated crisp sound.");
+            config.Remove(legacyDuration.Definition);
             SoundPackId=Output(config.Bind("StarFeedback","SoundPackId",RewardSoundPack.DefaultId,
                 "One local sound pack for all four stars. Unknown/missing pack mutes audio only; restart to discover newly installed packs."));
+            if(RewardSoundPack.IsRetired(SoundPackId.Value))SoundPackId.Value=RewardSoundPack.DefaultId;
             RespectGameFocus = Output(config.Bind("Audio", "RespectGameFocus", true, "Stop this plugin's feedback on focus loss. Recommended true."));
             foreach (GameEventType type in Enum.GetValues(typeof(GameEventType)))
             {

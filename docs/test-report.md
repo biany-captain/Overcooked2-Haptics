@@ -1,36 +1,28 @@
-# Test report — 0.4.0-alpha sound packs
+# Test report — 0.4.1-alpha Ultra Victory v3
 
-2026-11-21. User approved formalv1.4 star haptics, unchanged suppliedWAV including3.25s four-star, startup preload, persistent pack dropdown/defaultjazz and necessary GPL/source files inGitHub. Menu intensity/two-tab changes from0.3.1 are included;0.3.1 was not separately installed/tested.
+2026-11-21. User rejected both old shipped sound sets; approved three whole new packs,12uneditedWAV, defaultturbo_swing, full3.80–4.05s four-star files, unchanged short haptics. No mixed-star or crowd-layer feature. User approved game master/SFX following with default relativegain1 and custom slider, and localvolume.7006757->1; preserve currentHapticsOnly/master1/ordergain.97.
 
 ## Software verification
 
-- Core80/80 PASS: existing70 plus4 WAV/catalog/actual-asset cases and6 v1.4 pattern/audio-tail/preemption/queue cases. New API tests first failed, then passed after implementation. Review regression first failed0/1, then passed after canceling prior motor tasks even for zero-gain replacement stars.
-- Actual BepInEx config10/10 PASS: known old defaults migrate; custom patterns including submilliscale motor differences, selected/unknown future pack, existing master/volume and original crisp duration remain. Default new pack isjoyful-cartoon-jazz. Precision regression first failed9/10, then passed after exact parsed-segment comparison.
-- Actual game-managed-data probe5/5 PASS: score/threshold source and NGP gate tests retained.
-- net35/x86 using current game references:0 warnings/errors, assembly0.4.0.0. Unity's stripped framework lacksInvalidDataException; format errors usemscorlib FormatException without an extra dependency.
+- Core80/80 PASS. Sound-pack focused5/5: retired IDs/case variants excluded, absent root produces empty catalog, all12actual files decode at exact approved millisecond lengths,4050/5000ms accepted and5001ms rejected. Focused firstRED2/5 before implementation. Obsolete synthetic-tone-only test removed with that explicitly removed feature; gameplay/output regressions retained.
+- Actual BepInEx config11/11 PASS. Retired selections migrate, unknown custom pack/volume/profile precision/mode/master remain; new relativeSoundVolume defaults1, obsolete MaxSoundDurationMs is removed. FirstRED9/11 thenGREEN11/11.
+- Actual game-managed-data probe5/5 PASS. No scoreHook, threshold,Combo or dedup change.
+- Actual Unity2017.4/net35/x86 references build0warnings/errors, assembly0.4.1.0. No runtime dependency added.
 
-Evidence: evidence/core-tests-0.4.txt, config-tests-0.4.txt, probe-tests-0.4.txt, build-0.4.txt and audio-assets-0.4.txt. Prior real user/log acceptance is archived in test-report-0.3.md, with0.3.1 UI software work in test-report-0.3.1.md.
+Evidence: evidence/core-tests-0.4.1.txt,config-tests-0.4.1.txt,probe-tests-0.4.1.txt,build-0.4.1.txt and audio-assets-0.4.1.json. Sourceprovenance/author notices and exact originalWAV hashes: assets/audio/SOURCES.md.
 
-## Asset evidence
+## Audio and scope
 
-Four original userWAV copied without trim, gain edits or re-encoding. All48kHz/PCM16/stereo. Durations980/1490/2160/3250ms; digital clipped samples0; first samples above-60dBFS approximately0.6–0.8ms; final samples at most1/32768. This does not prove the absence of an audible click or establish perceived loudness.
+Three presets: TurboSwing1050/1570/2300/3850ms; ChampionFanfare1130/1700/2480/4050ms; KitchenRock1010/1530/2350/3800ms. All12WAV48kHz/PCM16/stereo, clipped samples0, final samples0or1/32768; total5,149,960bytes. Mapping JSON and actual frame length agree within one48kHz sample. No file was trimmed, re-encoded or amplified. Digital peaks/RMS do not establish human comfort or equal perceived loudness.
 
-Peak dBFS: -7.35/-8.13/-4.07/-2.38. RMS dBFS: -23.68/-21.78/-19.13/-18.26. Four-star peak exceeds the spec's suggested-3dBFS headroom but has no digital clipping; files retained unchanged for the explicitly approved prototype audition. Subjective loudness and orchestration were not evaluated by the assistant. SHA256/provenance/license records: assets/audio/SOURCES.md and supplied notices, MIDI and generator.
+Oldjazz WAV/source assets are removed except the sharedoffline build_music helper required by the new generator; no old generatedtone is compiled or used asfallback. No thirdparty crowd audio/OGG/previews/HTML player/SoundFont/cache is shipped. New material's declaredSoundFont source/license records are preserved without claiming independent ownership clearance orCC0.
 
-## Integration and limits
+Volume continues through the existing gameSFX group and one relative gain; default100% removes extra default attenuation. Game settings/mute and independentcustom slider require focused native acceptance. Existing current modeHapticsOnly intentionally persists; explicitAudioOnly/combined preview works independently, actualautomatic music requires user choosing a mode containingaudio.
 
-AudioClip upload occurs inAwake;Play only selects a prepared clip and appliesgain once through the game'sSFX group. Hooks enqueue immutable feedback,Update schedules playback. Software uses a common monotonic start timestamp, not measured soundcard/controller onset. No claim ofsample-level or≤50ms physical synchronization.
+## Real runtime evidence and remaining acceptance
 
-Higher stars replace active celebration; ordinary actions do not stop audio tails. Existingfailure/expiry stopaudio and can override motors. Queue is discarded oncancel/roundidentity change;globaloff drains with output gated, so no backlog replay. Disconnect stops own audio/motors after observed state change (Update poll250ms); no physical latency guarantee under a blockedmainthread/devicefault.
+Prior0.4 user reported tested menu features normal/distinguishable, then rejected both audio styles. Priorlog only records fourHapticsOnly star levels and oneAudioOnly one-star jazz preview plus clean shutdown, real-event countersall0 (evidence/runtime-menu-0.4.txt). It does not verify everymode, three new styles or actualgame milestones.
 
-## Pending real acceptance
+Allnew0.4.1 native playback/dropdown/volumefollowing/comfort and hardware synchronization: UNTESTED. Followbatch-test-0.4.1.md. Realstars2/4/NGP and previously unobserved expiry samples remain unverified. FireHooks/multi-controller/online remain later scope. No human blindtest or physical≤50ms assertion. Knownstartup invalid-pattern warning omission unchanged.
 
-Allnew0.4 game playback/menus/dropdown/restart persistence/slider visibility and perceived motor/music timing: **UNTESTED**. Follow batch-test-0.4.md. Real stars2/4,NGP and any prior unobserved expiry sample remain unverified. No new fire/burning warningHook, local multi-controller oronline capability is claimed. M02 human blind identification≥85% is a goal, with nohuman trial results. Missing-file behavior is tested at the decoder/catalog/output seam, not yet in nativeUnity runtime.
-
-Review/package/install status is recorded below when actually completed. Deferred knownMinor: initial invalid-pattern text mutes the event but does not log its initial warning until an output settingchanges.
-
-## Delivery verification
-
-Freshreview found twoImportant boundary defects; one fix pass and RED/GREEN regressions recorded inreview-v14.md. Finalcore80/80, config10/10, probe5/5 unchanged, build0warnings/errors.
-
-Game was stopped. A cold0.3.0 DLL/config backup was captured before installation. Installed only own0.4.0.0 DLL and audio/source/license directory. Four installedWAV transfer hashes match source; personalCFG bytes unchanged during installation, retainingmaster0.75,volume0.7006757,Pad0/XInput0. Pattern/default migration happens on next launch; native playback remains untested.
+Delivery/review/install verification will be appended only after actual completion.

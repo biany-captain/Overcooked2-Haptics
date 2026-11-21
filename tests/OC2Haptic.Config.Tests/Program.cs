@@ -51,7 +51,7 @@ internal static class Program
         string musicPath=Path.Combine(root,"v14-preserve.cfg");
         File.WriteAllText(musicPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nSoundPackId = future-pack\nSoundVolume = 0.7006757\nMaxSoundDurationMs = 700\n[Patterns]\nStarMilestone1 = 0.05,0.22,75\nStarMilestone2 = 0.9,0.1,123\nStarMilestone1HapticsOnly = 0.05,0.22,75;0,0,45;0.03,0.13,25\n");
         var music=new HapticConfig(new ConfigFile(musicPath,false));
-        bool musicCorrect=music.SoundPackId.Value=="future-pack" && Math.Abs(music.SoundVolume.Value-.7006757f)<.000001 && music.Intensity==.4f && music.MaxSoundDurationMs.Value==700 &&
+        bool musicCorrect=music.SoundPackId.Value=="future-pack" && Math.Abs(music.SoundVolume.Value-.7006757f)<.000001 && music.Intensity==.4f && !File.ReadAllText(musicPath).Contains("MaxSoundDurationMs =") &&
             music.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==180 && music.PatternFor(GameEventType.StarMilestone2).TotalDurationMs==123 &&
             music.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 && gains.SoundPackId.Value==RewardSoundPack.DefaultId;
         if(!musicCorrect){failed++;Console.WriteLine("FAIL v14 defaults migrate while custom profiles and pack preference survive");}
@@ -65,7 +65,19 @@ internal static class Program
             precision.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==145;
         if(!precisionCorrect){failed++;Console.WriteLine("FAIL v14 migration preserves submilliscale custom motor values");}
         else Console.WriteLine("PASS v14 migration preserves submilliscale custom motor values");
-        Console.WriteLine("RESULT " + (content.Length+6 - failed) + "/" + (content.Length+6) + " config migration passed");
+        bool retiredCorrect=true;
+        foreach(string id in new[]{"joyful-cartoon-jazz","crisp-reward","JOYFUL-CARTOON-JAZZ"})
+        {
+            string path=Path.Combine(root,"retired-"+id+".cfg");File.WriteAllText(path,"[StarFeedback]\nSoundPackId = "+id+"\nSoundVolume = 0.42\n");
+            var retired=new HapticConfig(new ConfigFile(path,false));
+            retiredCorrect=retiredCorrect && retired.SoundPackId.Value=="turbo_swing" && retired.SoundVolume.Value==.42f;
+        }
+        string defaultPath=Path.Combine(root,"new-audio-default.cfg");File.WriteAllText(defaultPath,"");
+        var defaults=new HapticConfig(new ConfigFile(defaultPath,false));
+        retiredCorrect=retiredCorrect && defaults.SoundPackId.Value=="turbo_swing" && defaults.SoundVolume.Value==1;
+        if(!retiredCorrect){failed++;Console.WriteLine("FAIL retired selections migrate and relative gameSFX gain defaults100percent");}
+        else Console.WriteLine("PASS retired selections migrate and relative gameSFX gain defaults100percent");
+        Console.WriteLine("RESULT " + (content.Length+7 - failed) + "/" + (content.Length+7) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }

@@ -11,7 +11,7 @@ namespace OC2Haptic.Core
         private bool audioFaulted;
         private StarFeedbackMode mode=StarFeedbackMode.HapticsAndAudio;
         public RewardOutput(HapticEngine engine,IRewardAudioBackend audio,Action<string> log=null,Func<int,int> audioDurationMs=null)
-        {this.engine=engine;this.audio=audio;this.log=log;this.audioDurationMs=audioDurationMs??(star=>RewardTone.DurationMs(star,1000));}
+        {this.engine=engine;this.audio=audio;this.log=log;this.audioDurationMs=audioDurationMs??(star=>0);}
         public StarFeedbackMode Mode {get{return mode;}set{if(mode!=value){Stop();mode=value;}}}
         public bool Emit(int index,string key,GameEventType type,HapticPattern pattern,double now,float intensity,float volume,bool useDefaultPattern=true,
             StarFeedbackMode? previewMode=null)

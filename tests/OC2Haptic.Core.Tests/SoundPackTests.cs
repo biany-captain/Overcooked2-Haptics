@@ -9,8 +9,9 @@ internal static class SoundPackTests
     {
         tests.Add("sound pack PCM16 stereo decodes signed samples and unknown chunks",Decode);
         tests.Add("sound pack rejects truncated compressed oversized or invalid WAV",InvalidWave);
-        tests.Add("sound pack catalog retains builtin and isolates malformed manifests",Catalog);
+        tests.Add("sound pack catalog excludes retired sets and isolates malformed manifests",Catalog);
         tests.Add("sound pack supplied assets preserve full approved durations",ActualAssets);
+        tests.Add("sound pack permits full4050ms music and enforces5000ms boundary",LongMusic);
     }
     private static void Decode()
     {
@@ -24,7 +25,7 @@ internal static class SoundPackTests
     private static void InvalidWave()
     {
         foreach(var stream in new[]{Wave(48000,2,3,16,new short[4]),Wave(48000,2,1,8,new short[4]),
-            Wave(48000,3,1,16,new short[6]),Wave(48000,2,1,16,new short[48000*2*4]),Wave(48000,2,1,16,new short[3])})
+            Wave(48000,3,1,16,new short[6]),Wave(48000,2,1,16,new short[48000*2*6]),Wave(48000,2,1,16,new short[3])})
             using(stream)Reject(stream);
         using(var truncated=Wave(48000,2,1,16,new short[4])){truncated.SetLength(truncated.Length-1);Reject(truncated);}
         using(var invalid=new MemoryStream(new byte[64]))Reject(invalid);
@@ -35,30 +36,38 @@ internal static class SoundPackTests
         Directory.CreateDirectory(root);
         try
         {
-            string good=Path.Combine(root,"joyful-cartoon-jazz");Directory.CreateDirectory(good);
-            File.WriteAllText(Path.Combine(good,"pack.ini"),"Name = 欢乐卡通爵士\nStar1 = one.wav\nStar2 = two.wav\nStar3 = three.wav\nStar4 = four.wav\n");
+            string good=Path.Combine(root,"turbo_swing");Directory.CreateDirectory(good);
+            string manifest="Name = 超燃卡通大乐队\nStar1 = one.wav\nStar2 = two.wav\nStar3 = three.wav\nStar4 = four.wav\n";
+            File.WriteAllText(Path.Combine(good,"pack.ini"),manifest);
+            foreach(string retired in new[]{"joyful-cartoon-jazz","CRISP-REWARD"})
+            {string folder=Path.Combine(root,retired);Directory.CreateDirectory(folder);File.WriteAllText(Path.Combine(folder,"pack.ini"),manifest);}
             string bad=Path.Combine(root,"bad");Directory.CreateDirectory(bad);
             File.WriteAllText(Path.Combine(bad,"pack.ini"),"Name=bad\nStar1=../escape.wav\nStar2=2.wav\nStar3=3.wav\nStar4=4.wav\n");
             int warnings=0;var packs=RewardSoundPack.Discover(root,_=>warnings++);
-            Check(packs.Length==2 && packs[0].Id=="crisp-reward" && packs[1].Id=="joyful-cartoon-jazz" && warnings==1);
-            Check(packs[1].Name=="欢乐卡通爵士" && packs[1].FileFor(4)==Path.Combine(good,"four.wav"));
-            Check(RewardSoundPack.Discover(Path.Combine(root,"missing"),null).Length==1);
+            Check(packs.Length==1 && packs[0].Id=="turbo_swing" && warnings==1);
+            Check(packs[0].Name=="超燃卡通大乐队" && packs[0].FileFor(4)==Path.Combine(good,"four.wav"));
+            Check(RewardSoundPack.Discover(Path.Combine(root,"missing"),null).Length==0);
         }
         finally{Directory.Delete(root,true);}
     }
     private static void ActualAssets()
     {
         string root=Path.Combine(Directory.GetCurrentDirectory(),"assets","audio");
-        var packs=RewardSoundPack.Discover(root,null);RewardSoundPack jazz=null;
-        foreach(var pack in packs)if(pack.Id=="joyful-cartoon-jazz")jazz=pack;
-        Check(jazz!=null);
-        int[] expected={980,1490,2160,3250};
-        for(int star=1;star<=4;star++)using(var file=File.OpenRead(jazz.FileFor(star)))
+        var packs=RewardSoundPack.Discover(root,null);Check(packs.Length==3);
+        var expected=new Dictionary<string,int[]>{{"turbo_swing",new[]{1050,1570,2300,3850}},
+            {"champion_fanfare",new[]{1130,1700,2480,4050}},{"kitchen_rock",new[]{1010,1530,2350,3800}}};
+        foreach(var pack in packs)for(int star=1;star<=4;star++)using(var file=File.OpenRead(pack.FileFor(star)))
         {
-            var pcm=PcmWaveReader.Read(file);Check(pcm.SampleRate==48000 && pcm.Channels==2 && pcm.DurationMs==expected[star-1]);
+            var pcm=PcmWaveReader.Read(file);Check(pcm.SampleRate==48000 && pcm.Channels==2 && pcm.DurationMs==expected[pack.Id][star-1]);
             float peak=0;foreach(float sample in pcm.Samples){Check(!float.IsNaN(sample) && Math.Abs(sample)<1);peak=Math.Max(peak,Math.Abs(sample));}
             Check(peak>.1 && Math.Abs(pcm.Samples[pcm.Samples.Length-1])<.0001);
         }
+    }
+    private static void LongMusic()
+    {
+        foreach(int ms in new[]{4050,5000})using(var stream=Wave(48000,2,1,16,new short[48000*2*ms/1000]))
+            Check(PcmWaveReader.Read(stream).DurationMs==ms);
+        using(var stream=Wave(48000,2,1,16,new short[48000*2*5001/1000]))Reject(stream);
     }
     private static MemoryStream Wave(int rate,int channels,int format,int bits,short[] samples,bool extra=false)
     {

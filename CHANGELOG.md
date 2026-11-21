@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1-alpha — 2026-11-21
+
+- Remove both rejected shipped sound sets and generated-tone fallback. AddUltra Victory v3: TurboSwing(default), ChampionFanfare and KitchenRock,12uneditedPCM WAVs with sourceMIDI/scripts/credits.
+- Preserve full3.80–4.05s four-star tracks; decoder bound5s, haptic profiles remain180/285/425/660ms with850ms ceiling. No mixed-star selector or unbundled crowd layers.
+- Default relative gain100% through existing gameSFX group; keep user volume slider and game mute/master behavior. Existing custom gains remain; local user explicitly approved .7006757->1.
+- Migrate only retiredpack selections; keep unknown/custom IDs, other preferences and user-owned packs. Empty catalog safely has no audio. Remove obsolete generated-tone duration key and tests tied only to the removed feature.
+- Retain0.4 functional/user evidence separately from rejected audio quality. New native music/volume acceptance remains pending.
+
 ## 0.4.0-alpha — 2026-11-21
 
 - Adopt formalv1.4 star haptics180/285/425/660ms within850ms; migrate only known old defaults, retaining custom profiles and user gains/volume/binding.

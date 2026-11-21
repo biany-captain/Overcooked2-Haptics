@@ -221,7 +221,7 @@ namespace OC2Haptic.UI
         private string TopText()
         {
             return tab==0?"单项倍率叠加总强度，不改变节奏；列表可滚动。\n0%不震动；星级试听请点击上方「星级测试」。"
-                :"音效包统一作用于四个星级；下方列表可滚动。\n测试不改自动模式；主菜单 / 暂停中也可试听。";
+                :"音量跟随游戏主音量 / 音效，相对100%为原声。\n音效包统一四星；主菜单 / 暂停中可单独测试。";
         }
         private int ContentRows(){return tab==0?1+Types.Length*2:4+(packDropdown?soundPacks.Length:0)+StarTypes.Length*2;}
         private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
@@ -267,7 +267,7 @@ namespace OC2Haptic.UI
             int mode=GUI.SelectionGrid(new Rect(4,header+row,width-8,row-8),(int)settings.FeedbackMode,
                 new[]{"震动＋音效","仅震动","仅音效","关闭"},4,buttonStyle);
             if(mode!=(int)settings.FeedbackMode)settings.StarMode.Value=(StarFeedbackMode)mode;
-            DrawStrength(4,header+row*2,width-8,row-8,"庆祝音量",settings.SoundVolume,1);
+            DrawStrength(4,header+row*2,width-8,row-8,"相对音量",settings.SoundVolume,1);
             var modes=new[]{StarFeedbackMode.AudioOnly,StarFeedbackMode.HapticsOnly,StarFeedbackMode.HapticsAndAudio};
             var labels=new[]{"试音","试震","同时测试"};
             for(int i=0;i<StarTypes.Length;i++)

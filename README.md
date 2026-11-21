@@ -1,10 +1,10 @@
-# OC2 Haptic — 0.4.0-alpha
+# OC2 Haptic — 0.4.1-alpha
 
 Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、接住、顺序/乱序上菜、Combo ×1～×4、订单过期，以及实时星级门槛庆祝。F6打开中文管理页，可调整强度、试音试震并选择星级音效包；F10控制总开关。
 
-**状态：0.3.0用户报告单套反馈正常，日志确认分类、Combo及一星/三星原短音效；0.4.0将强度滑杆、双页签与新音乐包合并交付，界面及游戏内新音乐待实测。** 未观察到的真实二星/四星、超时及其他兼容场景保留未验收。正式需求v1.4与插件版本号分别管理。
+**状态：0.4.1按用户要求移除旧两套声音，接入Ultra Victory v3三套12首音乐；新音色及游戏音量跟随待实测。** 已有分类/Combo及部分真实星级有旧版本日志，未观察到的真实二星/四星、超时及其他兼容场景保留未验收。正式需求v1.4与后续用户确认记录共同约束开发，插件版本号分别管理。
 
-[源码仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式需求](docs/requirements-v1.4.md) · [新版差异/设计](docs/design-v1.4.md) · [测试报告](docs/test-report.md) · [本轮实机清单](docs/batch-test-0.4.md)
+[源码仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式需求](docs/requirements-v1.4.md) · [当前接入设计](docs/design-ultra-v3.md) · [测试报告](docs/test-report.md) · [本轮实机清单](docs/batch-test-0.4.1.md)
 
 [后续开发与验收顺序](docs/roadmap.md) · [音效包格式与新增方式](docs/audio-packs.md)
 
@@ -21,8 +21,8 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 ## 安装
 
 1. 退出游戏，使用匹配游戏架构的BepInEx 5。当前开发环境为Steam默认分支、x86、BepInEx5.4.22.0；保留已有加载器及其他MOD。
-2. 将安装包的 `BepInEx/plugins/OC2Haptic/`（DLL及audio目录，含许可/来源）放到游戏目录同一位置。只复制DLL会缺少外置音乐；原清脆生成音仍可用。
-3. 启动后检查 `BepInEx/LogOutput.log` 中的 `OC2Haptic initialized | 0.4.0-alpha`、四条欢乐包 `Reward audio prepared` 及各Hook安装信息。加载成功不等于事件验收通过。
+2. 将安装包的 `BepInEx/plugins/OC2Haptic/`（DLL及audio目录，含许可/来源）放到游戏目录同一位置。只复制DLL会缺少音乐，不再有内置铃音兜底。升级可删除本插件audio/joyful-cartoon-jazz旧目录，其他自备包保留；新版本也不会发现已退役的两个旧ID。
+3. 启动后检查 `BepInEx/LogOutput.log` 中的 `OC2Haptic initialized | 0.4.1-alpha`、12条新包 `Reward audio prepared` 及各Hook安装信息。加载成功不等于事件验收通过。
 4. 配置位于 `BepInEx/config/dev.oc2haptic.feedback.cfg`；示例 `config/OC2Haptic.cfg.example` 不应覆盖个人配置。旧上菜成功开关自动迁移，原有禁用偏好、强度、绑定和快捷键保留。
 
 ## 首次手柄绑定
@@ -41,10 +41,10 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 - F6开关页面，右上角×关闭；F10和页面总反馈开关控制同一设置。关闭总开关后仍可打开F6。
 - 顶部总震动强度0–100%。「事件设置」中每项倍率0–200%，默认100%保留原手感；与总强度及既有Combo倍率叠加，保持节奏，达到上限时统一限制峰值以维持左右比例。
 - 「星级测试」集中显示一到四星，每档有试音、试震、同时测试按钮和单独倍率。明确点击测试会替换前一次星级预览，不改变星级自动输出模式，也不计真实事件。
-- 同页「音效包」下拉框统一选择四星音乐，默认欢乐卡通爵士，保留清脆奖励音。切换停旧输出并保存；新增本地包后重启识别，见[包格式](docs/audio-packs.md)。没有素材的“超燃”等不显示为空选项。
+- 同页「音效包」下拉框统一选择四星音乐：默认超燃卡通大乐队，另有冠军加冕号角、厨房摇滚派对。切换停旧输出并保存；新增本地包后重启识别，见[包格式](docs/audio-packs.md)。本轮没有逐星混搭或欢呼分轨。
 - 页面不自动暂停，只屏蔽当前绑定厨师操作并显示鼠标，关闭后恢复。关卡时间继续，调试可先手动暂停。
 - 事件开关控制自动反馈；Combo和星级各有总开关。手动预览独立于自动事件开关，仍受总开关、相应强度/音量和设备条件限制。
-- 星级自动模式：震动＋音效、仅震动、仅音效、关闭；音量滑杆只改MOD奖励音的线性增益。独立试音/试震按钮不受此自动模式及自动事件开关限制，但仍受总开关、焦点、相应强度/音量和设备条件限制。
+- 星级自动模式：震动＋音效、仅震动、仅音效、关闭；相对音量默认100%，跟随游戏主音量及SFX音效组，并可调低。独立试音/试震按钮不受此自动模式及自动事件开关限制，但仍受总开关、焦点、相应强度/音量和设备条件限制。
 - 用户已批准在主菜单/暂停中点击试听；自动反馈在菜单/暂停中静音。失焦、关闭菜单、F10关闭、切场景会停止本插件输出。
 - 设置即时保存。手动预览单独记录，不计真实游戏事件。优先级较低的预览可能被拒绝，等当前反馈结束再点。
 
@@ -74,11 +74,11 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 
 ## 音效与停止策略
 
-默认欢乐卡通爵士为用户提供的四首独立WAV，0.98/1.49/2.16/3.25秒；第四星含合成卡通欢呼与掌声。文件原样接入，用户批准保留3.25秒四星；未做真人盲测、主观响度统一或真实音震延迟测量。原CrispReward短PCM铃音保留为可选包，四星约700ms。
+Ultra Victory v3为用户提供的三套12首WAV：超燃卡通大乐队1.05/1.57/2.30/3.85秒，冠军加冕号角1.13/1.70/2.48/4.05秒，厨房摇滚派对1.01/1.53/2.35/3.80秒。原样接入，不含模拟或真实欢呼/掌声。用户允许四星完整播放；马达仍在660ms结束。旧欢乐卡通爵士素材与清脆生成音已移除，旧选择会迁移到新默认。
 
-素材包自带说明将渲染音频按GPL-2.0-only处理，音色来自TimGM6mb（Tim Brechbill/David Bolton），需保留许可及署名；原始MIDI、制作脚本与说明随必要资产保留。详见[来源记录](assets/audio/SOURCES.md)。不含Fancy Day原曲、商业音乐剪辑或游戏原声；项目代码许可证尚未选择，此说明只记录资产来源。
+供包说明声明原创MIDI编排，渲染使用TimGM6mb（Tim Brechbill/David Bolton）；所附GPL/署名、MIDI与必要制作源码一并保留，见[来源记录](assets/audio/SOURCES.md)。音色库许可与渲染输出的适用边界按供包声明记录，不称CC0；项目代码许可证尚未选择。
 
-默认增益0.65只对新配置应用一次；升级保留你已有音量，不代表65%主观响度。插件自有2D声源接入游戏SFX组，尊重游戏静音，不改BGM或原游戏声源。启动预载，Hook不读文件、不解码、不等待；输出在下次Update调度。声音缺失/损坏时该声音不可用，已有震动及游戏继续。
+相对音量默认1，只应用一次；游戏主音量/SFX组继续控制最终声音，0为静音，滑杆可调0–100%。普通升级保留现有自定义音量，本机用户已明确选择将约70%改100%。自有2D声源尊重游戏静音，不改BGM、原声源或Mixer。启动预载，Hook不读文件、不解码、不等待；输出在下次Update调度。缺失/损坏或无可用包时声音不可用，震动及游戏继续。新的响度、实际调音跟随与音震同步尚待用户实测。
 
 失败/订单过期等高优先级反馈可停止奖励声音和覆盖震动；取消后不补播。音频初始化或播放失败只影响本插件音效，震动及输入清理继续。无SFX混音组时音效不可用，不绕过游戏音量。
 
@@ -90,7 +90,7 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 - Devices：XInputIndex、LocalGamePadSlot，默认-1。
 - Events：ThrowSuccess、CatchSuccess、DeliveryOrdered、DeliveryOutOfOrder、DeliveryUnclassified、DeliveryFailure、OrderExpired。
 - Combo：Enabled、TriggerMode=EveryOrderedDelivery、MaxHapticTier=4、ComboMasterIntensity=0.85。OnLevelUp只在已知的真实等级提升时分级；关闭分级仍保留分类反馈。
-- Stars.Enabled与StarFeedback.Mode；SoundPackId=joyful-cartoon-jazz，SoundVolume默认0.65，MaxSoundDurationMs=1000仅约束原清脆生成音。
+- Stars.Enabled与StarFeedback.Mode；SoundPackId=turbo_swing，SoundVolume默认1为游戏SFX相对100%；旧生成音专属MaxSoundDurationMs移除。
 - Patterns：各事件片段及StarMilestone1HapticsOnly。EventStrength为各事件额外倍率0–2，默认1；0不创建马达任务。BepInEx会将越界配置限制到有效范围（例如正无穷限制为2）；实际马达仍统一限幅。非法片段/负时长/超长模式拒绝。
 - Diagnostics.ScoreSourceProbe控制详细快照日志；新功能所需的只读采集不依赖详细日志开关。
 - Hotkeys：OpenMenu=F6、ToggleMod=F10，None禁用。F8/F9已被本机其他MOD占用。
@@ -111,7 +111,7 @@ Set-Location Overcooked2-Haptics
 ./scripts/package.ps1 -SkipBuild
 ```
 
-不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.4.0-alpha安装/源码ZIP。
+不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.4.1-alpha安装/源码ZIP。
 
 Git只跟踪必要源码、脚本、配置示例和需求/验证文档。`.gitignore`排除bin/obj/artifacts/.cache、游戏文件、二进制、日志及个人配置。经筛选的docs/evidence文本为验证记录。
 

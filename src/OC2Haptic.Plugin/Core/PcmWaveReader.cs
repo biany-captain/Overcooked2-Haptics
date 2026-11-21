@@ -14,7 +14,7 @@ namespace OC2Haptic.Core
     // External WAV is the only decoding boundary; no Unity API or file I/O in score Hooks.
     public static class PcmWaveReader
     {
-        public const int MaxDurationMs=3500;
+        public const int MaxDurationMs=5000;
         public static PcmWaveData Read(Stream stream)
         {
             var reader=new BinaryReader(stream);
@@ -47,6 +47,6 @@ namespace OC2Haptic.Core
             for(int i=0;i<samples.Length;i++)samples[i]=reader.ReadInt16()/32768f;
             return new PcmWaveData(samples,channels,rate);
         }
-        private static FormatException Invalid(){return new FormatException("Expected bounded PCM16 WAV, mono/stereo, 44.1/48kHz, up to3.5s.");}
+        private static FormatException Invalid(){return new FormatException("Expected bounded PCM16 WAV, mono/stereo, 44.1/48kHz, up to5s.");}
     }
 }
