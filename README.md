@@ -40,7 +40,7 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 - 顶部总震动强度0–100%。「事件设置」中每项倍率0–200%，默认100%保留原手感；与总强度及既有Combo倍率叠加，保持节奏，达到上限时统一限制峰值以维持左右比例。
 - 「星级测试」集中显示一到四星，每档有试音、试震、同时测试按钮和单独倍率。明确点击测试会替换前一次星级预览，不改变星级自动输出模式，也不计真实事件。
 - 页面不自动暂停，只屏蔽当前绑定厨师操作并显示鼠标，关闭后恢复。关卡时间继续，调试可先手动暂停。
-- 事件开关控制自动反馈；Combo和星级各有总开关。各档预览独立于自动事件开关，仍受总开关和星级输出模式约束。
+- 事件开关控制自动反馈；Combo和星级各有总开关。手动预览独立于自动事件开关，仍受总开关、相应强度/音量和设备条件限制。
 - 星级自动模式：震动＋音效、仅震动、仅音效、关闭；音量滑杆只改MOD奖励音的线性增益。独立试音/试震按钮不受此自动模式及自动事件开关限制，但仍受总开关、焦点、相应强度/音量和设备条件限制。
 - 用户已批准在主菜单/暂停中点击试听；自动反馈在菜单/暂停中静音。失焦、关闭菜单、F10关闭、切场景会停止本插件输出。
 - 设置即时保存。手动预览单独记录，不计真实游戏事件。优先级较低的预览可能被拒绝，等当前反馈结束再点。
@@ -84,7 +84,7 @@ CrispReward是本项目生成的原创短PCM铃音，不含商业歌曲或其他
 - Events：ThrowSuccess、CatchSuccess、DeliveryOrdered、DeliveryOutOfOrder、DeliveryUnclassified、DeliveryFailure、OrderExpired。
 - Combo：Enabled、TriggerMode=EveryOrderedDelivery、MaxHapticTier=4、ComboMasterIntensity=0.85。OnLevelUp只在已知的真实等级提升时分级；关闭分级仍保留分类反馈。
 - Stars.Enabled与StarFeedback.Mode；SoundVolume=0.65，MaxSoundDurationMs=1000。
-- Patterns：各事件片段及StarMilestone1HapticsOnly。EventStrength为各事件额外倍率0–2，默认1；0不创建马达任务。非有限倍率安全静音，非法片段/负时长/超长模式拒绝。
+- Patterns：各事件片段及StarMilestone1HapticsOnly。EventStrength为各事件额外倍率0–2，默认1；0不创建马达任务。BepInEx会将越界配置限制到有效范围（例如正无穷限制为2）；实际马达仍统一限幅。非法片段/负时长/超长模式拒绝。
 - Diagnostics.ScoreSourceProbe控制详细快照日志；新功能所需的只读采集不依赖详细日志开关。
 - Hotkeys：OpenMenu=F6、ToggleMod=F10，None禁用。F8/F9已被本机其他MOD占用。
 

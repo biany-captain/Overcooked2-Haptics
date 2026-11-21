@@ -32,6 +32,7 @@ namespace OC2Haptic.UI
         private CursorLockMode previousCursorLock;
         private Rect rectangle;
         private Vector2 scroll;
+        private Vector2 outerScroll;
         private int tab;
         private int screenWidth, screenHeight;
         private Font font;
@@ -153,8 +154,28 @@ namespace OC2Haptic.UI
             float width = rectangle.width;
             float height = rectangle.height;
             MenuMetrics metrics = Measure(width);
-            float y = 42;
             if (GUI.Button(new Rect(width - 38, 6, 28, 24), "×", buttonStyle)) { Close(); return; }
+            float fixedHeight=metrics.TotalHeight-VisibleRows()*metrics.Row;
+            if(height<fixedHeight+48)
+            {
+                float innerWidth=width-20;
+                metrics=Measure(innerWidth);
+                float virtualHeight=metrics.TotalHeight+(ContentRows()-VisibleRows())*metrics.Row;
+                outerScroll=GUI.BeginScrollView(new Rect(0,36,width,height-36),outerScroll,
+                    new Rect(0,36,innerWidth,virtualHeight-36));
+                try {DrawContent(innerWidth,virtualHeight,metrics,true);}
+                finally {GUI.EndScrollView();}
+            }
+            else DrawContent(width,height,metrics);
+            GUI.DragWindow(new Rect(0,0,width-46,34));
+            Event input=Event.current;
+            if((input.type==EventType.MouseDown || input.type==EventType.MouseUp || input.type==EventType.ScrollWheel) &&
+                new Rect(0,0,width,height).Contains(input.mousePosition))input.Use();
+        }
+
+        private void DrawContent(float width,float height,MenuMetrics metrics,bool wholeScroll=false)
+        {
+            float y=42;
             GUI.Label(new Rect(18, y, width - 36, metrics.Device), DeviceText(), labelStyle);
             y += metrics.Device + 8;
             bool enabled = GUI.Toggle(new Rect(18, y, width - 225, metrics.MainRow), settings.Enabled.Value, "总反馈开关（F10）", toggleStyle);
@@ -167,7 +188,7 @@ namespace OC2Haptic.UI
             DrawStrength(18,y,width-36,metrics.Master,"总震动强度",settings.MasterIntensity,1);
             y+=metrics.Master+8;
             int nextTab=GUI.SelectionGrid(new Rect(18,y,width-36,metrics.Tabs),tab,new[]{"事件设置","星级测试"},2,buttonStyle);
-            if(nextTab!=tab){stopPreviews();tab=nextTab;scroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"可分别调整每类事件的震动倍率。";}
+            if(nextTab!=tab){stopPreviews();tab=nextTab;scroll=Vector2.zero;outerScroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"可分别调整每类事件的震动倍率。";}
             y+=metrics.Tabs+8;
             GUI.Label(new Rect(18, y, width - 36, metrics.Top), TopText(), noteStyle);
             y += metrics.Top + 10;
@@ -175,14 +196,15 @@ namespace OC2Haptic.UI
             float contentWidth = width - 52;
             float footerHeight = metrics.Bottom + 8 + metrics.Status + 6 + metrics.Footer + 16;
             float listHeight = Mathf.Max(48, height - y - 12 - footerHeight);
-            scroll = GUI.BeginScrollView(new Rect(14, y, width - 28, listHeight), scroll,
-                new Rect(0, 0, contentWidth, ContentRows() * metrics.Row));
+            Rect listRect=new Rect(14,y,width-28,listHeight);
+            if(wholeScroll)GUI.BeginGroup(listRect);
+            else scroll=GUI.BeginScrollView(listRect,scroll,new Rect(0,0,contentWidth,ContentRows()*metrics.Row));
             try
             {
                 if(tab==0)DrawEventSettings(contentWidth,metrics.Row,originalEnabled);
                 else DrawStarTests(contentWidth,metrics.Row,originalEnabled);
             }
-            finally { GUI.EndScrollView(); GUI.enabled = originalEnabled; }
+            finally { if(wholeScroll)GUI.EndGroup();else GUI.EndScrollView();GUI.enabled=originalEnabled; }
 
             y += listHeight + 12;
             GUI.Label(new Rect(18, y, width - 36, metrics.Bottom), BottomNote, noteStyle);
@@ -190,10 +212,6 @@ namespace OC2Haptic.UI
             GUI.Label(new Rect(18, y, width - 36, metrics.Status), status, noteStyle);
             y += metrics.Status + 6;
             GUI.Label(new Rect(18, y, width - 36, metrics.Footer), Footer, noteStyle);
-            GUI.DragWindow(new Rect(0, 0, width - 46, 34));
-            Event input = Event.current;
-            if ((input.type == EventType.MouseDown || input.type == EventType.MouseUp || input.type == EventType.ScrollWheel) &&
-                new Rect(0, 0, width, height).Contains(input.mousePosition)) input.Use();
         }
 
         private string TopText()
@@ -202,6 +220,7 @@ namespace OC2Haptic.UI
                 :"四档可独立试音、试震或同时测试。\n测试不改自动模式；主菜单 / 暂停中也可试听。";
         }
         private int ContentRows(){return tab==0?1+Types.Length*2:3+StarTypes.Length*2;}
+        private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
         private void DrawEventSettings(float width,float row,bool originalEnabled)
         {
             bool combo=GUI.Toggle(new Rect(4,0,width/2-8,row-8),settings.ComboEnabled.Value,"Combo 分级",toggleStyle);
@@ -284,7 +303,7 @@ namespace OC2Haptic.UI
             };
             foreach (string name in Names) result.Row = Mathf.Max(result.Row, TextHeight(toggleStyle, name, width - 164) + 8);
             result.TotalHeight = 42 + result.Device + 8 + result.MainRow + 10 + result.Master+8+result.Tabs+8+result.Top + 10 +
-                (tab==0?Math.Min(ContentRows(),10):ContentRows()) * result.Row + 12 + result.Bottom + 8 + result.Status + 6 + result.Footer + 16;
+                VisibleRows() * result.Row + 12 + result.Bottom + 8 + result.Status + 6 + result.Footer + 16;
             return result;
         }
 

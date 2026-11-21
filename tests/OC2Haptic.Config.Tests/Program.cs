@@ -41,7 +41,14 @@ internal static class Program
             gains.FeedbackMode==StarFeedbackMode.AudioOnly && gains.EventGains[GameEventType.CatchSuccess].Value==1;
         if(!gainCorrect){failed++;Console.WriteLine("FAIL event gains and independent preview configuration");}
         else Console.WriteLine("PASS event gains and independent preview configuration");
-        Console.WriteLine("RESULT " + (content.Length+3 - failed) + "/" + (content.Length+3) + " config migration passed");
+        string invalidPath=Path.Combine(root,"gain-infinity.cfg");
+        File.WriteAllText(invalidPath,"[EventStrength]\nThrowSuccess = Infinity\n");
+        var clamped=new HapticConfig(new ConfigFile(invalidPath,false));
+        bool clampCorrect=clamped.EventGains[GameEventType.ThrowSuccess].Value==2 &&
+            clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right<=1;
+        if(!clampCorrect){failed++;Console.WriteLine("FAIL configured nonfinite gain range clamp");}
+        else Console.WriteLine("PASS configured nonfinite gain range clamp");
+        Console.WriteLine("RESULT " + (content.Length+4 - failed) + "/" + (content.Length+4) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }
