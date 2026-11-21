@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0-alpha — candidate delivery/Combo/star feedback
+
+- Implement runtime-calibrated client delivery classification and authoritative ×1–×4 feedback, preserving raw streak and per-team/session state. Retain disabled legacy success preference during configuration migration.
+- Add first committed-score threshold milestones from current-level data, no retroactive/repeated star celebration, highest-only for multiple crossings. Real NGP gates still determine fourth availability.
+- User approved immediate arbitration within the verified single client message, replacing the proposed fixed120ms wait. One final waveform, no old generic double-pulse duplicate.
+- Add original generated PCM reward sounds, independent2D source routed through game SFX mixer, four output modes and gain0.65 applied once. Audio exceptions cannot break haptics or menu/input cleanup.
+- Add editable candidate patterns, approved two-part115ms catch and145ms one-star haptics-only tail; four-star default500ms. Extend the existing measured/scrolled F6 page with category/Combo/star controls, previews, audio modes and volume.
+- Manual audio previews in menu/pause approved; automatic feedback is gated there. Focus/pause/scene/disable stop own outputs. No new danger hooks, multiplayer mapping, custom music or animation.
+- Compilation and shared-core/config/game-data tests pass; actual0.3 interaction, audio, waveform quality and star events remain pending. Current source calibration is documented separately from new feature acceptance.
+
 ## 0.2.3-alpha — 2026-11-21 · score source calibration
 
 - Add opt-in, read-only Prefix/Postfix capture around client score synchronization. Freeze before/payload/after score values and log actual multiplier, raw Combo, delivery metadata and observation context.

@@ -1,0 +1,63 @@
+PASS throw pulse lasts 65 ms and applies master multiplier
+PASS test pulse lasts 80 ms
+PASS cooldown survives completed pulse
+PASS duplicate events within 20 ms do not repeat output
+PASS higher priority interrupts without replaying the old pulse
+PASS lower priority cannot replace an active pulse
+PASS multi-segment pattern includes a silent gap
+PASS late tick stops instead of replaying stale segments
+PASS zero master intensity produces no nonzero command
+PASS stop clears pending effects and only touches owned slots
+PASS disconnect clears pending effect before reconnect
+PASS disconnect observed by Play clears old pulse even during cooldown
+PASS disconnect observed by a new event clears old pulse
+PASS stop retires ownership before an unrelated controller can reuse a slot
+PASS disconnect retires ownership before a later stop
+PASS invalid controller indices never reach backend
+PASS nonfinite master intensity is rejected
+PASS pattern rejects negative or excessive durations
+PASS matched local gamepad resolves selected controller
+PASS unbound or mismatched gamepad never resolves
+PASS keyboard remote unknown and input-intent events never resolve
+PASS native backend rejects invalid indices and nonfinite strengths
+PASS candidate catch profile has two pulses within 115ms
+PASS stage C successful delivery has two pulses and a silent gap
+PASS stage C failed delivery is a 220ms low motor pulse
+PASS stage C expired order is a 250ms dual motor pulse
+PASS stage C team routing rejects wrong or unknown local team
+PASS stage C catch retains personal binding rules
+PASS stage C invalid-order failures can repeat after cooldown
+PASS stage C expiry interrupts success gap without replay
+PASS stage C repeated order callback cannot duplicate a pulse
+PASS menu opening does not automatically vibrate
+PASS menu previews require open menu and global enable
+PASS menu event preview uses the existing double-pulse profile
+PASS menu generic test stops at 80ms on real-time ticks
+PASS menu closing cancels pending preview with no replay
+PASS menu invalid or unbound output never reaches backend
+PASS menu input ownership change releases old participant immediately
+PASS menu unchanged participant keeps one owned token
+PASS menu cleanup releases remaining participants after one release fails
+PASS score probe accepts positive strictly increasing level thresholds
+PASS score probe rejects missing invalid or unordered thresholds
+PASS score probe keeps threshold snapshots independent of mutable input
+PASS score probe requires explicit four-star availability
+PASS v13 combo first and four tiers use authoritative raw values
+PASS v13 combo unknown cannot infer levels from boolean or tips
+PASS v13 combo duplicate and reused order IDs retain real deliveries
+PASS v13 combo reset teams mode and disabled grading
+PASS v13 stars precise crossings highest only and no loss replay
+PASS v13 stars join restart teams thresholds and unavailable data
+PASS v13 stars disabled and stale snapshots never replay
+PASS v13 synchronous delivery combo star arbitration chooses one
+PASS v13 profiles distinct rhythms and strict duration limits
+PASS v13 editable patterns reject invalid unsafe values
+PASS v13 original PCM has bounded peaks and silent boundaries
+PASS v13 audio failure preserves rumble and modes stop output
+PASS v13 danger interrupts celebration without replay
+PASS v13 1000 duplicate delivery callbacks remain bounded in output
+PASS v13 nested capture finalizers release only their own frame
+PASS v13 thrown audio failures cannot break rumble or cleanup
+PASS v13 real calibration replay selects first and third star only
+PASS v13 level-up reads reliable pre-commit and reset snapshots
+RESULT 62/62 passed

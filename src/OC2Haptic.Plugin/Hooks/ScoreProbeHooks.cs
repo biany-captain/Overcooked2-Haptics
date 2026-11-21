@@ -18,8 +18,9 @@ namespace OC2Haptic.Hooks
                     new[] { typeof(Team17.Online.Multiplayer.Messaging.Serialisable) });
                 if (method == null) { log.LogWarning("Score source probe Unavailable: ApplyServerEvent signature missing."); return; }
                 owner.Patch(method, prefix: new HarmonyMethod(typeof(ScoreProbeHooks), "Before"),
-                    postfix: new HarmonyMethod(typeof(ScoreProbeHooks), "After"));
-                log.LogInfo("Score source probe installed: read-only client sync capture; no new feedback; runtime calibration pending.");
+                    postfix: new HarmonyMethod(typeof(ScoreProbeHooks), "After"),
+                    finalizer: new HarmonyMethod(typeof(ScoreProbeHooks), "Release"));
+                log.LogInfo("Score capture installed: read-only client sync; immediate single-result arbitration; optional detailed probe log.");
             }
             catch (Exception error)
             {
@@ -33,7 +34,7 @@ namespace OC2Haptic.Hooks
         {
             __state = null;
             HapticPlugin plugin = HapticPlugin.Current;
-            if (plugin == null || !plugin.IsScoreProbeEnabled) return;
+            if (plugin == null || !plugin.IsScoreCaptureEnabled) return;
             try { __state = plugin.CaptureScoreProbe(__instance, __0 as KitchenFlowMessage); }
             catch (Exception error) { plugin.StopFaultedScoreProbe(error); }
         }
@@ -41,9 +42,16 @@ namespace OC2Haptic.Hooks
         private static void After(ClientKitchenFlowControllerBase __instance, ScoreSourceProbe.Observation __state)
         {
             HapticPlugin plugin = HapticPlugin.Current;
-            if (plugin == null || !plugin.IsScoreProbeEnabled || __state == null) return;
+            if (plugin == null || !plugin.IsScoreCaptureEnabled || __state == null) return;
             try { plugin.CompleteScoreProbe(__instance, __state); }
             catch (Exception error) { plugin.StopFaultedScoreProbe(error); }
+            finally { plugin.ReleaseScoreCapture(__state); }
+        }
+
+        private static void Release(ScoreSourceProbe.Observation __state)
+        {
+            HapticPlugin plugin=HapticPlugin.Current;
+            if(plugin!=null && __state!=null)plugin.ReleaseScoreCapture(__state);
         }
 
         public void Dispose()

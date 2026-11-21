@@ -83,6 +83,13 @@ namespace OC2Haptic.Core
             }
         }
 
+        public bool IsBusyAtOrAbove(int index, int priority, double nowMs)
+        {
+            if (index < 0 || index > 3) return false;
+            OutputState state = outputs[index];
+            return state.Pattern != null && nowMs - state.StartedMs < state.Pattern.TotalDurationMs && state.Priority >= priority;
+        }
+
         private void Finish(int index)
         {
             OutputState state = outputs[index];

@@ -1,140 +1,100 @@
-# OC2 Haptic — 0.2.3-alpha（数据校准版）
+# OC2 Haptic — 0.3.0-alpha
 
-Windows 版《胡闹厨房2》的单手柄触觉增强测试版。支持投掷、接住、上菜成功/失败、订单已过期，以及 F6 游戏内管理页、手动试震、配置、日志及停震保护。
+Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、接住、顺序/乱序上菜、Combo ×1～×4、订单过期，以及实时星级门槛庆祝与原创短音效。F6 打开中文管理页，F10 控制总开关。
 
-源码仓库：[biany-captain/Overcooked2-Haptics](https://github.com/biany-captain/Overcooked2-Haptics)。当前已验证基线为 **0.2.2-alpha**。新版设计文档的 **v1.3 是需求版本号**，不代表插件已经发布到 1.3。
+**状态：0.3.0 已编译并通过软件测试，新增触感、声音、菜单与真实星级触发仍待整批游戏验收。** 已验证基线0.2.2、0.2.3数据校准和新功能的验证分别记录，不能相互替代。需求文档v1.3是需求版本，插件版本为0.3.0-alpha。
 
-新版开发范围：顺序/乱序上菜分类、可信 Combo ×1～×4、首次达到实时星级分数门槛的庆祝震动及原创奖励音效。它们正在研究和开发，当前基线尚不具备这些功能。多手柄和在线兼容仍后置；实现及实测状态会分别记录。
+[源码仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式需求](docs/requirements-v1.3.md) · [测试报告](docs/test-report.md) · [本轮实机清单](docs/batch-test-0.3.md)
 
-**0.2.1 验证状态：编译 0 警告/0 错误，40 项核心测试和 4 项实际配置迁移测试通过。用户报告菜单、各试震、总开关同步、输入恢复及暂停试震均正常；日志确认菜单加载、各类预览成功和快捷键迁移。五类游戏事件的实测保留在 `docs/test-report-0.2.md`，证据边界见 `docs/test-report.md`。**
+## 功能与边界
 
-0.2.2 修复截图中说明文字被裁切的问题：按实际字体测量行高，说明/列表/底部文字依次排布，窗口高度随内容调整，小窗口列表可滚动；面板使用深色背景提高可读性。用户重新加载后已确认“文字完整，遮挡已解决”。触觉和开关逻辑沿用已验证版本。画面验收见 `docs/menu-layout-0.2.2.md`。
-
-实际目标设备：黑武士 5 Pro，2.4G XInput。按本地一手柄验收；本地多人、多手柄映射和联机覆盖后置。接住当前使用本地/房主服务端路径，在线客机尚未验证。新增管理页只控制已有触觉，不自动暂停关卡。
-
-## 新版数据校准（0.2.3）
-
-新版需求的首个实施步骤是独立的只读探针：对照客户端实际提交的分数、HUD 倍率和关卡星级门槛。**这一版没有新增自动 Combo/星级反馈或声音，也没有改变已有触觉参数。** 校准后才开放后续反馈，避免把未知来源当成真实等级。
-
-- 在本插件 cfg 的 `[Diagnostics]` 中设置 `ScoreSourceProbe = true` 后重启游戏启用；默认 false，关闭后立即停止采集。无需启用其他事件的冗长日志。
-- 日志条目为 `Score source probe`，包含复制前/消息中/应用后的数值、订单 ID、wasCombo、tip、当前关卡/人数/模式和候选门槛；不记录玩家账号。
-- 第四星同时检查关卡 NGP 和游戏 NGP 提示状态；数据或模式不匹配时显示 Unavailable，不猜门槛。
-- `confidence=StaticILOnly runtimeComparison=Pending` 表示尚需实际 HUD/地图对照；Patch 安装成功不等于校准通过。
-- 探针错误只关闭探针，原有五类事件和菜单继续运行。
-
-开发顺序见 [v1.3 实施设计](docs/design-v1.3.md)，本轮操作见 [校准清单](docs/calibration-0.2.3.md)。
+- 只读游戏事件，不改分数、订单、存档或网络消息。
+- 投掷/接住只驱动明确绑定的本地手柄；上菜和星级按独立确认的本地队伍过滤。当前仅验收一手柄，本地多人/在线客机后置。
+- 顺序上菜使用真实客户端确认的倍率，×4以后不继续增强，原始连续计数仍保留；乱序成功与真正失败分开。
+- 分数首次达到当前关卡实际星级门槛时庆祝。门槛按关卡/模式/人数读取，不使用固定分数表。一次跨多星只庆祝最高星，分数下降再涨回不重播；中途启用不补播旧成绩。
+- 同一条已验证的客户端消息内，立即选择星级或上菜/Combo中的一种。没有固定120ms等待，也不会额外播放旧通用成功双震。
+- 星级表示“曾达到实时分数线”，不保证最终结算星数。第四星必须满足游戏的真实NGP条件；F6四星预览不等于真实四星验收。
+- 新数据路径限已校准的当前游戏程序集/普通模式；未知版本/状态保守降级，失败与过期等原有事件独立工作。
 
 ## 安装
 
-1. 关闭游戏，保留现有 MOD 环境。需要与游戏架构匹配的 BepInEx 5；本机检查到 x86、BepInEx 5.4.22.0。无需替换现有加载器。
-2. 将安装包中的 `BepInEx/plugins/OC2Haptic/OC2Haptic.dll` 放到游戏目录相同位置。
-3. 启动游戏，检查 `BepInEx/LogOutput.log` 是否出现：
-   - `OC2Haptic initialized`
-   - `Throw Hook installed: ClientThrowableItem.StartFlight(IClientThrower)`
-   - `CatchSuccess Hook installed: ServerAttachmentCatcher.HandleCatch`
-   - 三条 `Kitchen Hook installed`（成功上菜、失败上菜、订单过期）
-4. 首次加载会生成 `BepInEx/config/dev.oc2haptic.feedback.cfg`。`config/OC2Haptic.cfg.example` 仅供参考，不会覆盖现有配置。
+1. 退出游戏，使用匹配游戏架构的BepInEx 5。当前开发环境为Steam默认分支、x86、BepInEx5.4.22.0；保留已有加载器及其他MOD。
+2. 将安装包的 `BepInEx/plugins/OC2Haptic/OC2Haptic.dll` 放到游戏目录同一位置。
+3. 启动后检查 `BepInEx/LogOutput.log` 中的 `OC2Haptic initialized | 0.3.0-alpha` 和各Hook安装信息。加载成功不等于事件验收通过。
+4. 配置位于 `BepInEx/config/dev.oc2haptic.feedback.cfg`；示例 `config/OC2Haptic.cfg.example` 不应覆盖个人配置。旧上菜成功开关自动迁移，原有禁用偏好、强度、绑定和快捷键保留。
 
-插件初始化日志只证明加载；Hook 安装日志只证明补丁安装，均不能单独证明真实操作正确。
+## 首次手柄绑定
 
-## F6 触觉管理页
+游戏本地Pad、网络玩家ID与Windows XInput索引不是同一标识。安装包两个绑定默认均为-1，不猜测设备。
 
-- F6 打开/关闭菜单，打开时不会自动震动；右上角 × 也可关闭。
-- 菜单的“总震动开关”与 F10 控制同一个 Enabled 设置，实时同步。总开关关闭时 F6 仍可打开菜单。
-- “通用试震”保留原 80ms 测试；五个事件各有独立试震按钮，沿用已确认的节奏与强度。
-- 事件复选框控制游戏自动触发；独立试震不受该事件复选框限制，但必须开启总开关。手动预览单独记录，不计入真实 Hook 事件统计。
-- 开关修改即时保存到本插件 cfg。原总强度和绑定在页面中只读显示。
-- 菜单不自动暂停。只抑制当前绑定手柄的本地厨师操作；关闭、切场景或禁用时释放输入和光标。关卡仍运行，调试前可先手动暂停。
-- 已暂停时仍可点试震，实时调度器负责结束并归零。正在播放更高优先级反馈时，低优先级预览可能被拒绝，请稍后再点。
-- 旧 TestRumble 快捷键迁移到 OpenMenu；旧值 None 保持禁用，已有 OpenMenu 配置优先。
+1. 选定实际连接的 `Devices.XInputIndex=0..3`；开发环境可运行 `scripts/test.ps1 -Filter '--devices'` 查询，查询不震动。
+2. F6打开管理页，点击通用80ms试震，确认是目标设备。
+3. 保持 `Devices.LocalGamePadSlot=-1`，暂启 `General.DebugLogEvents=true`，在允许投掷的关卡成功投出食材，读取 `Event probe` 中 `keyboard=False` 的 `gamePad=N`。
+4. 将LocalGamePadSlot设为实际N，重启后验证成功投掷、空手不震、F10关闭后不震。
 
-菜单实机清单：`docs/menu-test-0.2.1.md`。
+本机开发设备为黑武士5 Pro、2.4G XInput，已实测Pad0→XInput0。其他环境须自行确认。键盘玩家不输出手柄震动。XInput没有持久硬件身份，更换物理设备后要重新核对绑定。
 
-## 首次绑定和测试
+## F6管理页
 
-本机开发验收已完成 Pad0 → XInput0 绑定。安装包默认仍为未绑定，供其他环境按各自实测结果设置。
+- F6开关页面，右上角×关闭；F10和页面总反馈开关控制同一设置。关闭总开关后仍可打开F6。
+- 页面不自动暂停，只屏蔽当前绑定厨师操作并显示鼠标，关闭后恢复。关卡时间继续，调试可先手动暂停。
+- 事件开关控制自动反馈；Combo和星级各有总开关。各档预览独立于自动事件开关，仍受总开关和星级输出模式约束。
+- 星级模式：震动＋音效、仅震动、仅音效、关闭；音量滑杆只改MOD奖励音的线性增益。
+- 用户已批准在主菜单/暂停中点击试听；自动反馈在菜单/暂停中静音。失焦、关闭菜单、F10关闭、切场景会停止本插件输出。
+- 设置即时保存。手动预览单独记录，不计真实游戏事件。优先级较低的预览可能被拒绝，等当前反馈结束再点。
 
-游戏 Pad 编号、本地玩家编号、Windows XInput 索引是不同标识。默认两个绑定值均为 `-1`，不输出震动。
+## 首轮候选波形
 
-1. 将手柄接入 2.4G XInput 模式，按已知连接状态选定 `[Devices] XInputIndex = 0..3`。
-   - 开发环境可运行 `./scripts/test.ps1 -Filter '--devices'` 查询连接状态；该命令不输出震动。
-   - 单个设备也不应仅凭“玩家 1”就推断 XInput 索引是 0。
-2. 按 **F6** 打开管理页，再点“通用试震”。选定手柄应轻震 **80ms** 后停止；再次按 F6 关闭。
-3. 暂时保持 `LocalGamePadSlot = -1`，将 `DebugLogEvents = true`，进入允许投掷的关卡，用手柄真正投出食材。
-4. 查看 `Event probe | type=ThrowSuccess` 日志。确认 `keyboard=False`，并记录 `gamePad=N`。将 `LocalGamePadSlot` 设为该 N。
-5. 再投掷一次，检查日志是否为 `allowed=True accepted=True`，并确认只有指定手柄短震。
-6. 验证成功投掷、空手按键、不可投物品、被挡住投掷；每种情况分别记录实际次数、日志次数和震动次数。空手及失败操作不应产生成功反馈。
-7. 按 **F10** 关闭，再重复操作，应无震动。切换到菜单、暂停和退出时检查是否停止。
+下表为基础马达强度，仍乘总震动倍率0.75；Combo ×2～×4另乘Combo倍率0.85。实际设备感受尚待本轮确认，可在cfg的Patterns节调整，格式为 `左,右,毫秒;...`。
 
-F6 页面和已有 Configuration Manager 读写同一组配置。修改输出相关配置会立即清空已有震动；手动编辑 cfg 请在关闭游戏时进行，没有文件监视热重载。
+| 事件 | 基础片段，左/右 | 时长 | 优先级 |
+|---|---|---:|---:|
+| 通用试震 | .22/.28 | 80ms | 10 |
+| 投掷 | .15/.32 | 65ms | 20 |
+| 接住双段 | .22/.10×35 → 停35 → .08/.30×45 | 115ms | 25 |
+| 顺序 / ×1 | 0/.25×70 → 停80 → .18/.32×100 | 250ms | 30 |
+| Combo ×2 | .12/.28×60 → 停55 → .20/.38×110 | 225ms | 32 |
+| Combo ×3 | 0/.30×55 → 停50 → 0/.35×60 → 停50 → .22/.43×80 | 295ms | 34 |
+| Combo ×4+ | 0/.31×55 → 停40 → 0/.35×55 → 停40 → 0/.39×55 → 停40 → .25/.48×95 | 380ms | 36 |
+| 乱序成功 | .38/.08 | 160ms | 42 |
+| 未分类成功 | 0/.14 | 70ms | 20 |
+| 上菜失败 | .34/0 | 220ms | 55 |
+| 订单过期 | .40/.30 | 250ms | 85 |
+| 一星 | .05/.22×75 | 75ms | 46 |
+| 二星 | .06/.26×65 → 停55 → .14/.34×95 | 215ms | 47 |
+| 三星 | .07/.26×55 → 停45 → .13/.33×65 → 停45 → .20/.42×105 | 315ms | 48 |
+| 四星 | .09/.26×55 → 停45 → .12/.34×60 → 停45 → .18/.42×65 → 停60 → .32/.48×170 | 500ms | 49 |
 
-## 触觉初值
+仅震动模式下一星增加停45ms和 .03/.13×25ms尾脉冲，共145ms，用于和投掷区分。普通模式最长500ms，庆祝上限850ms，单片段最长500ms；四星默认序列实际500ms，不为凑上限延长。非法模式字符串使对应震动静音并记警告。
 
-| 事件 | 左/右基础强度 | 时长 | 冷却 |
-|---|---|---|---|
-| 菜单通用试震 | 0.22 / 0.28 | 80ms | 120ms |
-| 成功投掷候选 | 0.15 / 0.32 | 65ms | 120ms |
-| 厨师接住飞行物 | 0.25 / 0.18 | 90ms | 120ms |
-| 成功上菜 | 右0.20，间隔后右0.24 | 70ms + 静默80ms + 70ms | 120ms |
-| 上菜失败 | 0.34 / 0 | 220ms | 120ms |
-| 订单已过期 | 0.40 / 0.30 | 250ms | 120ms |
+## 音效与停止策略
 
-默认总强度倍率为 **0.75**，因此实际下发的投掷强度为 0.1125 / 0.24。时长由 Unity 更新调度归零，实际设备时长存在帧调度和驱动误差；65ms 是逻辑目标，不是已测得的物理值。
+CrispReward是本项目生成的原创短PCM铃音，不含商业歌曲或其他MOD素材。默认增益0.65只应用一次，不代表65%主观响度，不改变系统/游戏音量。插件自有2D声源接入游戏SFX混音组，尊重游戏静音；素材最长1000ms，当前候选四星约700ms。
 
-优先级为：订单过期85 > 上菜失败55 > 上菜成功30 > 接住25 > 投掷20 > 测试10。高优先级可打断，低/同优先级不排队补播。订单反馈按独立解析到的本地队伍筛选，只驱动已绑定手柄。整批测试步骤见 `docs/batch-test-0.2.md`。
+失败/订单过期等高优先级反馈可停止奖励声音和覆盖震动；取消后不补播。音频初始化或播放失败只影响本插件音效，震动及输入清理继续。无SFX混音组时音效不可用，不绕过游戏音量。
 
-## 配置
+退出、禁用、失焦、暂停、切关和绑定改变会清空输出。手柄断连清空马达任务，重连不补震；只对本插件持有的槽位归零。游戏主线程卡死、强制结束和驱动/设备故障仍不能保证及时停止。
 
-| 项 | 默认值 | 含义 |
-|---|---|---|
-| General.Enabled | true | 总开关；关闭立即清空输出 |
-| General.MasterIntensity | 0.75 | 0–1；0 完全无震动；非有限值静音 |
-| General.DebugLogEvents | false | 开启后记录每次探针和路由结果 |
-| Diagnostics.ScoreSourceProbe | false | 新版比分/倍率/门槛只读校准；启用需重启或重新启用插件 |
-| Devices.XInputIndex | -1 | 手动选定 Windows 设备槽，0–3 |
-| Devices.LocalGamePadSlot | -1 | 探针报告的游戏 Pad，0–14 |
-| Events.ThrowSuccess | true | 投掷反馈开关；不影响手动测试 |
-| Events.CatchSuccess | true | 接住反馈开关 |
-| Events.DeliverySuccess | true | 本地队伍上菜成功双震 |
-| Events.DeliveryFailure | true | 本地队伍上菜失败长震 |
-| Events.OrderExpired | true | 本地队伍订单实际过期提醒 |
-| Hotkeys.OpenMenu | F6 | 管理页开关键；None 可关闭 |
-| Hotkeys.ToggleMod | F10 | 总开关键；None 可关闭 |
+## 配置要点
 
-F8/F9 已由本机主机工具占用，因此采用用户确认的 F6/F10。其他环境如有快捷键冲突，可在配置中修改。
+- General：Enabled、MasterIntensity=0.75、DebugLogEvents=false。
+- Devices：XInputIndex、LocalGamePadSlot，默认-1。
+- Events：ThrowSuccess、CatchSuccess、DeliveryOrdered、DeliveryOutOfOrder、DeliveryUnclassified、DeliveryFailure、OrderExpired。
+- Combo：Enabled、TriggerMode=EveryOrderedDelivery、MaxHapticTier=4、ComboMasterIntensity=0.85。OnLevelUp只在已知的真实等级提升时分级；关闭分级仍保留分类反馈。
+- Stars.Enabled与StarFeedback.Mode；SoundVolume=0.65，MaxSoundDurationMs=1000。
+- Patterns：各事件片段及StarMilestone1HapticsOnly。非有限强度、越界数值、负时长、超长模式均拒绝。
+- Diagnostics.ScoreSourceProbe控制详细快照日志；新功能所需的只读采集不依赖详细日志开关。
+- Hotkeys：OpenMenu=F6、ToggleMod=F10，None禁用。F8/F9已被本机其他MOD占用。
 
-## 停震和故障行为
+输出相关修改立即停当前反馈。手动编辑cfg请先退出游戏，没有文件监视热重载。已有Configuration Manager可修改同一配置。
 
-- 游戏暂停、关卡结束、活动场景变化、应用暂停、配置禁用、组件禁用/销毁及正常退出时清空任务。
-- 使用单调时间；不依赖 Time.timeScale；不在 Hook 中等待或睡眠。
-- 仅对本插件当前持有的明确输出槽位发送停止指令；最后一次归零后释放该槽位，不向其他手柄广播。
-- 断连清空任务，不在重连后补播。换模式或重新插接后请重新确认绑定。
-- 首版保留单手柄原有交互，不增加强制重连确认步骤。XInput 不提供持久硬件身份；更换设备后若沿用同一槽位，插件无法识别这种替换，必须由用户核对绑定。未宣称支持多设备热插拔映射。
-- 找不到 Hook 时记录 `Unavailable`；测试功能仍可用。单个事件适配器异常时关闭对应反馈并记录异常，其余事件继续工作。
-- 所有片段和完整动作模式最长 500ms；已过期事件不会排队补播。
-- 主线程完全卡死、异常强制结束及设备/驱动故障时，无法保证及时停震。
-- 游戏、Steam Input 或其他程序也可能改写马达输出；编译通过不代表此类冲突不存在。
+## 构建、测试与打包
 
-## MOD 管理器、禁用与卸载
-
-可使用已有管理器安排共存测试。部分管理器的“关闭”只改变下次启动的文件加载状态，并不卸载当前进程中的程序集；实际行为需要用你的管理器验证。**F10 / General.Enabled 是本插件即时停震入口。**
-
-卸载：退出游戏，删除 `BepInEx/plugins/OC2Haptic/` 中本插件文件；配置文件可按需保留或另行删除。无需改动原版 DLL、存档、其他插件、Steam 设置或 BepInEx 核心。
-
-## 开发与构建
-
-运行 PowerShell，需 .NET SDK 10（仅用于开发和测试；游戏插件仍为 net35）。脚本使用已安装的游戏及加载器程序集，不下载 NuGet 包。
-
-先克隆仓库并进入目录：
+开发需要.NET SDK10、本地游戏及匹配的BepInEx；安装插件无需.NET10。不下载NuGet包，引用的游戏/Unity/加载器程序集不会分发。
 
 ```powershell
 git clone https://github.com/biany-captain/Overcooked2-Haptics.git
 Set-Location Overcooked2-Haptics
-```
-
-需要本地安装游戏和匹配的 BepInEx。随后执行：
-
-```powershell
 ./scripts/test.ps1
 ./scripts/test-config.ps1
 ./scripts/test-probe.ps1
@@ -142,28 +102,14 @@ Set-Location Overcooked2-Haptics
 ./scripts/package.ps1 -SkipBuild
 ```
 
-不传 GameRoot 时从 Steam 库查找，也可设置 `OC2_GAME_DIR`。脚本的输出、构建缓存和 NuGet 配置隔离都留在工作区。
+不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.3.0-alpha安装/源码ZIP。
 
-`test-config.ps1` 使用本机游戏/加载器程序集测试真实配置迁移，不启动游戏或触发震动；这些程序集仅作为开发依赖，不打包分发。
+Git只跟踪必要源码、脚本、配置示例和需求/验证文档。`.gitignore`排除bin/obj/artifacts/.cache、游戏文件、二进制、日志及个人配置。经筛选的docs/evidence文本为验证记录。
 
-`test-probe.ps1` 使用本机游戏的纯数据类型及实际 PC 分数属性做探针回归测试，不启动 Unity、不输出震动。它覆盖缺失门槛/目录和同步不一致，不能代替实际 HUD 校准。
+## 回退、卸载与来源
 
-- DLL：`artifacts/OC2Haptic.dll`
-- 安装包：`artifacts/OC2Haptic-0.2.3-alpha.zip`
-- 源码包：`artifacts/OC2Haptic-0.2.3-alpha-source.zip`
+本地已保留历史安装包和升级前DLL/配置。使用MOD管理器时，某些关闭操作仅影响下次加载；F10是即时总开关。退出游戏后删除本插件目录即可卸载，不改原版DLL/存档/其他MOD。
 
-不将游戏原始 DLL 或加载器 DLL 打包再分发。项目自身许可证尚待负责人选择；当前交付为本地测试 alpha。
+历史实测：[0.2.2菜单](docs/test-report-0.2.2.md)、[0.2.3数据校准](docs/test-report-0.2.3.md)。本地多人、在线客机、实际NGP四星、跨平台、其他版本和完整MOD兼容矩阵仍未验收。
 
-## 仓库内容
-
-提交范围为源码、测试、构建/打包脚本、配置示例和需求/验证文档。`.gitignore` 排除 `bin/`、`obj/`、`artifacts/`、`.cache/`、安装后的游戏和 BepInEx 文件、二进制文件、日志及个人配置。安装包在本地构建生成，不存入 Git 历史。仓库中的 `docs/evidence/*.txt` 是经筛选的验证记录。
-
-## 来源
-
-- 当前正式需求：[v1.3](docs/requirements-v1.3.md)；历史基线：[v1.0](docs/requirements-v1.0.md)
-- [XInputSetState](https://learn.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputsetstate)
-- [BepInEx 文档](https://docs.bepinex.dev/)
-- [Jetpack MOD 工程参照](https://github.com/gua248/Overcooked2-Jetpack)
-- [hpmv 投掷研究](https://hpmv.dev/docs/tech/throwing/)
-
-BepInEx、Harmony 及参考项目各有其许可证；本包仅本地引用它们，没有附带第三方库。游戏内容归原权利人所有。
+技术参考：[BepInEx](https://docs.bepinex.dev/)、[XInput](https://learn.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputsetstate)、[hpmv研究](https://hpmv.dev/docs/tech/kitchen_flow_controller/)、[Unity2017.4 PlayOneShot](https://docs.unity3d.com/2017.4/Documentation/ScriptReference/AudioSource.PlayOneShot.html)。项目许可证尚待负责人选择；不附带原版游戏或第三方库。

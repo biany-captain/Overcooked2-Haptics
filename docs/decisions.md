@@ -36,3 +36,10 @@ Low-vibration-mode semantics; same-priority handling for later event types; glob
 - v1.3 assumes v1.2 existed; current0.2.2 does not contain delivery classification or Combo tiers. Establish actual client score/threshold evidence first, then implement those features in sequence.
 - User authorized GitHub pushes of necessary files, including README and .gitignore. Initial verified0.2.2 baseline is8d28f73; local intermediates and personal/game dependencies remain excluded.
 - Continue in the established user-selected project directory using a dedicated feature branch; no extra checkout or environment migration is needed for the single probe patch.
+
+## v1.3 user decisions after actual data capture
+
+- Star thresholds differ by level; use current selected game configuration, never require per-level manual entry or a fixed internet table.
+- User approved immediate single-message arbitration on the runtime-proven synchronous path rather than a universal120ms window.
+- User approved explicitly clicked reward audio previews in menu/pause; automatic feedback remains gated and focus loss stops output.
+- Candidate patterns remain adjustable and require joint real testing. No final tactile-identification/volume/four-star/multiplayer acceptance is inferred from compilation or old-source logs.

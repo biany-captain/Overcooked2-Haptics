@@ -23,20 +23,22 @@ namespace OC2Haptic.Core
     public sealed class HapticPattern
     {
         private readonly HapticSegment[] segments;
-        public HapticPattern(params HapticSegment[] segments)
+        public HapticPattern(params HapticSegment[] segments) : this(false, segments) { }
+        private HapticPattern(bool celebration, params HapticSegment[] segments)
         {
             if (segments == null || segments.Length == 0) throw new ArgumentException("A pattern needs segments.", "segments");
             int total = 0;
             foreach (HapticSegment segment in segments)
             {
-                if (segment.DurationMs <= 0 || total > 500 - segment.DurationMs)
-                    throw new ArgumentException("A complete action pattern must last 1-500 ms.", "segments");
+                if (segment.DurationMs <= 0 || total > (celebration ? 850 : 500) - segment.DurationMs)
+                    throw new ArgumentException("Pattern exceeds its action/celebration duration limit.", "segments");
                 total += segment.DurationMs;
             }
             this.segments = (HapticSegment[])segments.Clone();
             TotalDurationMs = total;
         }
         public int Count { get { return segments.Length; } }
+        public static HapticPattern Celebration(params HapticSegment[] segments) { return new HapticPattern(true, segments); }
         public int TotalDurationMs { get; private set; }
         public HapticSegment SegmentAt(int index) { return segments[index]; }
     }

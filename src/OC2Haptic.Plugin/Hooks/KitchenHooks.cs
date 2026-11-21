@@ -40,7 +40,12 @@ namespace OC2Haptic.Hooks
             }
         }
 
-        private static void SuccessPostfix(object __0, object __1) { Observe(GameEventType.DeliverySuccess, __0, __1, "OnSuccessfulDelivery"); }
+        private static void SuccessPostfix(ClientKitchenFlowControllerBase __instance, TeamID __0, OrderController.OrderID __1)
+        {
+            HapticPlugin plugin=HapticPlugin.Current;
+            if(plugin==null || plugin.OwnsSuccessCapture(__instance,(int)__0,__1.m_id))return;
+            Observe(GameEventType.DeliveryUnclassified,__0,__1,"OnSuccessfulDelivery:fallback");
+        }
         private static void FailurePostfix(object __0, object __1) { Observe(GameEventType.DeliveryFailure, __0, __1, "OnFailedDelivery"); }
         private static void ExpiredPostfix(object __0, object __1) { Observe(GameEventType.OrderExpired, __0, __1, "OnOrderExpired"); }
 

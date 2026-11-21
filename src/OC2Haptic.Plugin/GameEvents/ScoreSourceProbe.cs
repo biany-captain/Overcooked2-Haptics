@@ -13,7 +13,7 @@ namespace OC2Haptic.GameEvents
         private readonly int mainThreadId;
         private int generation, flowId;
         private long sequence;
-        private string context;
+        private LevelContext context;
 
         internal ScoreSourceProbe(Action<string> log, Func<double> now)
         {
@@ -32,6 +32,7 @@ namespace OC2Haptic.GameEvents
 
             int currentId = flow.GetInstanceID();
             if (flowId != currentId) { Reset("client flow changed"); flowId = currentId; }
+            if(context!=null && !context.IsCurrent()) {Reset("level/mode/player-count context changed");flowId=currentId;}
             if (context == null) context = ReadContext(flow);
             ClientTeamMonitor monitor = flow.GetMonitorForTeam(message.m_teamID);
             // Snapshot both sides by value: network messages and monitors may reuse mutable stats objects.
@@ -59,7 +60,7 @@ namespace OC2Haptic.GameEvents
                 "} after={" + Format(after) + "} result=" + result +
                 " timestampMs=" + observation.Timestamp.ToString("F1", CultureInfo.InvariantCulture) +
                 " thread=" + mainThreadId + " source=ClientKitchenFlowControllerBase.ApplyServerEvent" +
-                " confidence=StaticILOnly runtimeComparison=Pending | " + observation.Context);
+                " confidence=CapturedClientState | " + observation.Context.Description);
         }
 
         internal void Reset(string reason)
@@ -68,11 +69,11 @@ namespace OC2Haptic.GameEvents
             generation++; flowId = 0; context = null;
         }
 
-        private static string ReadContext(ClientKitchenFlowControllerBase flow)
+        private static LevelContext ReadContext(ClientKitchenFlowControllerBase flow)
         {
             GameSession session = GameUtils.GetGameSession();
             if (session == null || session.LevelSettings == null || session.LevelSettings.SceneDirectoryVarientEntry == null)
-                return "thresholdCandidate=Unavailable reason=missing-current-session-or-variant";
+                return new LevelContext("thresholdCandidate=Unavailable reason=missing-current-session-or-variant",null,"unknown",false);
             var variant = session.LevelSettings.SceneDirectoryVarientEntry;
             GameProgress progress = session.Progress;
             SceneDirectoryData directory = progress == null ? null : progress.GetSceneDirectory();
@@ -96,12 +97,20 @@ namespace OC2Haptic.GameEvents
                 for (int i = 0; i < values.Length; i++) values[i] = thresholds.At(i).ToString(CultureInfo.InvariantCulture);
                 selected = string.Join(",", values);
             }
-            return "level=" + levelId + " dlc=" + session.DLC + " mode=" + session.GameModeKind +
+            bool calibrated = contextMatches && typeof(GameUtils).Module.ModuleVersionId == new Guid("114d606a-29d5-472c-8ebe-c2c20fbe3be3");
+            string description = "level=" + levelId + " dlc=" + session.DLC + " mode=" + session.GameModeKind +
                 " flow=" + flow.GetType().Name + " scene=" + variant.SceneName + " playerCount=" + variant.PlayerCount +
                 " hasScoreBoundaries=" + hasBoundaries + " contextMatches=" + contextMatches +
                 " ngpForLevel=" + ngpForLevel + " ngpDialogShown=" + ngpDialogShown + " fourthAvailable=" + fourthAvailable +
                 " rawThresholds=" + raw +
-                " thresholdCandidate=" + selected + " thresholdSource=GameSession.LevelSettings.SceneDirectoryVarientEntry";
+                " thresholdCandidate=" + selected + " calibratedBuild=" + calibrated + " thresholdSource=GameSession.LevelSettings.SceneDirectoryVarientEntry";
+            int selectedPlayers=variant.PlayerCount;
+            var selectedMode=session.GameModeKind;
+            return new LevelContext(description, usable ? thresholds : null,
+                session.DLC+":"+levelId+":"+selectedMode+":"+selectedPlayers,calibrated,
+                ()=>session!=null && session.LevelSettings!=null &&
+                    object.ReferenceEquals(session.LevelSettings.SceneDirectoryVarientEntry,variant) &&
+                    variant.PlayerCount==selectedPlayers && session.GameModeKind==selectedMode);
         }
 
         internal static bool ShouldLog(bool scoreOnly, bool beforeMatchesAfter, bool payloadMatchesAfter)
@@ -109,7 +118,7 @@ namespace OC2Haptic.GameEvents
             return !scoreOnly || !beforeMatchesAfter || !payloadMatchesAfter;
         }
 
-        private static bool Same(Sample first, Sample second)
+        internal static bool Same(Sample first, Sample second)
         {
             return first != null && second != null && first.Base == second.Base && first.Tips == second.Tips &&
                 first.Deductions == second.Deductions && first.Multiplier == second.Multiplier &&
@@ -146,15 +155,26 @@ namespace OC2Haptic.GameEvents
             internal readonly KitchenFlowMessage.MsgType Kind;
             internal readonly bool Success, WasCombo;
             internal readonly Sample Before, Payload;
-            internal readonly string Context;
+            internal readonly LevelContext Context;
             internal Observation(long sequence, int generation, int flowId, double timestamp, KitchenFlowMessage message,
-                Sample before, Sample payload, string context)
+                Sample before, Sample payload, LevelContext context)
             {
                 Sequence = sequence; Generation = generation; FlowId = flowId; Timestamp = timestamp;
                 Team = message.m_teamID; Kind = message.m_msgType; Success = message.m_success;
                 OrderId = message.m_orderID.m_id; WasCombo = message.m_wasCombo; Tip = message.m_tip;
                 Before = before; Payload = payload; Context = context;
             }
+        }
+
+        internal sealed class LevelContext
+        {
+            internal readonly string Description, Key;
+            internal readonly ScoreThresholds Thresholds;
+            internal readonly bool Calibrated;
+            private readonly Func<bool> current;
+            internal bool IsCurrent(){return current==null || current();}
+            internal LevelContext(string description,ScoreThresholds thresholds,string key,bool calibrated,Func<bool> current=null)
+            {Description=description;Thresholds=thresholds;Key=key;Calibrated=calibrated;this.current=current;}
         }
     }
 }

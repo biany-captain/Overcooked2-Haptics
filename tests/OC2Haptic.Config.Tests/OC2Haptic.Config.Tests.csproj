@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/OC2Haptic.Plugin/Config/HapticConfig.cs" Link="HapticConfig.cs" />
-    <Compile Include="../../src/OC2Haptic.Plugin/Core/GameEvent.cs" Link="GameEvent.cs" />
+    <Compile Include="../../src/OC2Haptic.Plugin/Core/*.cs" Link="Core/%(Filename)%(Extension)" />
     <Reference Include="BepInEx"><HintPath>$(GameRoot)/BepInEx/core/BepInEx.dll</HintPath></Reference>
     <Reference Include="UnityEngine"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/UnityEngine.dll</HintPath></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>

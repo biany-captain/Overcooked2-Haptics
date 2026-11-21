@@ -7,9 +7,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <AssemblyName>OC2Haptic</AssemblyName>
     <RootNamespace>OC2Haptic</RootNamespace>
-    <Version>0.2.3</Version>
-    <AssemblyVersion>0.2.3.0</AssemblyVersion>
-    <FileVersion>0.2.3.0</FileVersion>
+    <Version>0.3.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages>
     <GameRoot Condition="'$(GameRoot)' == ''">$(OC2_GAME_DIR)</GameRoot>
@@ -24,6 +24,7 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameManagedDir)\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(GameManagedDir)\UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(GameManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.AudioModule"><HintPath>$(GameManagedDir)\UnityEngine.AudioModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.InputModule" Condition="Exists('$(GameManagedDir)\UnityEngine.InputModule.dll')"><HintPath>$(GameManagedDir)\UnityEngine.InputModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <Target Name="CheckLocalGame" BeforeTargets="ResolveReferences">

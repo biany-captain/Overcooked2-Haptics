@@ -38,7 +38,7 @@ internal static class Program
             { "unbound or mismatched gamepad never resolves", UnboundRouting },
             { "keyboard remote unknown and input-intent events never resolve", UnsafeRouting },
             { "native backend rejects invalid indices and nonfinite strengths", NativeBoundary },
-            { "stage C catch profile is 90ms with approved motor balance", CatchProfile },
+            { "candidate catch profile has two pulses within 115ms", CatchProfile },
             { "stage C successful delivery has two pulses and a silent gap", DeliveryProfile },
             { "stage C failed delivery is a 220ms low motor pulse", FailedProfile },
             { "stage C expired order is a 250ms dual motor pulse", ExpiredProfile },
@@ -61,6 +61,7 @@ internal static class Program
             { "score probe keeps threshold snapshots independent of mutable input", ProbeThresholdSnapshot },
             { "score probe requires explicit four-star availability", ProbeFourStarGate }
         };
+        V13Tests.Add(tests);
         int failed = 0;
         int run = 0;
         foreach (var test in tests)
@@ -278,8 +279,9 @@ internal static class Program
         var b = new FakeBackend(); var e = new HapticEngine(b); var f = EventFeedback.For(GameEventType.CatchSuccess);
         Check(f.Priority == 25 && f.CooldownMs == 120, "catch policy changed");
         e.Play(0, "catch", f.Pattern, f.Priority, f.CooldownMs, 0, .75f); e.Tick(0);
-        Near(.1875f, b.Last.Left); Near(.135f, b.Last.Right);
-        e.Tick(89); Near(.135f, b.Last.Right); e.Tick(90); Near(0, b.Last.Right);
+        Near(.165f, b.Last.Left); Near(.075f, b.Last.Right);
+        e.Tick(35); Near(0,b.Last.Right);e.Tick(70);Near(.225f,b.Last.Right);
+        e.Tick(114);Near(.225f,b.Last.Right);e.Tick(115);Near(0,b.Last.Right);
     }
 
     private static void DeliveryProfile()
