@@ -1,4 +1,4 @@
-# OC2 Haptic — 0.2.2-alpha
+# OC2 Haptic — 0.2.3-alpha（数据校准版）
 
 Windows 版《胡闹厨房2》的单手柄触觉增强测试版。支持投掷、接住、上菜成功/失败、订单已过期，以及 F6 游戏内管理页、手动试震、配置、日志及停震保护。
 
@@ -11,6 +11,18 @@ Windows 版《胡闹厨房2》的单手柄触觉增强测试版。支持投掷�
 0.2.2 修复截图中说明文字被裁切的问题：按实际字体测量行高，说明/列表/底部文字依次排布，窗口高度随内容调整，小窗口列表可滚动；面板使用深色背景提高可读性。用户重新加载后已确认“文字完整，遮挡已解决”。触觉和开关逻辑沿用已验证版本。画面验收见 `docs/menu-layout-0.2.2.md`。
 
 实际目标设备：黑武士 5 Pro，2.4G XInput。按本地一手柄验收；本地多人、多手柄映射和联机覆盖后置。接住当前使用本地/房主服务端路径，在线客机尚未验证。新增管理页只控制已有触觉，不自动暂停关卡。
+
+## 新版数据校准（0.2.3）
+
+新版需求的首个实施步骤是独立的只读探针：对照客户端实际提交的分数、HUD 倍率和关卡星级门槛。**这一版没有新增自动 Combo/星级反馈或声音，也没有改变已有触觉参数。** 校准后才开放后续反馈，避免把未知来源当成真实等级。
+
+- 在本插件 cfg 的 `[Diagnostics]` 中设置 `ScoreSourceProbe = true` 后重启游戏启用；默认 false，关闭后立即停止采集。无需启用其他事件的冗长日志。
+- 日志条目为 `Score source probe`，包含复制前/消息中/应用后的数值、订单 ID、wasCombo、tip、当前关卡/人数/模式和候选门槛；不记录玩家账号。
+- 第四星同时检查关卡 NGP 和游戏 NGP 提示状态；数据或模式不匹配时显示 Unavailable，不猜门槛。
+- `confidence=StaticILOnly runtimeComparison=Pending` 表示尚需实际 HUD/地图对照；Patch 安装成功不等于校准通过。
+- 探针错误只关闭探针，原有五类事件和菜单继续运行。
+
+开发顺序见 [v1.3 实施设计](docs/design-v1.3.md)，本轮操作见 [校准清单](docs/calibration-0.2.3.md)。
 
 ## 安装
 
@@ -78,6 +90,7 @@ F6 页面和已有 Configuration Manager 读写同一组配置。修改输出相
 | General.Enabled | true | 总开关；关闭立即清空输出 |
 | General.MasterIntensity | 0.75 | 0–1；0 完全无震动；非有限值静音 |
 | General.DebugLogEvents | false | 开启后记录每次探针和路由结果 |
+| Diagnostics.ScoreSourceProbe | false | 新版比分/倍率/门槛只读校准；启用需重启或重新启用插件 |
 | Devices.XInputIndex | -1 | 手动选定 Windows 设备槽，0–3 |
 | Devices.LocalGamePadSlot | -1 | 探针报告的游戏 Pad，0–14 |
 | Events.ThrowSuccess | true | 投掷反馈开关；不影响手动测试 |
@@ -133,8 +146,8 @@ Set-Location Overcooked2-Haptics
 `test-config.ps1` 使用本机游戏/加载器程序集测试真实配置迁移，不启动游戏或触发震动；这些程序集仅作为开发依赖，不打包分发。
 
 - DLL：`artifacts/OC2Haptic.dll`
-- 安装包：`artifacts/OC2Haptic-0.2.2-alpha.zip`
-- 源码包：`artifacts/OC2Haptic-0.2.2-alpha-source.zip`
+- 安装包：`artifacts/OC2Haptic-0.2.3-alpha.zip`
+- 源码包：`artifacts/OC2Haptic-0.2.3-alpha-source.zip`
 
 不将游戏原始 DLL 或加载器 DLL 打包再分发。项目自身许可证尚待负责人选择；当前交付为本地测试 alpha。
 

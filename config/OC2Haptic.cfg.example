@@ -6,6 +6,9 @@ Enabled = true
 MasterIntensity = 0.75
 DebugLogEvents = false
 
+[Diagnostics]
+ScoreSourceProbe = false
+
 [Devices]
 XInputIndex = -1
 LocalGamePadSlot = -1

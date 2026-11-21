@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3-alpha — 2026-11-21 · score source calibration
+
+- Add opt-in, read-only Prefix/Postfix capture around client score synchronization. Freeze before/payload/after score values and log actual multiplier, raw Combo, delivery metadata and observation context.
+- Read current session/platform/player-count thresholds and both game's four-star NGP gates; reject invalid/mismatched threshold candidates. No hardcoded score tables.
+- Add immutable threshold boundary tests. Probe failure is isolated from existing feedback.
+- Preserve 0.2.2 haptic patterns and F6/F10 behavior. New classified delivery/Combo/star/audio effects remain pending actual data calibration; static inspection/build are not game verification.
+- Add public README, ignore rules and latest formal v1.3 requirements to the GitHub repository. Exclude game DLLs, build output, caches and local configuration.
+
 ## 0.2.2-alpha — 2026-11-21
 
 - Fixed screenshot-confirmed clipping caused by fixed-height Chinese explanatory labels.

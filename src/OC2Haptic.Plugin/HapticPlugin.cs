@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.2.2")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.2.3")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -24,6 +24,9 @@ namespace OC2Haptic
         private ThrowHooks hooks;
         private CatchHooks catchHooks;
         private KitchenHooks kitchenHooks;
+        private ScoreProbeHooks scoreProbeHooks;
+        private ScoreSourceProbe scoreProbe;
+        private bool scoreProbeFaulted;
         private HapticMenu menu;
         private bool menuFaulted;
         private bool ready, subscribed, applicationPaused, wasInRound, wasPaused;
@@ -47,10 +50,12 @@ namespace OC2Haptic
                 hooks = new ThrowHooks(Logger);
                 catchHooks = new CatchHooks(Logger);
                 kitchenHooks = new KitchenHooks(Logger);
+                scoreProbeHooks = new ScoreProbeHooks(Logger);
+                scoreProbe = new ScoreSourceProbe(message => Logger.LogInfo(message), () => clock.Elapsed.TotalMilliseconds);
                 menu = new HapticMenu(this, settings, engine, () => clock.Elapsed.TotalMilliseconds, message => Logger.LogInfo(message));
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.2.2-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.2.3-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -61,12 +66,15 @@ namespace OC2Haptic
             if (!ready) return;
             Current = this;
             Array.Clear(faultedEvents, 0, faultedEvents.Length);
+            scoreProbeFaulted = false;
+            scoreProbe.Reset("plugin enabled");
             currentFlow = null; flowOwner = null; nextFlowLookupMs = 0;
             SceneManager.activeSceneChanged += OnSceneChanged;
             subscribed = true;
             InstallAdapter("ThrowSuccess", delegate { hooks.Install(); });
             InstallAdapter("CatchSuccess", catchHooks.Install);
             InstallAdapter("Kitchen", kitchenHooks.Install);
+            if (settings.ScoreSourceProbe.Value) InstallAdapter("Score source probe", scoreProbeHooks.Install);
         }
 
         private void InstallAdapter(string name, Action install)
@@ -83,6 +91,8 @@ namespace OC2Haptic
                 double now = clock.Elapsed.TotalMilliseconds;
                 bool inRound = IsInRound(now);
                 bool paused = applicationPaused || TimeManager.IsPaused(TimeManager.PauseLayer.Main);
+                if (!wasInRound && inRound) scoreProbe.Reset("round began");
+                if (wasInRound && !inRound) scoreProbe.Reset("round ended");
                 if ((wasInRound && !inRound) || (!wasPaused && paused)) Stop("round ended or game paused");
                 wasInRound = inRound; wasPaused = paused;
 
@@ -164,6 +174,22 @@ namespace OC2Haptic
                 clock.Elapsed.TotalMilliseconds, source);
             if (gameEvent == null) { LogUnresolved(type, "bound local team unavailable; eventTeam=" + team + " order=" + orderId); return; }
             Dispatch(gameEvent);
+        }
+
+        internal bool IsScoreProbeEnabled { get { return ready && settings.ScoreSourceProbe.Value && !scoreProbeFaulted; } }
+        internal ScoreSourceProbe.Observation CaptureScoreProbe(ClientKitchenFlowControllerBase flow, KitchenFlowMessage message)
+        {
+            return scoreProbe.Before(flow, message);
+        }
+        internal void CompleteScoreProbe(ClientKitchenFlowControllerBase flow, ScoreSourceProbe.Observation observation)
+        {
+            scoreProbe.After(flow, observation);
+        }
+        internal void StopFaultedScoreProbe(Exception error)
+        {
+            if (scoreProbeFaulted) return;
+            scoreProbeFaulted = true;
+            Logger.LogError("Score source probe disabled after a fault; existing feedback continues: " + error);
         }
 
         private void Dispatch(GameEvent gameEvent)
@@ -249,6 +275,7 @@ namespace OC2Haptic
         private void OnSceneChanged(Scene previous, Scene next)
         {
             Stop("scene changed");
+            if (scoreProbe != null) scoreProbe.Reset("scene changed");
             CloseMenuSafely();
             Array.Clear(lastProbeIdentity, 0, lastProbeIdentity.Length); wasInRound = false;
             currentFlow = null; flowOwner = null; nextFlowLookupMs = 0;
@@ -269,10 +296,11 @@ namespace OC2Haptic
         private void OnDisable()
         {
             Stop("plugin disabled");
+            if (scoreProbe != null) scoreProbe.Reset("plugin disabled");
             CloseMenuSafely();
             if (Current == this) Current = null;
             if (subscribed) { SceneManager.activeSceneChanged -= OnSceneChanged; subscribed = false; }
-            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks })
+            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks, scoreProbeHooks })
             {
                 if (adapter == null) continue;
                 try { adapter.Dispose(); }

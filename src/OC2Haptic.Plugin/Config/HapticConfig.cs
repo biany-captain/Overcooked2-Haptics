@@ -17,6 +17,7 @@ namespace OC2Haptic.Config
         internal readonly ConfigEntry<bool> DeliveryFailure;
         internal readonly ConfigEntry<bool> OrderExpired;
         internal readonly ConfigEntry<bool> DebugLogEvents;
+        internal readonly ConfigEntry<bool> ScoreSourceProbe;
         internal readonly ConfigEntry<KeyCode> MenuKey;
         internal readonly ConfigEntry<KeyCode> ToggleKey;
 
@@ -26,6 +27,8 @@ namespace OC2Haptic.Config
             MasterIntensity = config.Bind("General", "MasterIntensity", .75f,
                 new ConfigDescription("Global intensity multiplier. Approved initial value: 0.75.", new AcceptableValueRange<float>(0, 1)));
             DebugLogEvents = config.Bind("General", "DebugLogEvents", false, "Log every observed game event and routing result. Enable for batch event validation.");
+            ScoreSourceProbe = config.Bind("Diagnostics", "ScoreSourceProbe", false,
+                "Opt-in read-only score/combo/threshold calibration log. Enable then restart or re-enable the plugin to install. No new vibration/audio. Turning off stops capture immediately.");
             XInputIndex = config.Bind("Devices", "XInputIndex", -1,
                 new ConfigDescription("Explicit output slot: 0-3. -1 means unbound; no automatic vibration or slot guessing.", new AcceptableValueRange<int>(-1, 3)));
             LocalPadSlot = config.Bind("Devices", "LocalGamePadSlot", -1,

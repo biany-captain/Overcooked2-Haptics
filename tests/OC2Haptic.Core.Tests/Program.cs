@@ -55,7 +55,11 @@ internal static class Program
             { "menu invalid or unbound output never reaches backend", MenuInvalidOutput },
             { "menu input ownership change releases old participant immediately", MenuInputReassignment },
             { "menu unchanged participant keeps one owned token", MenuInputRetained },
-            { "menu cleanup releases remaining participants after one release fails", MenuInputReleaseFailure }
+            { "menu cleanup releases remaining participants after one release fails", MenuInputReleaseFailure },
+            { "score probe accepts positive strictly increasing level thresholds", ProbeValidThresholds },
+            { "score probe rejects missing invalid or unordered thresholds", ProbeInvalidThresholds },
+            { "score probe keeps threshold snapshots independent of mutable input", ProbeThresholdSnapshot },
+            { "score probe requires explicit four-star availability", ProbeFourStarGate }
         };
         int failed = 0;
         int run = 0;
@@ -432,6 +436,46 @@ internal static class Program
         try { scope.Clear(); } catch (InvalidOperationException) { surfaced = true; }
         Check(surfaced && secondReleased, "one failed release prevented cleanup of other local inputs");
         scope.Clear();
+    }
+
+    private static void ProbeValidThresholds()
+    {
+        ScoreThresholds thresholds;
+        Check(ScoreThresholds.TryCreate(new[] { 100, 200, 300 }, out thresholds), "valid three-star set rejected");
+        Check(thresholds.Count == 3 && thresholds.At(2) == 300, "three-star thresholds changed");
+        Check(ScoreThresholds.TryCreate(new[] { 100, 200, 300, 500 }, out thresholds), "valid four-star set rejected");
+        Check(thresholds.Count == 4 && thresholds.At(3) == 500, "four-star thresholds changed");
+    }
+
+    private static void ProbeInvalidThresholds()
+    {
+        foreach (int[] values in new int[][] { null, new int[0], new[] { 0, 100, 200 }, new[] { -1, 100 },
+            new[] { 100, 100, 200 }, new[] { 200, 100, 300 }, new[] { 1, 2, 3, 4, 5 } })
+        {
+            ScoreThresholds thresholds;
+            Check(!ScoreThresholds.TryCreate(values, out thresholds) && thresholds == null,
+                "invalid threshold set became usable");
+        }
+    }
+
+    private static void ProbeThresholdSnapshot()
+    {
+        var values = new[] { 100, 200, 300 };
+        ScoreThresholds thresholds;
+        Check(ScoreThresholds.TryCreate(values, out thresholds), "valid set rejected");
+        values[1] = 999;
+        Check(thresholds.At(1) == 200, "game/config mutation changed recorded thresholds");
+    }
+
+    private static void ProbeFourStarGate()
+    {
+        ScoreThresholds thresholds;
+        Check(ScoreThresholds.TryForLevel(100, 200, 300, 500, false, out thresholds), "normal mode rejected");
+        Check(thresholds.Count == 3, "four-star value bypassed NGP availability");
+        Check(ScoreThresholds.TryForLevel(100, 200, 300, 500, true, out thresholds) && thresholds.Count == 4,
+            "available fourth star lost");
+        Check(!ScoreThresholds.TryForLevel(100, 200, 300, 0, true, out thresholds),
+            "missing fourth threshold guessed");
     }
 
     private static void Throws(Action action)
