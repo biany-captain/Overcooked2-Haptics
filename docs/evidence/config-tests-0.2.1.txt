@@ -1,0 +1,5 @@
+PASS migration 0 -> F6
+PASS migration 1 -> None
+PASS migration 2 -> F7
+PASS migration 3 -> F8
+RESULT 4/4 config migration passed

@@ -1,0 +1,44 @@
+[Info   :   BepInEx] Loading [OC2 Haptic 0.2.0]
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.2.0-alpha | x86/net35 | F6 test / F10 toggle (configurable)
+[Info   :OC2 Haptic] Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.
+[Info   :OC2 Haptic] Throw Hook installed: ClientThrowableItem.StartFlight(IClientThrower); routes confirmed flight state.
+[Info   :OC2 Haptic] CatchSuccess Hook installed: ServerAttachmentCatcher.HandleCatch; local/host runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnSuccessfulDelivery; runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnFailedDelivery; runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnOrderExpired; runtime validation required.
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-62986 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=CatchSuccess observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-62868 source=ServerAttachmentCatcher.HandleCatch | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=2 scheduled=2 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-62986 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=CatchSuccess observed=2 scheduled=2 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-62868 source=ServerAttachmentCatcher.HandleCatch | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=3 scheduled=3 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-64252 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=4 scheduled=4 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-65336 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=5 scheduled=5 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-65992 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=ThrowSuccess observed=6 scheduled=6 | player=0 gamePad=0 keyboard=False team= localTeam= entity=-65336 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=DeliverySuccess observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team=0 localTeam=0 entity=1 source=ClientKitchenFlowControllerBase.OnSuccessfulDelivery | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Event probe | type=DeliveryFailure observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team=0 localTeam=0 entity=1 source=ClientKitchenFlowControllerBase.OnFailedDelivery | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Event probe | type=OrderExpired observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team=0 localTeam=0 entity=2 source=ClientKitchenFlowControllerBase.OnOrderExpired | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=6 scheduled=6
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=2 scheduled=2
+[Info   :OC2 Haptic] Event totals | type=DeliverySuccess observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=DeliveryFailure observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=OrderExpired observed=1 scheduled=1

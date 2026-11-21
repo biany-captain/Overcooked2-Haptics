@@ -1,0 +1,46 @@
+# Build outputs and package staging
+**/bin/
+**/obj/
+/artifacts/
+/.cache/
+/TestResults/
+*.dll
+*.exe
+*.pdb
+*.zip
+*.nupkg
+*.snupkg
+*.log
+*.tmp
+*.bak
+
+# Editors, local tooling and isolated checkouts
+.vs/
+.vscode/
+.idea/
+.worktrees/
+worktrees/
+.codex/
+.agents/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.DS_Store
+Thumbs.db
+
+# Local credentials, installed-game files and personal configuration
+.env
+.env.*
+!.env.example
+*.pfx
+*.p12
+*.key
+*.cfg
+!config/*.cfg.example
+/BepInEx/
+/Overcooked2_Data/
+
+# Local agent execution notes; public requirements and verification docs stay tracked
+/docs/progress.md
+/docs/superpowers/

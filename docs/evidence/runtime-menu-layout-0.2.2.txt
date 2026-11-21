@@ -1,0 +1,29 @@
+[Info   :   BepInEx] Loading [OC2 Haptic 0.2.2]
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.2.2-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)
+[Info   :OC2 Haptic] Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.
+[Info   :OC2 Haptic] Throw Hook installed: ClientThrowableItem.StartFlight(IClientThrower); routes confirmed flight state.
+[Info   :OC2 Haptic] CatchSuccess Hook installed: ServerAttachmentCatcher.HandleCatch; local/host runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnSuccessfulDelivery; runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnFailedDelivery; runtime validation required.
+[Info   :OC2 Haptic] Kitchen Hook installed: ClientKitchenFlowControllerBase.OnOrderExpired; runtime validation required.
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Haptic menu opened; local input suppressed, no automatic vibration.
+[Info   :OC2 Haptic] Menu layout | width=520 height=512 noteHeight=43 rowHeight=40
+[Info   :OC2 Haptic] Menu preview | type=ThrowSuccess accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Menu preview | type=ThrowSuccess accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Menu preview | type=CatchSuccess accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Menu preview | type=DeliverySuccess accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Menu preview | type=DeliveryFailure accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Menu preview | type=OrderExpired accepted=True XInput=0 master=0.75
+[Info   :OC2 Haptic] Haptic menu closed; local input and cursor restored.
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliverySuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryFailure observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=OrderExpired observed=0 scheduled=0

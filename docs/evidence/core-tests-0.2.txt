@@ -1,0 +1,32 @@
+PASS throw pulse lasts 65 ms and applies master multiplier
+PASS test pulse lasts 80 ms
+PASS cooldown survives completed pulse
+PASS duplicate events within 20 ms do not repeat output
+PASS higher priority interrupts without replaying the old pulse
+PASS lower priority cannot replace an active pulse
+PASS multi-segment pattern includes a silent gap
+PASS late tick stops instead of replaying stale segments
+PASS zero master intensity produces no nonzero command
+PASS stop clears pending effects and only touches owned slots
+PASS disconnect clears pending effect before reconnect
+PASS disconnect observed by Play clears old pulse even during cooldown
+PASS disconnect observed by a new event clears old pulse
+PASS stop retires ownership before an unrelated controller can reuse a slot
+PASS disconnect retires ownership before a later stop
+PASS invalid controller indices never reach backend
+PASS nonfinite master intensity is rejected
+PASS pattern rejects negative or excessive durations
+PASS matched local gamepad resolves selected controller
+PASS unbound or mismatched gamepad never resolves
+PASS keyboard remote unknown and input-intent events never resolve
+PASS native backend rejects invalid indices and nonfinite strengths
+PASS stage C catch profile is 90ms with approved motor balance
+PASS stage C successful delivery has two pulses and a silent gap
+PASS stage C failed delivery is a 220ms low motor pulse
+PASS stage C expired order is a 250ms dual motor pulse
+PASS stage C team routing rejects wrong or unknown local team
+PASS stage C catch retains personal binding rules
+PASS stage C invalid-order failures can repeat after cooldown
+PASS stage C expiry interrupts success gap without replay
+PASS stage C repeated order callback cannot duplicate a pulse
+RESULT 31/31 passed

@@ -1,0 +1,8 @@
+  OC2Haptic.Plugin -> E:\Codex\厨房mod\src\OC2Haptic.Plugin\bin\Release\net35\OC2Haptic.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:00.55
+Plugin artifact: E:\Codex\厨房mod\artifacts\OC2Haptic.dll

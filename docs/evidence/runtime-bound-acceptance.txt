@@ -1,0 +1,19 @@
+[Info   :   BepInEx] Loading [OC2 Haptic 0.1.0]
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.1.0-alpha | x86/net35 | F6 test / F10 toggle (configurable)
+[Info   :OC2 Haptic] Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.
+[Info   :OC2 Haptic] Throw Hook installed: ClientThrowableItem.StartFlight(IClientThrower); runtime event accuracy NOT yet verified.
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: round ended or game paused
+[Info   :OC2 Haptic] Throw probe | observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False entity=-34556 source=ClientThrowableItem.StartFlight | XInput=0 allowed=True accepted=True
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] Haptics disabled
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Throw probe | observed=2 scheduled=1 | player=0 gamePad=0 keyboard=False entity=-34776 source=ClientThrowableItem.StartFlight | XInput=0 allowed=False accepted=False
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown | observed=2 scheduled=1

@@ -1,0 +1,22 @@
+## Reference only. BepInEx generates dev.oc2haptic.feedback.cfg on first load.
+## XInputIndex and LocalGamePadSlot are separate identifiers; bind explicitly.
+
+[General]
+Enabled = true
+MasterIntensity = 0.75
+DebugLogEvents = false
+
+[Devices]
+XInputIndex = -1
+LocalGamePadSlot = -1
+
+[Events]
+ThrowSuccess = true
+CatchSuccess = true
+DeliverySuccess = true
+DeliveryFailure = true
+OrderExpired = true
+
+[Hotkeys]
+OpenMenu = F6
+ToggleMod = F10
