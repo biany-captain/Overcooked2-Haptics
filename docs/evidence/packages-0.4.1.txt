@@ -1,0 +1,2 @@
+OC2Haptic-0.4.1-alpha-source.zip: 12 WAV,12 MIDI, original/source/license records; no oldstock audio, DLL, OGG, HTML previews or cache.
+OC2Haptic-0.4.1-alpha.zip: 12 WAV,12 MIDI, own0.4.1.0 DLL and source/license records; no oldstock audio, game assemblies, OGG, HTML previews or cache.

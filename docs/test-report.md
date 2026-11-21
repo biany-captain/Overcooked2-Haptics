@@ -25,4 +25,6 @@ Prior0.4 user reported tested menu features normal/distinguishable, then rejecte
 
 Allnew0.4.1 native playback/dropdown/volumefollowing/comfort and hardware synchronization: UNTESTED. Followbatch-test-0.4.1.md. Realstars2/4/NGP and previously unobserved expiry samples remain unverified. FireHooks/multi-controller/online remain later scope. No human blindtest or physical≤50ms assertion. Knownstartup invalid-pattern warning omission unchanged.
 
-Delivery/review/install verification will be appended only after actual completion.
+## Delivery verification
+
+Freshread-only review found no newCritical/Important/Minor issues (review-ultra-v3.md). Coldbackup completed whilegame stopped; installed0.4.1.0 ownDLL and12source-identicalWAV/source/license files. Verified retiredownfolders absent; onlylocalcfgSoundVolume1 andSoundPackIdturbo_swing changed. ModeHapticsOnly/master1/ordergain.97 and allothercfgtext preserved. The newDLL has noRewardTone type. Native0.4.1 playback and gamevolume acceptance remain pending; software checks do not replace them.
