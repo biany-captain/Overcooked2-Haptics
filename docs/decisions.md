@@ -28,3 +28,11 @@ Stage C batch approved: CatchSuccess, DeliverySuccess, DeliveryFailure and Order
 ## Deferred decisions
 
 Low-vibration-mode semantics; same-priority handling for later event types; global warning cadence across pots/orders; early-warning thresholds; optional settings UI; multiplayer binding; public source license. None is silently added to A+B.
+
+## New specification and repository (2026-11-21)
+
+- Current formal requirement is requirements-v1.3.md, preserving requirements-v1.0.md as historical baseline.
+- User approved standard candidate waveforms / EveryOrderedDelivery / original CrispReward at 0.65, plus haptics-only one-star tail and two-part catch for joint testing.
+- v1.3 assumes v1.2 existed; current0.2.2 does not contain delivery classification or Combo tiers. Establish actual client score/threshold evidence first, then implement those features in sequence.
+- User authorized GitHub pushes of necessary files, including README and .gitignore. Initial verified0.2.2 baseline is8d28f73; local intermediates and personal/game dependencies remain excluded.
+- Continue in the established user-selected project directory using a dedicated feature branch; no extra checkout or environment migration is needed for the single probe patch.
