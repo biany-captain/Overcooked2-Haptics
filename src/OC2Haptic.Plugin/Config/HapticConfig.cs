@@ -94,8 +94,14 @@ namespace OC2Haptic.Config
             "0.09,0.26,55;0,0,45;0.12,0.34,60;0,0,45;0.18,0.42,65;0,0,60;0.32,0.48,170"};
         private static void MigrateDefault(ConfigEntry<string> entry,string legacy,HapticPattern replacement)
         {
-            HapticPattern old;
-            if(PatternCodec.TryParse(entry.Value,true,out old) && PatternCodec.Format(old)==legacy)entry.Value=PatternCodec.Format(replacement);
+            HapticPattern old,baseline;
+            if(!PatternCodec.TryParse(entry.Value,true,out old) || !PatternCodec.TryParse(legacy,true,out baseline) || old.Count!=baseline.Count)return;
+            for(int i=0;i<old.Count;i++)
+            {
+                HapticSegment a=old.SegmentAt(i),b=baseline.SegmentAt(i);
+                if(a.Left!=b.Left || a.Right!=b.Right || a.DurationMs!=b.DurationMs)return;
+            }
+            entry.Value=PatternCodec.Format(replacement);
         }
         internal void WatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, true); }
         internal void UnwatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, false); }

@@ -20,6 +20,8 @@ foreach ($file in @('test-report.md','test-report-0.1.md','test-report-0.2.md','
     Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\' + $file)) -Destination $docsDir
 }
 $evidenceDir = Join-Path $projectRoot 'docs\evidence'
+Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\roadmap.md') -Destination $docsDir
+Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\review-v14.md') -Destination $docsDir
 if (Test-Path -LiteralPath $evidenceDir) { Copy-Item -LiteralPath $evidenceDir -Destination (Join-Path $docsDir 'evidence') -Recurse }
 $runtimeZip = Join-Path $artifactRoot "OC2Haptic-$version.zip"
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $runtimeZip -Force

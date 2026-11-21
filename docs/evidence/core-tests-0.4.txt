@@ -77,4 +77,5 @@ PASS v14 long audio blocks lower star while higher star replaces it
 PASS v14 ordinary action does not stop musical tail
 PASS v14 failed audio still permits haptics and later stop
 PASS v14 queued feedback waits for drain and cancellation discards pending
-RESULT 79/79 passed
+PASS v14 higher zero-gain star cancels previous star motors
+RESULT 80/80 passed

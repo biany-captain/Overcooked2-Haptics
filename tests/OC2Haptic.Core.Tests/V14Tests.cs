@@ -11,6 +11,7 @@ internal static class V14Tests
         tests.Add("v14 ordinary action does not stop musical tail",MusicalTail);
         tests.Add("v14 failed audio still permits haptics and later stop",MissingAudio);
         tests.Add("v14 queued feedback waits for drain and cancellation discards pending",Deferred);
+        tests.Add("v14 higher zero-gain star cancels previous star motors",ZeroGainReplacement);
     }
     private static void Patterns()
     {
@@ -52,6 +53,14 @@ internal static class V14Tests
         var q=new FeedbackQueue();int played=0;var ev=new GameEvent(GameEventType.ThrowSuccess,EventScope.LocalPlayer,0,0,0,1,true,false,EventConfidence.ConfirmedState,"fixture");
         q.Enqueue(ev,"one");Check(played==0);q.Drain((e,key)=>{Check(key=="one");played++;});Check(played==1);
         q.Enqueue(ev,"stale");q.Clear();q.Drain((e,key)=>played++);Check(played==1);
+    }
+    private static void ZeroGainReplacement()
+    {
+        var b=new Motors();var e=new HapticEngine(b);var a=new Sound();var o=new RewardOutput(e,a,audioDurationMs:_=>3250);
+        Check(o.Emit(0,"three",GameEventType.StarMilestone3,null,0,1,.65f));e.Tick(0);Check(!b.LastZero);
+        var zero=EventFeedback.For(GameEventType.StarMilestone4).Pattern.WithGain(0);
+        Check(o.Emit(0,"four",GameEventType.StarMilestone4,zero,20,1,.65f,false));e.Tick(20);Check(b.LastZero);
+        Check(!e.IsBusyAtOrAbove(0,1,20) && a.Plays==2);
     }
     private static void Check(bool b){if(!b)throw new Exception("v1.4 behavior mismatch");}
     private sealed class Sound:IRewardAudioBackend{public int Plays,Stops;public bool Fail;public bool Play(int star,float volume){Plays++;return !Fail;}public void Stop(){Stops++;}}

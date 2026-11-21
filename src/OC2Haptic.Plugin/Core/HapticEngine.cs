@@ -83,6 +83,10 @@ namespace OC2Haptic.Core
             }
         }
 
+        // Replace one owned task even when the incoming event intentionally has no motors.
+        // Keep recent event keys: cancellation must not bypass action cooldowns.
+        public void Cancel(int index){if(index>=0 && index<outputs.Length)Finish(index);}
+
         public bool IsBusyAtOrAbove(int index, int priority, double nowMs)
         {
             if (index < 0 || index > 3) return false;

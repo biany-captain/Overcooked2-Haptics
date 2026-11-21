@@ -7,4 +7,5 @@ PASS delivery preference migration 1
 PASS event gains and independent preview configuration
 PASS configured nonfinite gain range clamp
 PASS v14 defaults migrate while custom profiles and pack preference survive
-RESULT 9/9 config migration passed
+PASS v14 migration preserves submilliscale custom motor values
+RESULT 10/10 config migration passed

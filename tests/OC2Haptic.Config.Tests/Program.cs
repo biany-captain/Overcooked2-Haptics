@@ -56,7 +56,16 @@ internal static class Program
             music.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 && gains.SoundPackId.Value==RewardSoundPack.DefaultId;
         if(!musicCorrect){failed++;Console.WriteLine("FAIL v14 defaults migrate while custom profiles and pack preference survive");}
         else Console.WriteLine("PASS v14 defaults migrate while custom profiles and pack preference survive");
-        Console.WriteLine("RESULT " + (content.Length+5 - failed) + "/" + (content.Length+5) + " config migration passed");
+        string precisionPath=Path.Combine(root,"v14-custom-precision.cfg");
+        const string precise="0.0504,0.2204,75",preciseTail="0.0504,0.2204,75;0,0,45;0.0304,0.1304,25";
+        File.WriteAllText(precisionPath,"[Patterns]\nStarMilestone1 = "+precise+"\nStarMilestone1HapticsOnly = "+preciseTail+"\n");
+        var precision=new HapticConfig(new ConfigFile(precisionPath,false));
+        bool precisionCorrect=precision.Patterns[GameEventType.StarMilestone1].Value==precise && precision.OneStarTail.Value==preciseTail &&
+            precision.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==75 &&
+            precision.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==145;
+        if(!precisionCorrect){failed++;Console.WriteLine("FAIL v14 migration preserves submilliscale custom motor values");}
+        else Console.WriteLine("PASS v14 migration preserves submilliscale custom motor values");
+        Console.WriteLine("RESULT " + (content.Length+6 - failed) + "/" + (content.Length+6) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }

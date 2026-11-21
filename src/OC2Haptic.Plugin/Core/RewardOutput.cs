@@ -21,6 +21,7 @@ namespace OC2Haptic.Core
             if(star && effectiveMode==StarFeedbackMode.Disabled)return false;
             if(star && now<audioUntil && feedback.Priority<=audioPriority)return false;
             if(star && engine.IsBusyAtOrAbove(index,feedback.Priority,now))return false;
+            if(star)engine.Cancel(index);
             if((star && now<audioUntil) || (!star && feedback.Priority>=55))Interrupt();
             bool haptics=!star || effectiveMode!=StarFeedbackMode.AudioOnly;
             if(pattern==null && useDefaultPattern)pattern=star && type==GameEventType.StarMilestone1 && effectiveMode==StarFeedbackMode.HapticsOnly

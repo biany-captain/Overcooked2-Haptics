@@ -6,6 +6,8 @@ Windows《胡闹厨房2》的本地单手柄触觉增强 MOD。支持投掷、�
 
 [源码仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式需求](docs/requirements-v1.4.md) · [新版差异/设计](docs/design-v1.4.md) · [测试报告](docs/test-report.md) · [本轮实机清单](docs/batch-test-0.4.md)
 
+[后续开发与验收顺序](docs/roadmap.md) · [音效包格式与新增方式](docs/audio-packs.md)
+
 ## 功能与边界
 
 - 只读游戏事件，不改分数、订单、存档或网络消息。
@@ -109,7 +111,7 @@ Set-Location Overcooked2-Haptics
 ./scripts/package.ps1 -SkipBuild
 ```
 
-不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.3.1-alpha安装/源码ZIP。
+不传GameRoot时从Steam库查找，也可设置OC2_GAME_DIR。Core测试不启动Unity；config/probe测试使用本机程序集和合成数据，不能代替游戏运行。输出在artifacts：OC2Haptic.dll及0.4.0-alpha安装/源码ZIP。
 
 Git只跟踪必要源码、脚本、配置示例和需求/验证文档。`.gitignore`排除bin/obj/artifacts/.cache、游戏文件、二进制、日志及个人配置。经筛选的docs/evidence文本为验证记录。
 
