@@ -103,7 +103,7 @@ internal static class V13Tests
         Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.Count==3);
         Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.TotalDurationMs==115);
         Check(EventFeedback.For(GameEventType.ComboLevel4).Pattern.Count==7);
-        Check(EventFeedback.For(GameEventType.StarMilestone4).Pattern.TotalDurationMs==500);
+        Check(EventFeedback.For(GameEventType.StarMilestone4).Pattern.TotalDurationMs==660);
         Check(EventFeedback.OneStarHapticsOnly.Count==3);
         for(int i=1;i<=4;i++) Check(EventFeedback.For((GameEventType)((int)GameEventType.StarMilestone1+i-1)).Pattern.TotalDurationMs<=850);
     }

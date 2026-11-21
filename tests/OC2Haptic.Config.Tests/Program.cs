@@ -36,7 +36,7 @@ internal static class Program
         var gains=new HapticConfig(new ConfigFile(gainPath,false));
         bool gainCorrect=Math.Abs(gains.Intensity-.4f)<.0001 && Math.Abs(gains.SoundVolume.Value-.7f)<.0001 &&
             Math.Abs(gains.EventGains[GameEventType.StarMilestone1].Value-1.5f)<.0001;
-        gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==145 &&
+        gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 &&
             Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.33f)<.0001 &&
             gains.FeedbackMode==StarFeedbackMode.AudioOnly && gains.EventGains[GameEventType.CatchSuccess].Value==1;
         if(!gainCorrect){failed++;Console.WriteLine("FAIL event gains and independent preview configuration");}
@@ -48,7 +48,15 @@ internal static class Program
             clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right<=1;
         if(!clampCorrect){failed++;Console.WriteLine("FAIL configured nonfinite gain range clamp");}
         else Console.WriteLine("PASS configured nonfinite gain range clamp");
-        Console.WriteLine("RESULT " + (content.Length+4 - failed) + "/" + (content.Length+4) + " config migration passed");
+        string musicPath=Path.Combine(root,"v14-preserve.cfg");
+        File.WriteAllText(musicPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nSoundPackId = future-pack\nSoundVolume = 0.7006757\nMaxSoundDurationMs = 700\n[Patterns]\nStarMilestone1 = 0.05,0.22,75\nStarMilestone2 = 0.9,0.1,123\nStarMilestone1HapticsOnly = 0.05,0.22,75;0,0,45;0.03,0.13,25\n");
+        var music=new HapticConfig(new ConfigFile(musicPath,false));
+        bool musicCorrect=music.SoundPackId.Value=="future-pack" && Math.Abs(music.SoundVolume.Value-.7006757f)<.000001 && music.Intensity==.4f && music.MaxSoundDurationMs.Value==700 &&
+            music.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==180 && music.PatternFor(GameEventType.StarMilestone2).TotalDurationMs==123 &&
+            music.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 && gains.SoundPackId.Value==RewardSoundPack.DefaultId;
+        if(!musicCorrect){failed++;Console.WriteLine("FAIL v14 defaults migrate while custom profiles and pack preference survive");}
+        else Console.WriteLine("PASS v14 defaults migrate while custom profiles and pack preference survive");
+        Console.WriteLine("RESULT " + (content.Length+5 - failed) + "/" + (content.Length+5) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
 }

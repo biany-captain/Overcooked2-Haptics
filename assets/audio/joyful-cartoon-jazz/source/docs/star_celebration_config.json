@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "1.0",
+  "feature": "StarCelebrationAudio",
+  "style": "joyful-cartoon-swing",
+  "feedbackMode": "both",
+  "defaultVolume": 0.65,
+  "audioFolder": "audio_ogg",
+  "fallbackFolder": "audio_wav",
+  "oneShotPolicy": "highest-milestone-per-scoring-action",
+  "trigger": "score-crosses-verified-active-level-threshold-first-time",
+  "starMilestones": [
+    {
+      "star": 1,
+      "audio": "star_1_playful_spark.ogg",
+      "durationMs": 980,
+      "rumble": [
+        {
+          "atMs": 0,
+          "left": 0.15,
+          "right": 0.3,
+          "durationMs": 52
+        },
+        {
+          "atMs": 420,
+          "left": 0.1,
+          "right": 0.19,
+          "durationMs": 48
+        }
+      ]
+    },
+    {
+      "star": 2,
+      "audio": "star_2_bouncy_skip.ogg",
+      "durationMs": 1490,
+      "rumble": [
+        {
+          "atMs": 0,
+          "left": 0.2,
+          "right": 0.33,
+          "durationMs": 82
+        },
+        {
+          "atMs": 490,
+          "left": 0.27,
+          "right": 0.43,
+          "durationMs": 84
+        },
+        {
+          "atMs": 1005,
+          "left": 0.31,
+          "right": 0.47,
+          "durationMs": 85
+        }
+      ]
+    },
+    {
+      "star": 3,
+      "audio": "star_3_brass_victory.ogg",
+      "durationMs": 2160,
+      "rumble": [
+        {
+          "atMs": 0,
+          "left": 0.3,
+          "right": 0.38,
+          "durationMs": 86
+        },
+        {
+          "atMs": 285,
+          "left": 0.3,
+          "right": 0.54,
+          "durationMs": 108
+        },
+        {
+          "atMs": 755,
+          "left": 0.48,
+          "right": 0.6,
+          "durationMs": 165
+        }
+      ]
+    },
+    {
+      "star": 4,
+      "audio": "star_4_grand_kitchen_party.ogg",
+      "durationMs": 3250,
+      "cheerStartsMs": 2310,
+      "rumble": [
+        {
+          "atMs": 0,
+          "left": 0.28,
+          "right": 0.47,
+          "durationMs": 80
+        },
+        {
+          "atMs": 120,
+          "left": 0.27,
+          "right": 0.52,
+          "durationMs": 74
+        },
+        {
+          "atMs": 455,
+          "left": 0.4,
+          "right": 0.6,
+          "durationMs": 125
+        },
+        {
+          "atMs": 680,
+          "left": 0.57,
+          "right": 0.65,
+          "durationMs": 150
+        }
+      ]
+    }
+  ],
+  "priority": {
+    "emergencyWarnings": 100,
+    "starCelebration": 70,
+    "comboAndNormalDelivery": 40
+  },
+  "triggerUnknownThreshold": "disable-star-milestone",
+  "simultaneousMilestones": "highest-only",
+  "sameMilestoneRepeat": "suppress",
+  "localAudioTeamPlayback": "once",
+  "rumbleCooldownMs": 100,
+  "notes": "Proposed values, requires user confirmation after actual controller playtest."
+}

@@ -63,6 +63,8 @@ internal static class Program
         };
         V13Tests.Add(tests);
         MenuStrengthTests.Add(tests);
+        SoundPackTests.Add(tests);
+        V14Tests.Add(tests);
         int failed = 0;
         int run = 0;
         foreach (var test in tests)

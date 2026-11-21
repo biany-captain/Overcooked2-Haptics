@@ -13,6 +13,10 @@
 *.log
 *.tmp
 *.bak
+__pycache__/
+*.pyc
+/assets/audio/*/source/audio_wav/
+/assets/audio/*/source/audio_ogg/
 
 # Editors, local tooling and isolated checkouts
 .vs/

@@ -25,6 +25,7 @@ namespace OC2Haptic.UI
         private readonly Action<string> log;
         private readonly Func<GameEventType,StarFeedbackMode?,bool> previewEvent;
         private readonly Action stopPreviews;
+        private readonly RewardSoundPack[] soundPacks;
         private readonly MenuInputScope<PlayerControls> inputs = new MenuInputScope<PlayerControls>();
         private readonly HashSet<PlayerControls> eligible = new HashSet<PlayerControls>();
         private readonly Func<PlayerControls, Action> acquireInput;
@@ -34,6 +35,7 @@ namespace OC2Haptic.UI
         private Vector2 scroll;
         private Vector2 outerScroll;
         private int tab;
+        private bool packDropdown;
         private int screenWidth, screenHeight;
         private Font font;
         private Texture2D background;
@@ -41,10 +43,11 @@ namespace OC2Haptic.UI
         private string status = "点击试震，可直接比较现有触觉节奏。";
 
         internal HapticMenu(UnityEngine.Object owner, HapticConfig settings, HapticEngine engine,
-            Func<double> now, Action<string> log, Func<GameEventType,StarFeedbackMode?,bool> previewEvent, Action stopPreviews)
+            Func<double> now, Action<string> log, Func<GameEventType,StarFeedbackMode?,bool> previewEvent, Action stopPreviews,RewardSoundPack[] soundPacks)
         {
             this.owner = owner; this.settings = settings; this.now = now; this.log = log;
             this.previewEvent=previewEvent;this.stopPreviews=stopPreviews;
+            this.soundPacks=soundPacks;
             state = new HapticMenuState(engine);
             acquireInput = AcquireInput;
         }
@@ -101,6 +104,7 @@ namespace OC2Haptic.UI
         {
             bool wasOpen = state.IsOpen;
             state.Close();
+            packDropdown=false;
             stopPreviews();
             try
             {
@@ -188,7 +192,7 @@ namespace OC2Haptic.UI
             DrawStrength(18,y,width-36,metrics.Master,"总震动强度",settings.MasterIntensity,1);
             y+=metrics.Master+8;
             int nextTab=GUI.SelectionGrid(new Rect(18,y,width-36,metrics.Tabs),tab,new[]{"事件设置","星级测试"},2,buttonStyle);
-            if(nextTab!=tab){stopPreviews();tab=nextTab;scroll=Vector2.zero;outerScroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"可分别调整每类事件的震动倍率。";}
+            if(nextTab!=tab){stopPreviews();tab=nextTab;packDropdown=false;scroll=Vector2.zero;outerScroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"可分别调整每类事件的震动倍率。";}
             y+=metrics.Tabs+8;
             GUI.Label(new Rect(18, y, width - 36, metrics.Top), TopText(), noteStyle);
             y += metrics.Top + 10;
@@ -217,9 +221,9 @@ namespace OC2Haptic.UI
         private string TopText()
         {
             return tab==0?"单项倍率叠加总强度，不改变节奏；列表可滚动。\n0%不震动；星级试听请点击上方「星级测试」。"
-                :"四档可独立试音、试震或同时测试。\n测试不改自动模式；主菜单 / 暂停中也可试听。";
+                :"音效包统一作用于四个星级；下方列表可滚动。\n测试不改自动模式；主菜单 / 暂停中也可试听。";
         }
-        private int ContentRows(){return tab==0?1+Types.Length*2:3+StarTypes.Length*2;}
+        private int ContentRows(){return tab==0?1+Types.Length*2:4+(packDropdown?soundPacks.Length:0)+StarTypes.Length*2;}
         private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
         private void DrawEventSettings(float width,float row,bool originalEnabled)
         {
@@ -245,18 +249,30 @@ namespace OC2Haptic.UI
         }
         private void DrawStarTests(float width,float row,bool originalEnabled)
         {
-            bool enabled=GUI.Toggle(new Rect(4,0,width/2,row-8),settings.StarsEnabled.Value,"星级自动反馈",toggleStyle);
+            if(GUI.Button(new Rect(4,0,width-8,row-8),"音效包："+SelectedPackName()+(packDropdown?"  ▲":"  ▼"),buttonStyle))packDropdown=!packDropdown;
+            int extra=packDropdown?soundPacks.Length:0;
+            for(int i=0;i<extra;i++)
+            {
+                bool selected=string.Equals(settings.SoundPackId.Value,soundPacks[i].Id,StringComparison.OrdinalIgnoreCase);
+                if(GUI.Button(new Rect(14,(i+1)*row,width-28,row-8),(selected?"● ":"  ")+soundPacks[i].Name,buttonStyle))
+                {
+                    stopPreviews();settings.SoundPackId.Value=soundPacks[i].Id;packDropdown=false;
+                    status="已选择「"+soundPacks[i].Name+"」，下方可试听一到四星。";
+                }
+            }
+            float header=(1+extra)*row;
+            bool enabled=GUI.Toggle(new Rect(4,header,width/2,row-8),settings.StarsEnabled.Value,"星级自动反馈",toggleStyle);
             if(enabled!=settings.StarsEnabled.Value)settings.StarsEnabled.Value=enabled;
-            GUI.Label(new Rect(width/2,0,width/2-4,row-8),"下方为自动输出模式",noteStyle);
-            int mode=GUI.SelectionGrid(new Rect(4,row,width-8,row-8),(int)settings.FeedbackMode,
+            GUI.Label(new Rect(width/2,header,width/2-4,row-8),"下方为自动输出模式",noteStyle);
+            int mode=GUI.SelectionGrid(new Rect(4,header+row,width-8,row-8),(int)settings.FeedbackMode,
                 new[]{"震动＋音效","仅震动","仅音效","关闭"},4,buttonStyle);
             if(mode!=(int)settings.FeedbackMode)settings.StarMode.Value=(StarFeedbackMode)mode;
-            DrawStrength(4,row*2,width-8,row-8,"庆祝音量",settings.SoundVolume,1);
+            DrawStrength(4,header+row*2,width-8,row-8,"庆祝音量",settings.SoundVolume,1);
             var modes=new[]{StarFeedbackMode.AudioOnly,StarFeedbackMode.HapticsOnly,StarFeedbackMode.HapticsAndAudio};
             var labels=new[]{"试音","试震","同时测试"};
             for(int i=0;i<StarTypes.Length;i++)
             {
-                float y=(3+i*2)*row;
+                float y=header+(3+i*2)*row;
                 GUI.Label(new Rect(4,y,84,row-8),StarNames[i],labelStyle);
                 float buttonWidth=(width-100)/3;
                 for(int j=0;j<modes.Length;j++)
@@ -267,6 +283,11 @@ namespace OC2Haptic.UI
                 GUI.enabled=originalEnabled;
                 DrawStrength(4,y+row,width-8,row-8,"星级倍率",settings.EventGains[StarTypes[i]],2);
             }
+        }
+        private string SelectedPackName()
+        {
+            foreach(var pack in soundPacks)if(string.Equals(pack.Id,settings.SoundPackId.Value,StringComparison.OrdinalIgnoreCase))return pack.Name;
+            return "所选包不可用（仅震动）";
         }
         private void DrawStrength(float x,float y,float width,float height,string name,ConfigEntry<float> entry,float maximum)
         {
@@ -302,6 +323,11 @@ namespace OC2Haptic.UI
                 Footer = TextHeight(noteStyle, Footer, body)
             };
             foreach (string name in Names) result.Row = Mathf.Max(result.Row, TextHeight(toggleStyle, name, width - 164) + 8);
+            if(tab==1)
+            {
+                result.Row=Mathf.Max(result.Row,TextHeight(buttonStyle,"音效包："+SelectedPackName()+"  ▼",width-60)+8);
+                foreach(var pack in soundPacks)result.Row=Mathf.Max(result.Row,TextHeight(buttonStyle,"● "+pack.Name,width-80)+8);
+            }
             result.TotalHeight = 42 + result.Device + 8 + result.MainRow + 10 + result.Master+8+result.Tabs+8+result.Top + 10 +
                 VisibleRows() * result.Row + 12 + result.Bottom + 8 + result.Status + 6 + result.Footer + 16;
             return result;

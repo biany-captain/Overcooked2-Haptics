@@ -11,11 +11,12 @@ $pluginDir = Join-Path $staging 'BepInEx\plugins\OC2Haptic'
 $configDir = Join-Path $staging 'config'
 New-Item -ItemType Directory -Path $pluginDir, $configDir -Force | Out-Null
 Copy-Item -LiteralPath $dll -Destination (Join-Path $pluginDir 'OC2Haptic.dll')
+Copy-Item -LiteralPath (Join-Path $projectRoot 'assets\audio') -Destination (Join-Path $pluginDir 'audio') -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot 'config\OC2Haptic.cfg.example') -Destination $configDir
 foreach ($file in @('README.md', 'CHANGELOG.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $staging }
 $docsDir = Join-Path $staging 'docs'
 New-Item -ItemType Directory -Path $docsDir -Force | Out-Null
-foreach ($file in @('test-report.md','test-report-0.1.md','test-report-0.2.md','test-report-0.2.1.md','test-report-0.2.2.md','test-report-0.2.3.md','test-report-0.3.md','hook-research.md','compatibility-matrix.md','decisions.md','review-ab-alpha.md','review-stage-c.md','review-menu.md','review-score-probe.md','review-v13.md','batch-test-0.2.md','batch-test-0.3.md','menu-test-0.2.1.md','menu-layout-0.2.2.md','design-v1.3.md','calibration-0.2.3.md','requirements-v1.0.md','requirements-v1.3.md')) {
+foreach ($file in @('test-report.md','test-report-0.1.md','test-report-0.2.md','test-report-0.2.1.md','test-report-0.2.2.md','test-report-0.2.3.md','test-report-0.3.md','test-report-0.3.1.md','hook-research.md','compatibility-matrix.md','decisions.md','review-ab-alpha.md','review-stage-c.md','review-menu.md','review-score-probe.md','review-v13.md','batch-test-0.2.md','batch-test-0.3.md','batch-test-0.4.md','audio-packs.md','menu-test-0.2.1.md','menu-layout-0.2.2.md','design-v1.3.md','design-v1.4.md','calibration-0.2.3.md','requirements-v1.0.md','requirements-v1.3.md','requirements-v1.4.md')) {
     Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\' + $file)) -Destination $docsDir
 }
 $evidenceDir = Join-Path $projectRoot 'docs\evidence'
@@ -26,9 +27,9 @@ Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $runtimeZip -Fo
 $sourceStage = Join-Path $artifactRoot ('source-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $sourceStage -Force | Out-Null
 $sourceFiles = @()
-foreach ($folder in @('src','tests','scripts','docs','config')) {
+foreach ($folder in @('src','tests','scripts','docs','config','assets')) {
     $sourceFiles += Get-ChildItem -LiteralPath (Join-Path $projectRoot $folder) -Recurse -File |
-        Where-Object { $_.FullName -notmatch '\\(bin|obj)\\' -and $_.Extension -notin @('.dll','.pdb','.log') }
+        Where-Object { $_.FullName -notmatch '\\(bin|obj|__pycache__|superpowers)\\' -and $_.Name -ne 'progress.md' -and $_.Extension -notin @('.dll','.pdb','.log','.pyc') }
 }
 foreach ($file in @('README.md','CHANGELOG.md','NuGet.Config','.gitignore','.gitattributes','OC2Haptic.sln')) {
     if (Test-Path -LiteralPath (Join-Path $projectRoot $file)) { $sourceFiles += Get-Item -LiteralPath (Join-Path $projectRoot $file) }

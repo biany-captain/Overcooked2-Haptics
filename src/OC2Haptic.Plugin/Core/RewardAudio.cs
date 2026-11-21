@@ -6,10 +6,14 @@ namespace OC2Haptic.Core
     public static class RewardTone
     {
         public const int SampleRate=44100;
-        public static float[] Generate(int star,int maxDurationMs)
+        public static int DurationMs(int star,int maxDurationMs)
         {
             if(star<1 || star>4)throw new ArgumentOutOfRangeException("star");
-            int duration=Math.Min(Math.Max(maxDurationMs,1),new[]{180,310,440,700}[star-1]);
+            return Math.Min(Math.Max(maxDurationMs,1),new[]{180,310,440,700}[star-1]);
+        }
+        public static float[] Generate(int star,int maxDurationMs)
+        {
+            int duration=DurationMs(star,maxDurationMs);
             var data=new float[SampleRate*duration/1000];var frequencies=new[]{880.0,1108.7305,1318.5102,1760.0};
             double peak=0;
             for(int i=0;i<data.Length;i++) {double value=0,time=(double)i/SampleRate;

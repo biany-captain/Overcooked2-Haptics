@@ -28,15 +28,14 @@ namespace OC2Haptic.Core
             new HapticSegment(0,.31f,55),new HapticSegment(0,0,40),new HapticSegment(0,.35f,55),new HapticSegment(0,0,40),
             new HapticSegment(0,.39f,55),new HapticSegment(0,0,40),new HapticSegment(.25f,.48f,95)),36);
         private static readonly EventFeedback[] Stars = {
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.05f,.22f,75)),46),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.06f,.26f,65),new HapticSegment(0,0,55),new HapticSegment(.14f,.34f,95)),47),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.07f,.26f,55),new HapticSegment(0,0,45),new HapticSegment(.13f,.33f,65),
-                new HapticSegment(0,0,45),new HapticSegment(.20f,.42f,105)),48),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.09f,.26f,55),new HapticSegment(0,0,45),new HapticSegment(.12f,.34f,60),
-                new HapticSegment(0,0,45),new HapticSegment(.18f,.42f,65),new HapticSegment(0,0,60),new HapticSegment(.32f,.48f,170)),49)
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.10f,.22f,55),new HapticSegment(0,0,90),new HapticSegment(.05f,.17f,35)),46),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.14f,.23f,70),new HapticSegment(0,0,105),new HapticSegment(.17f,.35f,110)),47),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.18f,.26f,55),new HapticSegment(0,0,70),new HapticSegment(.23f,.34f,80),
+                new HapticSegment(0,0,75),new HapticSegment(.32f,.43f,145)),48),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.20f,.28f,70),new HapticSegment(0,0,75),new HapticSegment(.24f,.34f,75),
+                new HapticSegment(0,0,75),new HapticSegment(.31f,.43f,85),new HapticSegment(0,0,90),new HapticSegment(.43f,.51f,190)),49)
         };
-        public static readonly HapticPattern OneStarHapticsOnly = HapticPattern.Celebration(
-            new HapticSegment(.05f,.22f,75),new HapticSegment(0,0,45),new HapticSegment(.03f,.13f,25));
+        public static readonly HapticPattern OneStarHapticsOnly = Stars[0].Pattern;
 
         public static EventFeedback For(GameEventType type)
         {

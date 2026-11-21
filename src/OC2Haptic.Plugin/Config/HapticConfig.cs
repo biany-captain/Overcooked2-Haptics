@@ -19,6 +19,7 @@ namespace OC2Haptic.Config
         internal readonly Dictionary<GameEventType, ConfigEntry<string>> Patterns = new Dictionary<GameEventType, ConfigEntry<string>>();
         internal readonly Dictionary<GameEventType, ConfigEntry<float>> EventGains = new Dictionary<GameEventType, ConfigEntry<float>>();
         internal readonly ConfigEntry<string> OneStarTail;
+        internal readonly ConfigEntry<string> SoundPackId;
         private readonly Dictionary<GameEventType, HapticPattern> parsed = new Dictionary<GameEventType, HapticPattern>();
         private readonly List<Action<EventHandler, bool>> watchers = new List<Action<EventHandler, bool>>();
         private HapticPattern tailPattern;
@@ -56,6 +57,8 @@ namespace OC2Haptic.Config
                 new ConfigDescription("MOD linear gain only, applied once; game SFX mixer and mute remain respected.", new AcceptableValueRange<float>(0, 1))));
             MaxSoundDurationMs = Output(config.Bind("StarFeedback", "MaxSoundDurationMs", 1000,
                 new ConfigDescription("Original generated reward sounds only.", new AcceptableValueRange<int>(100, 1000))));
+            SoundPackId=Output(config.Bind("StarFeedback","SoundPackId",RewardSoundPack.DefaultId,
+                "One local sound pack for all four stars. Unknown/missing pack mutes audio only; restart to discover newly installed packs."));
             RespectGameFocus = Output(config.Bind("Audio", "RespectGameFocus", true, "Stop this plugin's feedback on focus loss. Recommended true."));
             foreach (GameEventType type in Enum.GetValues(typeof(GameEventType)))
             {
@@ -64,9 +67,11 @@ namespace OC2Haptic.Config
                     new ConfigDescription("Per-event multiplier: 1=100%, range0-200%. Uniformly capped to preserve motor balance and timing.",new AcceptableValueRange<float>(0,2))));
                 Patterns[type] = Output(config.Bind("Patterns", type.ToString(), PatternCodec.Format(EventFeedback.For(type).Pattern),
                     "Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics."));
+                if(GameEventTypes.IsStar(type))MigrateDefault(Patterns[type],LegacyStars[GameEventTypes.StarLevel(type)-1],EventFeedback.For(type).Pattern);
             }
             OneStarTail = Output(config.Bind("Patterns", "StarMilestone1HapticsOnly", PatternCodec.Format(EventFeedback.OneStarHapticsOnly),
                 "Approved candidate one-star tail for haptics-only mode."));
+            MigrateDefault(OneStarTail,"0.05,0.22,75;0,0,45;0.03,0.13,25",EventFeedback.OneStarHapticsOnly);
             var legacyTestKey = config.Bind("Hotkeys", "TestRumble", KeyCode.F6, "Legacy key, migrated to OpenMenu.");
             MenuKey = config.Bind("Hotkeys", "OpenMenu", legacyTestKey.Value, "F6 management menu. None disables the key.");
             config.Remove(legacyTestKey.Definition);
@@ -83,6 +88,14 @@ namespace OC2Haptic.Config
                 else entry.SettingChanged -= callback;
             });
             return entry;
+        }
+        private static readonly string[] LegacyStars={"0.05,0.22,75","0.06,0.26,65;0,0,55;0.14,0.34,95",
+            "0.07,0.26,55;0,0,45;0.13,0.33,65;0,0,45;0.2,0.42,105",
+            "0.09,0.26,55;0,0,45;0.12,0.34,60;0,0,45;0.18,0.42,65;0,0,60;0.32,0.48,170"};
+        private static void MigrateDefault(ConfigEntry<string> entry,string legacy,HapticPattern replacement)
+        {
+            HapticPattern old;
+            if(PatternCodec.TryParse(entry.Value,true,out old) && PatternCodec.Format(old)==legacy)entry.Value=PatternCodec.Format(replacement);
         }
         internal void WatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, true); }
         internal void UnwatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, false); }

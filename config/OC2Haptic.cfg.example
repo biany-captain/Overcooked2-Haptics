@@ -260,28 +260,28 @@ ComboLevel4 = 0,0.31,55;0,0,40;0,0.35,55;0,0,40;0,0.39,55;0,0,40;0.25,0.48,95
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.05,0.22,75
-StarMilestone1 = 0.05,0.22,75
+# Default value: 0.1,0.22,55;0,0,90;0.05,0.17,35
+StarMilestone1 = 0.1,0.22,55;0,0,90;0.05,0.17,35
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.06,0.26,65;0,0,55;0.14,0.34,95
-StarMilestone2 = 0.06,0.26,65;0,0,55;0.14,0.34,95
+# Default value: 0.14,0.23,70;0,0,105;0.17,0.35,110
+StarMilestone2 = 0.14,0.23,70;0,0,105;0.17,0.35,110
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.07,0.26,55;0,0,45;0.13,0.33,65;0,0,45;0.2,0.42,105
-StarMilestone3 = 0.07,0.26,55;0,0,45;0.13,0.33,65;0,0,45;0.2,0.42,105
+# Default value: 0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145
+StarMilestone3 = 0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.09,0.26,55;0,0,45;0.12,0.34,60;0,0,45;0.18,0.42,65;0,0,60;0.32,0.48,170
-StarMilestone4 = 0.09,0.26,55;0,0,45;0.12,0.34,60;0,0,45;0.18,0.42,65;0,0,60;0.32,0.48,170
+# Default value: 0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190
+StarMilestone4 = 0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190
 
 ## Approved candidate one-star tail for haptics-only mode.
 # Setting type: String
-# Default value: 0.05,0.22,75;0,0,45;0.03,0.13,25
-StarMilestone1HapticsOnly = 0.05,0.22,75;0,0,45;0.03,0.13,25
+# Default value: 0.1,0.22,55;0,0,90;0.05,0.17,35
+StarMilestone1HapticsOnly = 0.1,0.22,55;0,0,90;0.05,0.17,35
 
 [StarFeedback]
 
@@ -302,6 +302,11 @@ SoundVolume = 0.65
 # Default value: 1000
 # Acceptable value range: From 100 to 1000
 MaxSoundDurationMs = 1000
+
+## One local sound pack for all four stars. Unknown/missing pack mutes audio only; restart to discover newly installed packs.
+# Setting type: String
+# Default value: joyful-cartoon-jazz
+SoundPackId = joyful-cartoon-jazz
 
 [Stars]
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0-alpha — 2026-11-21
+
+- Adopt formalv1.4 star haptics180/285/425/660ms within850ms; migrate only known old defaults, retaining custom profiles and user gains/volume/binding.
+- Preload four supplied unedited PCM16 WAV jingles and retain original generated crisp rewards. Add persistent all-star sound-pack dropdown to the existing star test tab; new local pack manifests are discovered on restart.
+- User approved retaining3.25s four-star audio. Include supplied GPL-2.0 notices/attribution, source MIDI and generation script, without SoundFont/OGG duplicates/cache or runtime dependencies.
+- Hooks queue feedback; Update plays prepared clips and schedules motors. Higher stars replace existing celebration, failure/expiry can preempt; switching/close/pause/focus/round/disconnect/disable stop own outputs without replay.
+- Include approved0.3.1 intensity controls/two tabs and short-window whole-body scroll. New game/UI/music comfort and hardware synchronization remain pending user acceptance; no real fire/multiplayer Hook is added.
+
 ## 0.3.1-alpha — 2026-11-21
 
 - Add F6 master intensity0–100% and individual event gain0–200%, default100% retaining existing profiles. Scale uniformly within motor limits, preserving timings/balance; zero gain never owns a motor task.
