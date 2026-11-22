@@ -70,6 +70,7 @@ internal static class Program
         MusicMuteTests.Add(tests);
         CoordinatorTests.Add(tests);
         HazardTests.Add(tests);
+        PersonalDeliveryTests.Add(tests);
         int failed = 0;
         int run = 0;
         foreach (var test in tests)

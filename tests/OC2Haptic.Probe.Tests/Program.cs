@@ -18,7 +18,8 @@ internal static class Program
             { "candidate client hazard signatures and cooking state data exist", HazardSignatures },
             { "actual music and SFX mixer controls have separate names", MusicControls },
             { "actual game audio sources use known shared parent and music group", MusicSourceBindings },
-            { "personal attribution probe has actual chef item and delivery station fields", PersonalAttributionSignatures }
+            { "personal attribution probe has actual chef item and delivery station fields", PersonalAttributionSignatures },
+            { "actual local placement sends the typed chef and station request", PersonalPlacementSignature }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -64,6 +65,17 @@ internal static class Program
         Check(typeof(PlateStationMessage).GetField("m_delivered").FieldType==typeof(UnityEngine.GameObject));
         Check(typeof(PlateStationMessage).GetField("m_success").FieldType==typeof(bool));
         Check(typeof(KitchenFlowMessage).GetField("m_plateStation").FieldType==typeof(UnityEngine.GameObject));
+    }
+    private static void PersonalPlacementSignature()
+    {
+        var flags=BindingFlags.Static|BindingFlags.Public|BindingFlags.NonPublic;
+        var type=typeof(Team17.Online.Multiplayer.Messaging.ChefEventMessage.ChefEventType);
+        Check((int)Team17.Online.Multiplayer.Messaging.ChefEventMessage.ChefEventType.Place==1);
+        Check((int)Team17.Online.Multiplayer.Messaging.ChefEventMessage.ChefEventType.Take==2);
+        var messenger=typeof(GameUtils).Assembly.GetType("ClientMessenger",true);
+        Check(messenger.GetMethod("ChefEventMessage",flags,null,new[]{type,typeof(UnityEngine.GameObject),typeof(UnityEngine.MonoBehaviour)},null)!=null);
+        Check(typeof(PlayerControlsHelper).GetMethod("PlaceHeldItem_Client",flags,null,new[]{typeof(PlayerControls)},null)!=null);
+        Check(typeof(ClientPlayerAttachmentCarrier).GetMethod("InspectCarriedItem",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic,null,Type.EmptyTypes,null).ReturnType==typeof(UnityEngine.GameObject));
     }
     private static void MissingDirectory()
     {

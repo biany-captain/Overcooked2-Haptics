@@ -87,7 +87,7 @@ namespace OC2Haptic.Core
             bool teamResult = gameEvent.EventType == GameEventType.DeliverySuccess ||
                 gameEvent.EventType == GameEventType.DeliveryFailure || gameEvent.EventType == GameEventType.OrderExpired ||
                 (gameEvent.EventType >= GameEventType.DeliveryOrdered && gameEvent.EventType <= GameEventType.StarMilestone4) || GameEventTypes.IsHazard(gameEvent.EventType);
-            if (!teamResult || gameEvent.Scope != EventScope.LocalTeam || !gameEvent.TeamIdentity.HasValue ||
+            if (!teamResult || (gameEvent.Scope != EventScope.LocalTeam && gameEvent.Scope != EventScope.LocalPlayer) || !gameEvent.TeamIdentity.HasValue ||
                 !gameEvent.LocalTeamIdentity.HasValue || gameEvent.TeamIdentity.Value < 0 || gameEvent.TeamIdentity.Value > 1 ||
                 gameEvent.TeamIdentity != gameEvent.LocalTeamIdentity) return false;
             return true;

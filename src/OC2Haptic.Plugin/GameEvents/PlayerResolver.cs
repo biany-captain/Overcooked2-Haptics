@@ -6,6 +6,17 @@ namespace OC2Haptic.GameEvents
 {
     internal static class PlayerResolver
     {
+        internal static PersonalActor ReadPersonalActor(Component chef)
+        {
+            if(chef==null)return null;
+            var identity=chef.GetComponent<PlayerIDProvider>();
+            if(identity==null)return null;
+            bool local=identity.IsLocallyControlled();int pad=-1;bool keyboard=false;
+            var controls=chef.GetComponent<PlayerControls>();
+            if(local && controls!=null && controls.ControlScheme!=null)
+            {var input=PlayerInputLookup.GetPadForPlayer(controls.ControlScheme.Player);pad=(int)input;keyboard=PCPadInputProvider.IsKeyboard(input);}
+            return new PersonalActor(chef.gameObject.GetInstanceID(),(int)identity.GetID(),pad,(int)identity.GetTeam(),local,keyboard);
+        }
         internal static GameEvent FromFlight(Component item, object thrower, double nowMs)
         {
             if (item == null) return null;

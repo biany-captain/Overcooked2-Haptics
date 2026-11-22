@@ -225,8 +225,8 @@ namespace OC2Haptic.UI
 
         private string TopText()
         {
-            return tab==0?"F10 一键全关 / 全开，保留下方功能偏好。\n功能开关只管自动反馈；手动测试仍服从两个总控。\n危险预警不含拒单 / 订单超时，细项沿用配置。"
-                :"一二星仅震动；三星短音，四星音乐可选。\n手动测试绕过功能开关，仍服从两个总控。\n音量跟随游戏主音量 / 音效，相对100%为原声。";
+            return tab==0?"F10 一键全关 / 全开，保留下方功能偏好。\n功能开关只管自动反馈；手动测试仍服从两个总控。\n个人模式：仅本人交付；未归属的危险 / 超时不自动提醒。"
+                :"一二星仅震动；三星短音，四星音乐可选。\n仅本人促成达星时自动庆祝；手动测试仍可用。\n音量跟随游戏主音量 / 音效，相对100%为原声。";
         }
         private int ContentRows(){return tab==0?FeatureRows+Types.Length:2+(packDropdown?soundPacks.Length:0)+StarTypes.Length;}
         private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
