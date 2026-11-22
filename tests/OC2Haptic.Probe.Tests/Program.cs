@@ -17,7 +17,8 @@ internal static class Program
             { "unchanged client state cannot hide a differing payload", MismatchMustLog },
             { "candidate client hazard signatures and cooking state data exist", HazardSignatures },
             { "actual music and SFX mixer controls have separate names", MusicControls },
-            { "actual game audio sources use known shared parent and music group", MusicSourceBindings }
+            { "actual game audio sources use known shared parent and music group", MusicSourceBindings },
+            { "personal attribution probe has actual chef item and delivery station fields", PersonalAttributionSignatures }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -50,6 +51,19 @@ internal static class Program
         var method=type.GetMethod("AddSource",flags,null,new[]{group,typeof(int)},null);
         byte[] body=method.GetMethodBody().GetILAsByteArray();
         Check(body.Length>=6 && body[1]==0x7b && method.Module.ResolveField(BitConverter.ToInt32(body,2)).Name=="m_sharedSource");
+    }
+    private static void PersonalAttributionSignatures()
+    {
+        var flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
+        var serialisable=typeof(Team17.Online.Multiplayer.Messaging.Serialisable);
+        Check(typeof(ClientPlayerAttachmentCarrier).GetMethod("ApplyServerEvent",flags,null,new[]{serialisable},null)!=null);
+        Check(typeof(ClientPlayerAttachmentCarrier).GetMethod("InspectCarriedItem",flags,null,new[]{typeof(PlayerAttachTarget)},null).ReturnType==typeof(UnityEngine.GameObject));
+        Check(typeof(ChefCarryMessage).GetField("m_carriableItem").FieldType==typeof(uint));
+        Check(typeof(ChefCarryMessage).GetField("m_playerAttachTarget").FieldType==typeof(PlayerAttachTarget));
+        Check(typeof(ClientPlateStation).GetMethod("ApplyServerEvent",flags,null,new[]{serialisable},null)!=null);
+        Check(typeof(PlateStationMessage).GetField("m_delivered").FieldType==typeof(UnityEngine.GameObject));
+        Check(typeof(PlateStationMessage).GetField("m_success").FieldType==typeof(bool));
+        Check(typeof(KitchenFlowMessage).GetField("m_plateStation").FieldType==typeof(UnityEngine.GameObject));
     }
     private static void MissingDirectory()
     {

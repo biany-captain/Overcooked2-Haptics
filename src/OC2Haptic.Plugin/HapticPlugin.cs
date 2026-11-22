@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.6.0")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.6.1")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -28,6 +28,7 @@ namespace OC2Haptic
         private CatchHooks catchHooks;
         private KitchenHooks kitchenHooks;
         private ScoreProbeHooks scoreProbeHooks;
+        private PersonalDeliveryProbeHooks personalDeliveryProbeHooks;
         private HazardHooks hazardHooks;
         private readonly HazardStateTracker hazards=new HazardStateTracker();
         private readonly Dictionary<int,CookingUIController.State> cookingProbeStates=new Dictionary<int,CookingUIController.State>();
@@ -77,12 +78,13 @@ namespace OC2Haptic
                 catchHooks = new CatchHooks(Logger);
                 kitchenHooks = new KitchenHooks(Logger);
                 scoreProbeHooks = new ScoreProbeHooks(Logger);
+                personalDeliveryProbeHooks = new PersonalDeliveryProbeHooks(Logger);
                 hazardHooks = new HazardHooks(Logger);
                 scoreProbe = new ScoreSourceProbe(message => Logger.LogInfo(message), () => clock.Elapsed.TotalMilliseconds);
                 menu = new HapticMenu(this, settings, engine, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.6.0-alpha v1.7 star candidate | x86/net35 | F6 feature switches / F10 all-off/all-on (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.6.1-alpha personal attribution diagnostics; feedback routing unchanged | x86/net35 | F6 / F10");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -104,6 +106,7 @@ namespace OC2Haptic
             InstallAdapter("CatchSuccess", catchHooks.Install);
             InstallAdapter("Kitchen", kitchenHooks.Install);
             InstallAdapter("Score capture", scoreProbeHooks.Install);
+            InstallAdapter("Personal delivery diagnostics",personalDeliveryProbeHooks.Install);
             InstallAdapter("Candidate hazards",hazardHooks.Install);
         }
 
@@ -213,6 +216,9 @@ namespace OC2Haptic
         }
 
         internal bool IsScoreCaptureEnabled { get { return ready && !scoreProbeFaulted; } }
+        internal bool IsPersonalDeliveryProbeEnabled {get{return ready && settings.ScoreSourceProbe.Value;}}
+        internal void LogPersonalDeliveryProbe(string detail)
+        {Logger.LogInfo("Personal delivery probe | timestampMs="+clock.ElapsedMilliseconds+" round="+(rewardRound.Key??"unprimed")+" "+detail);}
         internal ScoreSourceProbe.Observation CaptureScoreProbe(ClientKitchenFlowControllerBase flow, KitchenFlowMessage message)
         {
             // In the installed Unity2017 assembly GetHashCode returns Scene.m_Handle; handle itself is internal.
@@ -462,7 +468,7 @@ namespace OC2Haptic
             CloseMenuSafely();
             if (Current == this) Current = null;
             if (subscribed) { SceneManager.activeSceneChanged -= OnSceneChanged; subscribed = false; }
-            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks, scoreProbeHooks, hazardHooks })
+            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks, scoreProbeHooks, personalDeliveryProbeHooks, hazardHooks })
             {
                 if (adapter == null) continue;
                 try { adapter.Dispose(); }

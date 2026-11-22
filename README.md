@@ -1,8 +1,8 @@
-# OC2 Haptic — 0.6.0-alpha · v1.7星级候选
+# OC2 Haptic — 0.6.1-alpha · 联机个人归属校准
 
 Windows《胡闹厨房2》XInput触觉增强MOD。在原项目上增量开发，保留Combo A、长低频负反馈、危险协调器、F6/F10和已验收的精简控制。
 
-**当前状态：0.6.0软件核心125/125、实际配置20/20、实际数据/音乐参数探针8/8，Unity/net35/x86编译零警告/错误。新星级规则、音乐与临时BGM静音等待真实游戏/手柄验收。** 0.5.1三个功能开关四项测试已有用户报告通过，相关历史证据保留。模拟、配置结构检查和编译不等于Hook/硬件通过。
+**当前状态：用户报告0.6.0菜单正常，但联机自动反馈很少；日志证实仅11次达星通过，125次上菜/Combo/拒单因操作者不明被过滤。用户要求个人反馈。0.6.1增加只读厨师/盘子/交付台关联日志，尚未修复个人路由，也没有开启团队回退。** 核心125/125、实际游戏接口/数据9/9、Unity/net35/x86编译零警告/错误；配置未改，历史0.6.0配置20/20及其他验收证据保留。见[原因与对照测试](docs/investigation-online-feedback.md)。模拟和编译不等于Hook/硬件通过。
 
 [仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [v1.7需求](docs/requirements-star-feedback-v1.7.md) · [已确认增量方案](docs/design-star-feedback-v1.7.md) · [审计](docs/audit-star-feedback-v1.7.md) · [报告](docs/test-report.md) · [测试清单](docs/batch-test-v1.7.md) · [路线图](docs/roadmap.md)
 

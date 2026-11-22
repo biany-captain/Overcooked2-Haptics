@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1-alpha — 2026-11-22 · personal attribution diagnostics
+
+- Preserve joined-client failure evidence:125 unresolved delivery/Combo/rejection events; all11 accepted automatic cues were team score milestones. No personal attribution success is inferred. User rejects team feedback.
+- Add optional read-only client chef carry/plate-station message observations and station identity to existing score diagnostics, gated by ScoreSourceProbe. No motor/audio calls, game state writes, new input polling, routing fallback or waveform changes.
+- Keep all v1.7 star/music and v1.6 feedback functionality. This is an attribution calibration build, not a personal multiplayer fix. The relationship between plate, actor, station and authoritative order result still needs native verification; station acceptance is not recipe success.
+- Core125/125, actual API/data9/9, Unity/net35/x86 build0warnings/errors. Configuration unchanged; no redundant configuration run. Native own/teammate/transfer comparison pending.
+
 ## 0.6.0-alpha — 2026-11-22 · v1.7 candidate
 
 - First/second stars are always silent,55/145ms light haptics; third250ms plus supplied900ms simple sound; fourth630ms plus supplied10.667s cool music. Preserve actual thresholds, per-round/team once, highest-only crossing and same-delivery star/Combo/success selection.

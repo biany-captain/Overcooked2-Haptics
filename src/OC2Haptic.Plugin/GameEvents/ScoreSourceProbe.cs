@@ -54,7 +54,7 @@ namespace OC2Haptic.GameEvents
             log("Score source probe | observation=" + observation.Sequence +
                 " localRound=" + observation.Generation + ":" + observation.FlowId +
                 " roundIdSource=local-boundary team=" + (int)observation.Team + " kind=" + observation.Kind +
-                " success=" + observation.Success + " order=" + observation.OrderId +
+                " success=" + observation.Success + " order=" + observation.OrderId + " station=" + observation.StationId +
                 " wasCombo=" + observation.WasCombo + " tip=" + observation.Tip +
                 " before={" + Format(observation.Before) + "} payload={" + Format(observation.Payload) +
                 "} after={" + Format(after) + "} result=" + result +
@@ -148,7 +148,7 @@ namespace OC2Haptic.GameEvents
         internal sealed class Observation
         {
             internal readonly long Sequence;
-            internal readonly int Generation, FlowId, Tip;
+            internal readonly int Generation, FlowId, Tip, StationId;
             internal readonly uint OrderId;
             internal readonly double Timestamp;
             internal readonly TeamID Team;
@@ -164,6 +164,7 @@ namespace OC2Haptic.GameEvents
                 Sequence = sequence; Generation = generation; FlowId = flowId; Timestamp = timestamp;
                 Team = message.m_teamID; Kind = message.m_msgType; Success = message.m_success;
                 OrderId = message.m_orderID.m_id; WasCombo = message.m_wasCombo; Tip = message.m_tip;
+                StationId = Kind != KitchenFlowMessage.MsgType.Delivery || message.m_plateStation == null ? 0 : message.m_plateStation.GetInstanceID();
                 Before = before; Payload = payload; Context = context;
             }
         }
