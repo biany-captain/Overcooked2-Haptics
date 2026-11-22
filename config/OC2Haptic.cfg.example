@@ -144,8 +144,8 @@ OpenMenu = F6
 
 ## Approved candidate one-star tail for haptics-only mode.
 # Setting type: String
-# Default value: 0.1,0.22,55;0,0,90;0.05,0.17,35
-StarMilestone1HapticsOnly = 0.1,0.22,55;0,0,90;0.05,0.17,35
+# Default value: 0,0.32,55
+StarMilestone1HapticsOnly = 0,0.32,55
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
@@ -199,23 +199,23 @@ ComboLevel4 = 0,0.47,60;0,0,60;0,0.55,60;0,0,60;0,0.62,60;0,0,60;0.12,0.79,130
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.1,0.22,55;0,0,90;0.05,0.17,35
-StarMilestone1 = 0.1,0.22,55;0,0,90;0.05,0.17,35
+# Default value: 0,0.32,55
+StarMilestone1 = 0,0.32,55
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.14,0.23,70;0,0,105;0.17,0.35,110
-StarMilestone2 = 0.14,0.23,70;0,0,105;0.17,0.35,110
+# Default value: 0,0.33,45;0,0,55;0,0.4,45
+StarMilestone2 = 0,0.33,45;0,0,55;0,0.4,45
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145
-StarMilestone3 = 0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145
+# Default value: 0,0.4,60;0,0,70;0.03,0.53,120
+StarMilestone3 = 0,0.4,60;0,0,70;0.03,0.53,120
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
-# Default value: 0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190
-StarMilestone4 = 0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190
+# Default value: 0,0.47,70;0,0,70;0,0.56,70;0,0,70;0.02,0.66,110;0,0,70;0.14,0.76,170
+StarMilestone4 = 0,0.47,70;0,0,70;0,0.56,70;0,0,70;0.02,0.66,110;0,0,70;0.14,0.76,170
 
 ## Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics.
 # Setting type: String
@@ -262,6 +262,33 @@ SoundVolume = 1
 # Default value: turbo_swing
 SoundPackId = turbo_swing
 
+## Independent three-star PCM16 WAV; relative to plugin audio folder or an absolute path. Restart after editing. Missing/invalid file mutes only sound.
+# Setting type: String
+# Default value: user-v1.7/star3_progress.wav
+Star3AudioFile = user-v1.7/star3_progress.wav
+
+## Custom four-star PCM16 WAV,9-11s; relative to plugin audio folder or absolute. Restart after editing.
+# Setting type: String
+# Default value: user-v1.7/star4_victory.wav
+Star4AudioFile = user-v1.7/star4_victory.wav
+
+## Custom four-star file or an existing pack ID. Legacy pack music retains its original shorter duration. Old SoundPackId preference is preserved separately.
+# Setting type: String
+# Default value: custom-v17
+Star4Selection = custom-v17
+
+## Three-star audio multiplier; user approved100% initially, applied once with relative volume.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 1
+Star3Volume = 1
+
+## Four-star audio multiplier; user approved100% initially, applied once with relative volume.
+# Setting type: Single
+# Default value: 1
+# Acceptable value range: From 0 to 1
+Star4Volume = 1
+
 [Stars]
 
 ## Automatic star haptics, also subject to the haptic master. Explicit previews remain available.
@@ -273,3 +300,23 @@ HapticsEnabled = true
 # Setting type: Boolean
 # Default value: true
 AudioEnabled = true
+
+## Automatic milestone only. Explicit previews bypass this switch; stars1/2 can never play audio.
+# Setting type: Boolean
+# Default value: true
+Star1Enabled = true
+
+## Automatic milestone only. Explicit previews bypass this switch; stars1/2 can never play audio.
+# Setting type: Boolean
+# Default value: true
+Star2Enabled = true
+
+## Automatic milestone only. Explicit previews bypass this switch; stars1/2 can never play audio.
+# Setting type: Boolean
+# Default value: true
+Star3Enabled = true
+
+## Automatic milestone only. Explicit previews bypass this switch; stars1/2 can never play audio.
+# Setting type: Boolean
+# Default value: true
+Star4Enabled = true

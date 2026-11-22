@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0-alpha — 2026-11-22 · v1.7 candidate
+
+- First/second stars are always silent,55/145ms light haptics; third250ms plus supplied900ms simple sound; fourth630ms plus supplied10.667s cool music. Preserve actual thresholds, per-round/team once, highest-only crossing and same-delivery star/Combo/success selection.
+- Keep minimal controls,100% gain initially, immediate arbitration and danger/independent-negative stop. Four-star sound dropdown retains customcool plus original three shorter choices, explicitly permitted by user; third sound has its own cfg path. Old12 files remain; old1/2/3 music no longer preloads/plays automatically.
+- Bounded PCM11s with per-policy custom duration checks; no new runtime decoder/dependency. Hard silence in core/player, missing files mute only audio,0ms star cooldown retains commit dedup. Per-level audio-only1/2 fallback avoids swallowing delivery; known defaults migrate exactly with logs and preserve custom values/preferences.
+- New asset condition is user-stated noncommercial use, separately recorded pending source/full license. Not covered by old asset GPL record. No trimming/looping/volume edits.
+- Core116/116, actual cfg20/20, actual game build0warnings/errors; new native star/music acceptance pending. No new multiplayer/SDL/HUD scope.
+
 ## 0.5.1-alpha — 2026-11-22
 
 - Add the three approved F6 automatic-feature switches: star haptics, star audio and grouped hazard haptics. Keep global masters/sliders, all explicit previews and all music/waveforms.

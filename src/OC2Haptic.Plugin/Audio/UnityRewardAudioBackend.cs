@@ -14,6 +14,7 @@ namespace OC2Haptic.Audio
         private readonly Action<string> log;
         private readonly Func<bool> manualPreview;
         private readonly Func<string> selectedPack;
+        private readonly Func<string> thirdPath,fourthPath;
         private readonly int mainThread=Thread.CurrentThread.ManagedThreadId;
         private readonly Dictionary<string,PreparedPack> prepared=new Dictionary<string,PreparedPack>(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> unavailable=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -22,25 +23,33 @@ namespace OC2Haptic.Audio
         private AudioSource source;
         private bool faulted;
         internal RewardSoundPack[] Packs {get;private set;}
-        internal UnityRewardAudioBackend(Action<string> log,Func<bool> manualPreview,Func<string> selectedPack)
-        {this.log=log;this.manualPreview=manualPreview;this.selectedPack=selectedPack;}
+        internal UnityRewardAudioBackend(Action<string> log,Func<bool> manualPreview,Func<string> selectedPack,Func<string> thirdPath,Func<string> fourthPath)
+        {this.log=log;this.manualPreview=manualPreview;this.selectedPack=selectedPack;this.thirdPath=thirdPath;this.fourthPath=fourthPath;}
 
         internal void Prepare(string root)
         {
-            Packs=RewardSoundPack.Discover(root,log);
+            var choices=new List<RewardSoundPack>{RewardSoundPack.Custom(thirdPath(),fourthPath())};
+            choices.AddRange(RewardSoundPack.Discover(root,log));Packs=choices.ToArray();
             foreach(var pack in Packs)
             {
                 var loaded=new PreparedPack();prepared.Add(pack.Id,loaded);
-                for(int star=1;star<=4;star++)
+                for(int star=3;star<=4;star++)
+                {
+                    if(star==3 && pack.Id!=RewardSoundPack.CustomStarId)continue;
                     try
                     {
                         PcmWaveData pcm;
-                        using(var file=File.OpenRead(pack.FileFor(star)))pcm=PcmWaveReader.Read(file);
+                        string path=pack.FileFor(star);
+                        if(!Path.IsPathRooted(path))path=Path.Combine(root,path);
+                        using(var file=File.OpenRead(path))pcm=PcmWaveReader.Read(file);
+                        if(!StarAudioPolicy.DurationAllowed(star,pcm.DurationMs,pack.Id!=RewardSoundPack.CustomStarId))
+                            throw new FormatException("Audio duration does not match the selected v1.7 star policy.");
                         loaded.Clips[star-1]=Upload(pack.Id,star,pcm.Samples,pcm.Channels,pcm.SampleRate);
                         loaded.Durations[star-1]=pcm.DurationMs;
                         log("Reward audio prepared | pack="+pack.Id+" star="+star+" durationMs="+pcm.DurationMs+" rate="+pcm.SampleRate+" channels="+pcm.Channels);
                     }
                     catch(Exception error){log("Reward audio asset unavailable; haptics continue | pack="+pack.Id+" star="+star+" reason="+error.Message);}
+                }
             }
         }
         private AudioClip Upload(string pack,int star,float[] pcm,int channels,int rate)
@@ -51,11 +60,12 @@ namespace OC2Haptic.Audio
             UnityEngine.Object.Destroy(clip);throw new InvalidOperationException("PCM upload failed.");
         }
         internal int DurationMs(int star)
-        {PreparedPack pack;return prepared.TryGetValue(selectedPack(),out pack)?pack.Durations[star-1]:0;}
+        {PreparedPack pack;return StarAudioPolicy.CanPlay(star) && prepared.TryGetValue(PackFor(star),out pack)?pack.Durations[star-1]:0;}
+        private string PackFor(int star){return star==3?RewardSoundPack.CustomStarId:selectedPack();}
         public bool Play(int star,float volume)
         {
-            if(faulted || star<1 || star>4)return false;
-            PreparedPack pack;string id=selectedPack();
+            if(faulted || !StarAudioPolicy.CanPlay(star))return false;
+            PreparedPack pack;string id=PackFor(star);
             if(!prepared.TryGetValue(id,out pack) || pack.Clips[star-1]==null)
             {
                 if(unavailable.Add(id+":"+star))log("Selected reward audio unavailable; haptics continue | pack="+id+" star="+star);

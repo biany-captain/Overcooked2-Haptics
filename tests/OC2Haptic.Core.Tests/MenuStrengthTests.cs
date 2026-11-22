@@ -46,7 +46,7 @@ internal static class MenuStrengthTests
     {
         var b=new Motors();var sound=new Sound();var engine=new HapticEngine(b);var output=new RewardOutput(engine,sound);
         output.Mode=StarFeedbackMode.HapticsAndAudio;
-        Check(output.Emit(0,"audio",GameEventType.StarMilestone2,null,0,1,.4f,previewMode:StarFeedbackMode.AudioOnly));engine.Tick(0);
+        Check(output.Emit(0,"audio",GameEventType.StarMilestone3,null,0,1,.4f,previewMode:StarFeedbackMode.AudioOnly));engine.Tick(0);
         Check(sound.Plays==1 && b.Nonzero==0 && output.Mode==StarFeedbackMode.HapticsAndAudio);
         output.Stop();Check(output.Emit(0,"haptic",GameEventType.StarMilestone2,null,1000,1,.4f,previewMode:StarFeedbackMode.HapticsOnly));engine.Tick(1000);
         Check(sound.Plays==1 && b.Nonzero==1 && output.Mode==StarFeedbackMode.HapticsAndAudio);
@@ -59,7 +59,7 @@ internal static class MenuStrengthTests
         o.Mode=StarFeedbackMode.AudioOnly;
         Check(!o.Emit(0,"throw",GameEventType.ThrowSuccess,null,0,1,1));e.Tick(0);Check(b.Nonzero==0);
         Check(!o.Emit(0,"haptic-preview",GameEventType.StarMilestone1,null,1000,1,1,previewMode:StarFeedbackMode.HapticsOnly));
-        Check(o.Emit(0,"audio",GameEventType.StarMilestone1,null,2000,1,1));e.Tick(2000);Check(a.Plays==1 && b.Nonzero==0);
+        Check(o.Emit(0,"audio",GameEventType.StarMilestone3,null,2000,1,1));e.Tick(2000);Check(a.Plays==1 && b.Nonzero==0);
         o.Mode=StarFeedbackMode.HapticsOnly;
         Check(!o.Emit(0,"audio-preview",GameEventType.StarMilestone2,null,3000,1,1,previewMode:StarFeedbackMode.AudioOnly));
         Check(o.Emit(0,"catch",GameEventType.CatchSuccess,null,4000,1,1));e.Tick(4000);Check(b.Nonzero==1 && a.Plays==1);

@@ -17,6 +17,7 @@ __pycache__/
 *.pyc
 /assets/audio/*/source/audio_wav/
 /assets/audio/*/source/audio_ogg/
+/assets/audio/user-v1.7/*.mp3
 
 # Editors, local tooling and isolated checkouts
 .vs/

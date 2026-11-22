@@ -31,9 +31,9 @@ internal static class CoordinatorTests
     private static void Check(bool b){V16Tests.Check(b);}
     private sealed class Motors:IControllerRumbleBackend
     {
-        internal readonly float[] Left=new float[4];internal int Writes;
+        internal readonly float[] Left=new float[4],Right=new float[4];internal int Writes;
         public bool IsConnected(int index){return true;}
-        public bool SetMotors(int index,float left,float right){Writes++;Left[index]=left;return true;}
+        public bool SetMotors(int index,float left,float right){Writes++;Left[index]=left;Right[index]=right;return true;}
     }
     private sealed class Sound:IRewardAudioBackend
     {internal int Plays;internal bool Playing;public bool Play(int star,float volume){Plays++;Playing=true;return true;}public void Stop(){Playing=false;}}
@@ -89,9 +89,9 @@ internal static class CoordinatorTests
     }
     private static void TeamAudio()
     {
-        var r=new Rig();Check(r.Emit(E(GameEventType.StarMilestone2,0),"same-team-commit",0));r.Engine.Tick(0);
-        Check(r.Emit(E(GameEventType.StarMilestone2,10,1),"same-team-commit",10,output:1));r.Engine.Tick(10);
-        Check(r.Sound.Plays==1 && r.Motors.Left[0]>0 && r.Motors.Left[1]>0);
+        var r=new Rig();Check(r.Emit(E(GameEventType.StarMilestone3,0),"same-team-commit",0));r.Engine.Tick(0);
+        Check(r.Emit(E(GameEventType.StarMilestone3,10,1),"same-team-commit",10,output:1));r.Engine.Tick(10);
+        Check(r.Sound.Plays==1 && r.Motors.Right[0]>0 && r.Motors.Right[1]>0);
     }
     private static void Stop()
     {
@@ -129,7 +129,7 @@ internal static class CoordinatorTests
     private static void AudioBudget()
     {
         var r=new Rig();for(int i=0;i<3;i++){Check(r.Preview(0,"budget"+i,Pulse(400),i*1000));r.Engine.Tick(i*1000+400);}
-        Check(r.Emit(E(GameEventType.StarMilestone1,3000),"audio-without-budget",3000));r.Engine.Tick(3000);
+        Check(r.Emit(E(GameEventType.StarMilestone3,3000),"audio-without-budget",3000));r.Engine.Tick(3000);
         Check(r.Sound.Playing && r.Motors.Left[0]==0 && r.Logs.Exists(line=>line.Contains("motorWindowMs=0")));
     }
     private static void UnboundNegative()
@@ -153,13 +153,13 @@ internal static class CoordinatorTests
     private static void FeatureChannels()
     {
         var r=new Rig();r.Coordinator.SetFeatureSwitches(false,true,true,0);
-        Check(r.Emit(E(GameEventType.StarMilestone1,0),"audio-star",0));r.Engine.Tick(0);
+        Check(r.Emit(E(GameEventType.StarMilestone3,0),"audio-star",0));r.Engine.Tick(0);
         Check(r.Sound.Plays==1 && r.Motors.Writes==0);
         Check(r.Emit(E(GameEventType.DeliveryOrdered,200),"ordinary",200));r.Engine.Tick(200);
         Check(r.Motors.Left[0]>0 && r.Sound.Playing);
         var h=new Rig();h.Coordinator.SetFeatureSwitches(true,false,true,0);
         Check(h.Emit(E(GameEventType.StarMilestone1,0),"motor-star",0));h.Engine.Tick(0);
-        Check(h.Motors.Left[0]>0 && h.Sound.Plays==0);
+        Check(h.Motors.Right[0]>0 && h.Sound.Plays==0);
         h.Coordinator.SetFeatureSwitches(false,false,true,20);Check(h.Motors.Left[0]==0);
         Check(!h.Emit(E(GameEventType.StarMilestone2,1000),"disabled-star",1000));
         Check(h.Emit(E(GameEventType.ComboLevel2,1100),"combo-still-enabled",1100));
@@ -167,17 +167,17 @@ internal static class CoordinatorTests
     private static void FeatureCancellation()
     {
         var r=new Rig();Check(r.Emit(E(GameEventType.StarMilestone4,0),"star",0));r.Engine.Tick(0);
-        r.Coordinator.SetFeatureSwitches(false,true,true,20);Check(r.Motors.Left[0]==0 && r.Sound.Playing);
+        r.Coordinator.SetFeatureSwitches(false,true,true,20);Check(r.Motors.Left[0]==0 && r.Motors.Right[0]==0 && r.Sound.Playing);
         r.Coordinator.SetFeatureSwitches(true,true,true,30);r.Engine.Tick(40);Check(r.Motors.Left[0]==0 && r.Sound.Plays==1);
         var h=new Rig();Check(h.Emit(E(GameEventType.StarMilestone4,0),"star",0));h.Engine.Tick(0);
-        h.Coordinator.SetFeatureSwitches(true,false,true,20);h.Engine.Tick(20);Check(h.Motors.Left[0]>0 && !h.Sound.Playing);
+        h.Coordinator.SetFeatureSwitches(true,false,true,20);h.Engine.Tick(20);Check(h.Motors.Right[0]>0 && !h.Sound.Playing);
         h.Coordinator.SetFeatureSwitches(true,true,true,30);Check(h.Sound.Plays==1 && !h.Sound.Playing);
     }
     private static void FeatureHazards()
     {
         var r=new Rig();Check(r.Emit(E(GameEventType.StarMilestone4,0),"star",0));r.Engine.Tick(0);
         r.Coordinator.SetFeatureSwitches(true,true,false,20);
-        Check(!r.Emit(E(GameEventType.FireStart,30),"disabled-fire",30));Check(r.Sound.Playing && r.Motors.Left[0]>0);
+        Check(!r.Emit(E(GameEventType.FireStart,30),"disabled-fire",30));Check(r.Sound.Playing && r.Motors.Right[0]>0);
         Check(r.Emit(E(GameEventType.DeliveryFailure,40),"rejection",40));r.Engine.Tick(40);Check(!r.Sound.Playing && r.Motors.Left[0]>.7f);
         var h=new Rig();Check(h.Emit(E(GameEventType.FireStart,0),"fire",0));h.Engine.Tick(0);
         h.Coordinator.SetFeatureSwitches(true,true,false,20);Check(h.Motors.Left[0]==0);
@@ -191,7 +191,7 @@ internal static class CoordinatorTests
     {
         var r=new Rig();r.Coordinator.SetFeatureSwitches(false,false,false,0);
         Check(r.Coordinator.Preview(GameEventType.StarMilestone4,0,"manual-star",EventFeedback.For(GameEventType.StarMilestone4).Pattern,0,1,1,StarFeedbackMode.HapticsAndAudio));
-        r.Engine.Tick(0);Check(r.Motors.Left[0]>0 && r.Sound.Playing);
+        r.Engine.Tick(0);Check(r.Motors.Right[0]>0 && r.Sound.Playing);
         r.Coordinator.SetMode(StarFeedbackMode.AudioOnly,20);Check(r.Motors.Left[0]==0 && r.Sound.Playing);
         r.Coordinator.Stop(30);
         Check(r.Coordinator.Preview(GameEventType.StarMilestone4,0,"manual-audio",EventFeedback.For(GameEventType.StarMilestone4).Pattern,1000,1,1,StarFeedbackMode.HapticsAndAudio));
@@ -203,8 +203,8 @@ internal static class CoordinatorTests
     private static void FeatureTeamAudio()
     {
         var r=new Rig();r.Coordinator.SetFeatureSwitches(false,true,true,0);
-        Check(r.Emit(E(GameEventType.StarMilestone2,0),"same",0));
-        Check(!r.Emit(E(GameEventType.StarMilestone2,10,1),"same",10,output:1));r.Engine.Tick(10);
+        Check(r.Emit(E(GameEventType.StarMilestone3,0),"same",0));
+        Check(!r.Emit(E(GameEventType.StarMilestone3,10,1),"same",10,output:1));r.Engine.Tick(10);
         Check(r.Sound.Plays==1 && r.Motors.Writes==0);
     }
 }

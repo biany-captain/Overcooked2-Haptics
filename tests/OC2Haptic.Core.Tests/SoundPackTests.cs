@@ -11,7 +11,7 @@ internal static class SoundPackTests
         tests.Add("sound pack rejects truncated compressed oversized or invalid WAV",InvalidWave);
         tests.Add("sound pack catalog excludes retired sets and isolates malformed manifests",Catalog);
         tests.Add("sound pack supplied assets preserve full approved durations",ActualAssets);
-        tests.Add("sound pack permits full4050ms music and enforces5000ms boundary",LongMusic);
+        tests.Add("v17 PCM permits full11000ms music and enforces upper boundary",LongMusic);
     }
     private static void Decode()
     {
@@ -25,7 +25,7 @@ internal static class SoundPackTests
     private static void InvalidWave()
     {
         foreach(var stream in new[]{Wave(48000,2,3,16,new short[4]),Wave(48000,2,1,8,new short[4]),
-            Wave(48000,3,1,16,new short[6]),Wave(48000,2,1,16,new short[48000*2*6]),Wave(48000,2,1,16,new short[3])})
+            Wave(48000,3,1,16,new short[6]),Wave(48000,2,1,16,new short[48000*2*12]),Wave(48000,2,1,16,new short[3])})
             using(stream)Reject(stream);
         using(var truncated=Wave(48000,2,1,16,new short[4])){truncated.SetLength(truncated.Length-1);Reject(truncated);}
         using(var invalid=new MemoryStream(new byte[64]))Reject(invalid);
@@ -65,9 +65,9 @@ internal static class SoundPackTests
     }
     private static void LongMusic()
     {
-        foreach(int ms in new[]{4050,5000})using(var stream=Wave(48000,2,1,16,new short[48000*2*ms/1000]))
+        foreach(int ms in new[]{4050,5000,11000})using(var stream=Wave(48000,2,1,16,new short[48000*2*ms/1000]))
             Check(PcmWaveReader.Read(stream).DurationMs==ms);
-        using(var stream=Wave(48000,2,1,16,new short[48000*2*5001/1000]))Reject(stream);
+        using(var stream=Wave(48000,2,1,16,new short[48000*2*11001/1000]))Reject(stream);
     }
     private static MemoryStream Wave(int rate,int channels,int format,int bits,short[] samples,bool extra=false)
     {

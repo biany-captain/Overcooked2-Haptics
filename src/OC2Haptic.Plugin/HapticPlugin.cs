@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.5.1")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.6.0")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -61,10 +61,11 @@ namespace OC2Haptic
         {
             try
             {
-                settings = new HapticConfig(Config);
+                settings = new HapticConfig(Config,message=>Logger.LogInfo(message));
                 backend = new XInputBackend(message => Logger.LogError(message));
                 engine = new HapticEngine(backend);
-                rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>manualPreview,()=>settings.SoundPackId.Value);
+                rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>manualPreview,()=>settings.Star4Selection.Value,
+                    ()=>settings.Star3AudioFile.Value,()=>settings.Star4AudioFile.Value);
                 rewardAudio.Prepare(Path.Combine(Path.GetDirectoryName(Info.Location),"audio"));
                 rewards=new RewardOutput(engine,rewardAudio,message=>Logger.LogInfo(message),rewardAudio.DurationMs);
                 coordinator=new FeedbackCoordinator(engine,rewards);
@@ -80,7 +81,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.5.1-alpha v1.6 candidate | x86/net35 | F6 feature switches / F10 all-off/all-on (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.6.0-alpha v1.7 star candidate | x86/net35 | F6 feature switches / F10 all-off/all-on (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -243,7 +244,8 @@ namespace OC2Haptic
             var thresholds=observation.Context.Thresholds;
             if(observation.Before!=null)stars.Prime(new ScoreSnapshot(round,team,observation.Before.Score,thresholds,trusted,observation.Timestamp));
             int milestone=stars.Observe(new ScoreSnapshot(round,team,after==null?0:after.Score,thresholds,trusted,observation.Timestamp),
-                settings.IsEventEnabled(GameEventType.StarMilestone1) && GameplayOutputAllowed(observation.Timestamp));
+                settings.StarMode!=StarFeedbackMode.Disabled && GameplayOutputAllowed(observation.Timestamp));
+            if(milestone>0 && !settings.IsEventEnabled((GameEventType)((int)GameEventType.StarMilestone1+milestone-1)))milestone=0;
             GameEventType? delivery=null;string key=round+":"+team+":score:"+observation.Sequence;
             ComboResult result=null;
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && observation.Success)
@@ -329,7 +331,7 @@ namespace OC2Haptic
                 (!GameEventTypes.IsHazard(gameEvent.EventType) || (!hazardFaulted && hazards.IsCurrent(gameEvent.EventType,gameEvent.EntityIdentity)));
             EventFeedback feedback = EventFeedback.For(gameEvent.EventType);
             bool accepted = coordinator.Emit(gameEvent,binding,correlation??feedback.Key(gameEvent),settings.PatternFor(gameEvent.EventType),
-                now,settings.Intensity,settings.SoundVolume.Value,allowed);
+                now,settings.Intensity,settings.VolumeFor(gameEvent.EventType),allowed);
             if (accepted) scheduledEvents[eventIndex]++;
             string identity = gameEvent.PlayerIdentity + ":" + gameEvent.LocalPad + ":" + gameEvent.IsKeyboard + ":" + output + ":" + gameEvent.TeamIdentity;
             if (settings.DebugLogEvents.Value || lastProbeIdentity[eventIndex] != identity)
@@ -483,7 +485,7 @@ namespace OC2Haptic
             {
                 if(previewMode.HasValue)StopOutput();
                 return coordinator.Preview(type,settings.XInputIndex.Value,"preview:"+type+":"+(++previewSequence),settings.PatternFor(type,previewMode),
-                    clock.Elapsed.TotalMilliseconds,settings.Intensity,settings.SoundVolume.Value,previewMode);
+                    clock.Elapsed.TotalMilliseconds,settings.Intensity,settings.VolumeFor(type),previewMode);
             }
             finally {manualPreview=false;}
         }

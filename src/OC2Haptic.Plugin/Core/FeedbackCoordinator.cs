@@ -47,7 +47,7 @@ namespace OC2Haptic.Core
             if(!physical && !star && !negative)return Drop("unbound physical output");
             State state=states[physical?index:4];Accrue(state,now);
             double previous;
-            if(state.Keys.TryGetValue(key,out previous) && now-previous<feedback.CooldownMs)return Drop("event duplicate");
+            if(state.Keys.TryGetValue(key,out previous) && ((star && !manual) || now-previous<feedback.CooldownMs))return Drop("event duplicate");
             if(state.Cooldowns.TryGetValue(type,out previous) && now-previous<feedback.CooldownMs)return Drop("per-device event cooldown");
             bool haptics=rewards.Mode==StarFeedbackMode.HapticsAndAudio || rewards.Mode==StarFeedbackMode.HapticsOnly;
             if(star && preview.HasValue)haptics=haptics && (preview.Value==StarFeedbackMode.HapticsAndAudio || preview.Value==StarFeedbackMode.HapticsOnly);

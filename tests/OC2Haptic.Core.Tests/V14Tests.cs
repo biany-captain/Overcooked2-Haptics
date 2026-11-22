@@ -6,7 +6,7 @@ internal static class V14Tests
 {
     internal static void Add(Dictionary<string,Action> tests)
     {
-        tests.Add("v14 formal star pulses retain exact offsets within850ms",Patterns);
+        tests.Add("v17 formal star pulses retain exact offsets within850ms",Patterns);
         tests.Add("v14 long audio blocks lower star while higher star replaces it",Replace);
         tests.Add("v14 ordinary action does not stop musical tail",MusicalTail);
         tests.Add("v14 failed audio still permits haptics and later stop",MissingAudio);
@@ -15,8 +15,8 @@ internal static class V14Tests
     }
     private static void Patterns()
     {
-        int[][] offsets={new[]{0,145},new[]{0,175},new[]{0,125,280},new[]{0,145,295,470}};
-        int[] durations={180,285,425,660};
+        int[][] offsets={new[]{0},new[]{0,100},new[]{0,130},new[]{0,140,280,460}};
+        int[] durations={55,145,250,630};
         for(int star=1;star<=4;star++)
         {
             var p=EventFeedback.For((GameEventType)((int)GameEventType.StarMilestone1+star-1)).Pattern;
@@ -24,13 +24,13 @@ internal static class V14Tests
             for(int i=0;i<p.Count;i++){var s=p.SegmentAt(i);if(s.Left!=0 || s.Right!=0)Check(at==offsets[star-1][pulse++]);at+=s.DurationMs;}
             Check(pulse==offsets[star-1].Length && p.TotalDurationMs<=850);
         }
-        Check(EventFeedback.OneStarHapticsOnly.TotalDurationMs==180);
+        Check(EventFeedback.OneStarHapticsOnly.TotalDurationMs==55);
     }
     private static void Replace()
     {
         var b=new Motors();var e=new HapticEngine(b);var a=new Sound();var o=new RewardOutput(e,a,audioDurationMs:_=>3250);
         Check(o.Emit(0,"old",GameEventType.StarMilestone3,null,0,1,.65f));e.Tick(0);
-        Check(!o.Emit(0,"lower",GameEventType.StarMilestone2,null,1000,1,.65f));
+        Check(!o.Emit(0,"same",GameEventType.StarMilestone3,null,1000,1,.65f));
         Check(o.Emit(0,"higher",GameEventType.StarMilestone4,null,1000,1,.65f));Check(a.Stops==1 && a.Plays==2);
         o.Stop();e.Tick(5000);Check(b.LastZero && a.Stops==2);
     }

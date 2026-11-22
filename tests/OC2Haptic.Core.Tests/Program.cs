@@ -66,6 +66,7 @@ internal static class Program
         SoundPackTests.Add(tests);
         V14Tests.Add(tests);
         V16Tests.Add(tests);
+        V17Tests.Add(tests);
         CoordinatorTests.Add(tests);
         HazardTests.Add(tests);
         int failed = 0;

@@ -36,8 +36,8 @@ internal static class Program
         var gains=new HapticConfig(new ConfigFile(gainPath,false));
         bool gainCorrect=Math.Abs(gains.Intensity-.4f)<.0001 && Math.Abs(gains.SoundVolume.Value-.7f)<.0001 &&
             !File.ReadAllText(gainPath).Contains("[EventStrength]");
-        gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 &&
-            Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.22f)<.0001 &&
+        gainCorrect=gainCorrect && gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==55 &&
+            Math.Abs(gains.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).SegmentAt(0).Right-.32f)<.0001 &&
             gains.FeedbackMode==StarFeedbackMode.AudioOnly && !gains.HapticsEnabled.Value && gains.AudioEnabled.Value;
         if(!gainCorrect){failed++;Console.WriteLine("FAIL retired gains reset while master volume and mode migrate");}
         else Console.WriteLine("PASS retired gains reset while master volume and mode migrate");
@@ -52,8 +52,8 @@ internal static class Program
         File.WriteAllText(musicPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nSoundPackId = future-pack\nSoundVolume = 0.7006757\nMaxSoundDurationMs = 700\n[Patterns]\nStarMilestone1 = 0.05,0.22,75\nStarMilestone2 = 0.9,0.1,123\nStarMilestone1HapticsOnly = 0.05,0.22,75;0,0,45;0.03,0.13,25\n");
         var music=new HapticConfig(new ConfigFile(musicPath,false));
         bool musicCorrect=music.SoundPackId.Value=="future-pack" && Math.Abs(music.SoundVolume.Value-.7006757f)<.000001 && music.Intensity==.4f && !File.ReadAllText(musicPath).Contains("MaxSoundDurationMs =") &&
-            music.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==180 && music.PatternFor(GameEventType.StarMilestone2).TotalDurationMs==123 &&
-            music.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==180 && gains.SoundPackId.Value==RewardSoundPack.DefaultId;
+            music.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==55 && music.PatternFor(GameEventType.StarMilestone2).TotalDurationMs==123 &&
+            music.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==55 && gains.SoundPackId.Value==RewardSoundPack.DefaultId;
         if(!musicCorrect){failed++;Console.WriteLine("FAIL v14 defaults migrate while custom profiles and pack preference survive");}
         else Console.WriteLine("PASS v14 defaults migrate while custom profiles and pack preference survive");
         string precisionPath=Path.Combine(root,"v14-custom-precision.cfg");
@@ -145,7 +145,7 @@ internal static class Program
             features.StarHapticsEnabled.Value=(bits&4)!=0;features.StarAudioEnabled.Value=(bits&8)!=0;
             bool h=(bits&5)==5,a=(bits&10)==10;
             StarFeedbackMode mode=h?(a?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly):(a?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);
-            modes=modes && features.StarMode==mode && features.IsEventEnabled(GameEventType.StarMilestone1)==(h||a);
+            modes=modes && features.StarMode==mode && features.IsEventEnabled(GameEventType.StarMilestone1)==h && features.IsEventEnabled(GameEventType.StarMilestone3)==(h||a);
         }
         features.StarHapticsEnabled.Value=false;features.StarAudioEnabled.Value=true;
         features.ToggleAllOutput();features.ToggleAllOutput();
@@ -168,7 +168,28 @@ internal static class Program
         hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.FireStart) && !features.IsEventEnabled(GameEventType.FireReminder) && !features.IsEventEnabled(GameEventType.FoodBurned);
         if(!hazardsOff){failed++;Console.WriteLine("FAIL hazard group preserves individual switches and negative deliveries");}
         else Console.WriteLine("PASS hazard group preserves individual switches and negative deliveries");
-        Console.WriteLine("RESULT " + (content.Length+14 - failed) + "/" + (content.Length+14) + " config migration passed");
+        string star17Path=Path.Combine(root,"v17-stars.cfg");
+        File.WriteAllText(star17Path,"[General]\nMasterIntensity = 0.42\n[StarFeedback]\nSoundVolume = 0.37\nSoundPackId = future-pack\n[Patterns]\nStarMilestone1 = 0.1,0.22,55;0,0,90;0.05,0.17,35\nStarMilestone2 = 0.14,0.23,70;0,0,105;0.17,0.35,110\nStarMilestone3 = 0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145\nStarMilestone4 = 0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190\nStarMilestone1HapticsOnly = 0.1,0.22,55;0,0,90;0.05,0.17,35\n");
+        var migrationLog=new System.Collections.Generic.List<string>();
+        var star17=new HapticConfig(new ConfigFile(star17Path,false),migrationLog.Add);
+        bool star17Correct=star17.PatternFor(GameEventType.StarMilestone1).TotalDurationMs==55 && star17.PatternFor(GameEventType.StarMilestone2).TotalDurationMs==145 &&
+            star17.PatternFor(GameEventType.StarMilestone3).TotalDurationMs==250 && star17.PatternFor(GameEventType.StarMilestone4).TotalDurationMs==630 &&
+            star17.PatternFor(GameEventType.StarMilestone1,StarFeedbackMode.HapticsOnly).TotalDurationMs==55 && star17.Intensity==.42f && star17.SoundVolume.Value==.37f &&
+            star17.Star3Volume.Value==1 && star17.Star4Volume.Value==1 && star17.Star4Selection.Value==RewardSoundPack.CustomStarId && star17.SoundPackId.Value=="future-pack" && migrationLog.Count==5;
+        if(!star17Correct){failed++;Console.WriteLine("FAIL v17 known star defaults migrate while preferences and full gain survive");}
+        else Console.WriteLine("PASS v17 known star defaults migrate while preferences and full gain survive");
+        star17.StarHapticsEnabled.Value=false;star17.StarAudioEnabled.Value=true;
+        bool levelModes=!star17.IsEventEnabled(GameEventType.StarMilestone1) && !star17.IsEventEnabled(GameEventType.StarMilestone2) &&
+            star17.IsEventEnabled(GameEventType.StarMilestone3) && star17.StarModeFor(GameEventType.StarMilestone1)==StarFeedbackMode.Disabled &&
+            star17.StarModeFor(GameEventType.StarMilestone3)==StarFeedbackMode.AudioOnly;
+        star17.Star3AudioFile.Value="custom/short.wav";star17.Star4AudioFile.Value="custom/long.wav";star17.Star4Selection.Value="kitchen_rock";star17.Star3Volume.Value=.8f;
+        var star17Saved=new HapticConfig(new ConfigFile(star17Path,false));
+        levelModes=levelModes && star17Saved.Star3AudioFile.Value=="custom/short.wav" && star17Saved.Star4AudioFile.Value=="custom/long.wav" &&
+            star17Saved.Star4Selection.Value=="kitchen_rock" && Math.Abs(star17Saved.VolumeFor(GameEventType.StarMilestone3)-.296f)<.00001f &&
+            star17Saved.VolumeFor(GameEventType.StarMilestone1)==0 && star17Saved.VolumeFor(GameEventType.StarMilestone4)==.37f;
+        if(!levelModes){failed++;Console.WriteLine("FAIL v17 per-level channel policy independent audio paths and volume persist");}
+        else Console.WriteLine("PASS v17 per-level channel policy independent audio paths and volume persist");
+        Console.WriteLine("RESULT " + (content.Length+16 - failed) + "/" + (content.Length+16) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
     private static bool HasSetting(string path,string section,string key)

@@ -35,7 +35,7 @@ namespace OC2Haptic.Core
             int level=GameEventTypes.StarLevel(type);
             StarFeedbackMode requested=previewMode??StarFeedbackMode.HapticsAndAudio;
             bool haptics=HasHaptics(mode) && (!star || HasHaptics(requested));
-            bool sound=star && HasAudio(mode) && HasAudio(requested);
+            bool sound=StarAudioPolicy.CanPlay(level) && HasAudio(mode) && HasAudio(requested);
             StarFeedbackMode effectiveMode=haptics?(sound?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly)
                 :(sound?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);
             if(star && !haptics && !sound)return false;

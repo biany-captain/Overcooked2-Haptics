@@ -16,12 +16,11 @@ namespace OC2Haptic.Core
             new HapticSegment(0,.20f,70),new HapticSegment(0,0,80),new HapticSegment(0,.24f,70)),30,120,FeedbackCategory.Positive);
         private static readonly EventFeedback Test=new EventFeedback(new HapticPattern(new HapticSegment(.22f,.28f,80)),10,120,FeedbackCategory.Positive);
         private static readonly EventFeedback[] Stars = {
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.10f,.22f,55),new HapticSegment(0,0,90),new HapticSegment(.05f,.17f,35)),86),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.14f,.23f,70),new HapticSegment(0,0,105),new HapticSegment(.17f,.35f,110)),86),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.18f,.26f,55),new HapticSegment(0,0,70),new HapticSegment(.23f,.34f,80),
-                new HapticSegment(0,0,75),new HapticSegment(.32f,.43f,145)),86),
-            new EventFeedback(HapticPattern.Celebration(new HapticSegment(.20f,.28f,70),new HapticSegment(0,0,75),new HapticSegment(.24f,.34f,75),
-                new HapticSegment(0,0,75),new HapticSegment(.31f,.43f,85),new HapticSegment(0,0,90),new HapticSegment(.43f,.51f,190)),86)
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(0,.32f,55)),86,0,FeedbackCategory.Positive),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(0,.33f,45),new HapticSegment(0,0,55),new HapticSegment(0,.40f,45)),86,0,FeedbackCategory.Positive),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(0,.40f,60),new HapticSegment(0,0,70),new HapticSegment(.03f,.53f,120)),86,0,FeedbackCategory.Positive),
+            new EventFeedback(HapticPattern.Celebration(new HapticSegment(0,.47f,70),new HapticSegment(0,0,70),new HapticSegment(0,.56f,70),
+                new HapticSegment(0,0,70),new HapticSegment(.02f,.66f,110),new HapticSegment(0,0,70),new HapticSegment(.14f,.76f,170)),86,0,FeedbackCategory.Positive)
         };
         public static readonly HapticPattern OneStarHapticsOnly = Stars[0].Pattern;
 

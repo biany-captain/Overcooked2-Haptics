@@ -7,10 +7,13 @@ namespace OC2Haptic.Core
     public sealed class RewardSoundPack
     {
         public const string DefaultId="turbo_swing";
+        public const string CustomStarId="custom-v17";
         public readonly string Id,Name;
         private readonly string[] files;
         private RewardSoundPack(string id,string name,string[] files){Id=id;Name=name;this.files=files;}
         public string FileFor(int star){return files[star-1];}
+        public static RewardSoundPack Custom(string third,string fourth)
+        {return new RewardSoundPack(CustomStarId,"自定义四星音乐",new[]{null,null,third,fourth});}
         public static bool IsRetired(string id)
         {return string.Equals(id,"joyful-cartoon-jazz",StringComparison.OrdinalIgnoreCase) || string.Equals(id,"crisp-reward",StringComparison.OrdinalIgnoreCase);}
         public static RewardSoundPack[] Discover(string root,Action<string> log)
@@ -22,7 +25,7 @@ namespace OC2Haptic.Core
             catch(Exception error){if(log!=null)log("Sound pack discovery unavailable: "+error.Message);return packs.ToArray();}
             foreach(string folder in directories)
             {
-                string id=Path.GetFileName(folder);if(IsRetired(id))continue;
+                string id=Path.GetFileName(folder);if(IsRetired(id) || string.Equals(id,CustomStarId,StringComparison.OrdinalIgnoreCase))continue;
                 string path=Path.Combine(folder,"pack.ini");if(!File.Exists(path))continue;
                 try
                 {

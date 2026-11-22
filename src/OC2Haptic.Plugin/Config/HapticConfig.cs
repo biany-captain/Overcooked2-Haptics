@@ -20,13 +20,17 @@ namespace OC2Haptic.Config
         internal readonly Dictionary<GameEventType, ConfigEntry<string>> Patterns = new Dictionary<GameEventType, ConfigEntry<string>>();
         internal readonly ConfigEntry<string> OneStarTail;
         internal readonly ConfigEntry<string> SoundPackId;
+        internal readonly ConfigEntry<string> Star3AudioFile,Star4AudioFile,Star4Selection;
+        internal readonly ConfigEntry<float> Star3Volume,Star4Volume;
         private readonly Dictionary<GameEventType, HapticPattern> parsed = new Dictionary<GameEventType, HapticPattern>();
         private readonly List<Action<EventHandler, bool>> watchers = new List<Action<EventHandler, bool>>();
+        private readonly Action<string> migrationLog;
         private HapticPattern tailPattern;
         internal string InvalidPatterns { get; private set; }
 
-        internal HapticConfig(ConfigFile config)
+        internal HapticConfig(ConfigFile config,Action<string> migrationLog=null)
         {
+            this.migrationLog=migrationLog;
             var legacyEnabled=config.Bind("General","Enabled",true,"Retired combined output switch.");
             var legacyMode=config.Bind("StarFeedback","Mode",StarFeedbackMode.HapticsAndAudio,"Retired star output mode.");
             HapticsEnabled=Output(config.Bind("General","HapticsEnabled",legacyEnabled.Value &&
@@ -69,6 +73,11 @@ namespace OC2Haptic.Config
             SoundPackId=Output(config.Bind("StarFeedback","SoundPackId",RewardSoundPack.DefaultId,
                 "One local sound pack for all four stars. Unknown/missing pack mutes audio only; restart to discover newly installed packs."));
             if(RewardSoundPack.IsRetired(SoundPackId.Value))SoundPackId.Value=RewardSoundPack.DefaultId;
+            Star3AudioFile=Output(config.Bind("StarFeedback","Star3AudioFile","user-v1.7/star3_progress.wav","Independent three-star PCM16 WAV; relative to plugin audio folder or an absolute path. Restart after editing. Missing/invalid file mutes only sound."));
+            Star4AudioFile=Output(config.Bind("StarFeedback","Star4AudioFile","user-v1.7/star4_victory.wav","Custom four-star PCM16 WAV,9-11s; relative to plugin audio folder or absolute. Restart after editing."));
+            Star4Selection=Output(config.Bind("StarFeedback","Star4Selection",RewardSoundPack.CustomStarId,"Custom four-star file or an existing pack ID. Legacy pack music retains its original shorter duration. Old SoundPackId preference is preserved separately."));
+            Star3Volume=Output(config.Bind("StarFeedback","Star3Volume",1f,new ConfigDescription("Three-star audio multiplier; user approved100% initially, applied once with relative volume.",new AcceptableValueRange<float>(0,1))));
+            Star4Volume=Output(config.Bind("StarFeedback","Star4Volume",1f,new ConfigDescription("Four-star audio multiplier; user approved100% initially, applied once with relative volume.",new AcceptableValueRange<float>(0,1))));
             RespectGameFocus = Output(config.Bind("Audio", "RespectGameFocus", true, "Stop this plugin's feedback on focus loss. Recommended true."));
             foreach (GameEventType type in Enum.GetValues(typeof(GameEventType)))
             {
@@ -77,15 +86,18 @@ namespace OC2Haptic.Config
                 if(!GameEventTypes.IsStar(type))EventSwitches[type]=GameEventTypes.IsCombo(type)?comboEnabled:
                     Output(config.Bind("Events",type.ToString(),IsDeliverySuccess(type)?legacySuccess.Value:EventFeedback.For(type).DefaultEnabled,
                         "Automatic candidate feedback. Explicit tests bypass this event switch but always obey channel masters. Unverified hooks are not acceptance."));
+                else EventSwitches[type]=Output(config.Bind("Stars","Star"+GameEventTypes.StarLevel(type)+"Enabled",true,"Automatic milestone only. Explicit previews bypass this switch; stars1/2 can never play audio."));
                 Patterns[type] = Output(config.Bind("Patterns", type.ToString(), PatternCodec.Format(EventFeedback.For(type).Pattern),
                     "Editable candidate: left,right,milliseconds;... Silent segment: 0,0,gap. Invalid patterns mute this event's haptics."));
                 if(GameEventTypes.IsStar(type))MigrateDefault(Patterns[type],LegacyStars[GameEventTypes.StarLevel(type)-1],EventFeedback.For(type).Pattern);
+                if(GameEventTypes.IsStar(type))MigrateDefault(Patterns[type],LegacyV14Stars[GameEventTypes.StarLevel(type)-1],EventFeedback.For(type).Pattern);
                 string previous;if(LegacyProfiles.TryGetValue(type,out previous))MigrateDefault(Patterns[type],previous,EventFeedback.For(type).Pattern);
             }
             config.Remove(legacySuccess.Definition);
             OneStarTail = Output(config.Bind("Patterns", "StarMilestone1HapticsOnly", PatternCodec.Format(EventFeedback.OneStarHapticsOnly),
                 "Approved candidate one-star tail for haptics-only mode."));
             MigrateDefault(OneStarTail,"0.05,0.22,75;0,0,45;0.03,0.13,25",EventFeedback.OneStarHapticsOnly);
+            MigrateDefault(OneStarTail,LegacyV14Stars[0],EventFeedback.OneStarHapticsOnly);
             var legacyTestKey = config.Bind("Hotkeys", "TestRumble", KeyCode.F6, "Legacy key, migrated to OpenMenu.");
             MenuKey = config.Bind("Hotkeys", "OpenMenu", legacyTestKey.Value, "F6 management menu. None disables the key.");
             config.Remove(legacyTestKey.Definition);
@@ -106,6 +118,9 @@ namespace OC2Haptic.Config
         private static readonly string[] LegacyStars={"0.05,0.22,75","0.06,0.26,65;0,0,55;0.14,0.34,95",
             "0.07,0.26,55;0,0,45;0.13,0.33,65;0,0,45;0.2,0.42,105",
             "0.09,0.26,55;0,0,45;0.12,0.34,60;0,0,45;0.18,0.42,65;0,0,60;0.32,0.48,170"};
+        private static readonly string[] LegacyV14Stars={"0.1,0.22,55;0,0,90;0.05,0.17,35",
+            "0.14,0.23,70;0,0,105;0.17,0.35,110","0.18,0.26,55;0,0,70;0.23,0.34,80;0,0,75;0.32,0.43,145",
+            "0.2,0.28,70;0,0,75;0.24,0.34,75;0,0,75;0.31,0.43,85;0,0,90;0.43,0.51,190"};
         private static readonly Dictionary<GameEventType,string> LegacyProfiles=new Dictionary<GameEventType,string>
         {
             {GameEventType.ThrowSuccess,"0.15,0.32,65"},{GameEventType.CatchSuccess,"0.22,0.1,35;0,0,35;0.08,0.3,45"},
@@ -117,7 +132,7 @@ namespace OC2Haptic.Config
         };
         private static bool IsDeliverySuccess(GameEventType type)
         {return type==GameEventType.DeliveryOrdered || type==GameEventType.DeliveryOutOfOrder || type==GameEventType.DeliveryUnclassified;}
-        private static void MigrateDefault(ConfigEntry<string> entry,string legacy,HapticPattern replacement)
+        private void MigrateDefault(ConfigEntry<string> entry,string legacy,HapticPattern replacement)
         {
             HapticPattern old,baseline;
             if(!PatternCodec.TryParse(entry.Value,950,out old) || !PatternCodec.TryParse(legacy,950,out baseline) || old.Count!=baseline.Count)return;
@@ -127,6 +142,7 @@ namespace OC2Haptic.Config
                 if(a.Left!=b.Left || a.Right!=b.Right || a.DurationMs!=b.DurationMs)return;
             }
             entry.Value=PatternCodec.Format(replacement);
+            if(migrationLog!=null)migrationLog("Config migration | key="+entry.Definition.Section+"."+entry.Definition.Key+" known default -> current "+replacement.TotalDurationMs+"ms");
         }
         internal void WatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, true); }
         internal void UnwatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, false); }
@@ -135,6 +151,10 @@ namespace OC2Haptic.Config
         internal StarFeedbackMode FeedbackMode { get { return OutputMode(HapticsEnabled.Value,AudioEnabled.Value); } }
         internal StarFeedbackMode StarMode {get{return OutputMode(HapticsEnabled.Value && StarHapticsEnabled.Value,
             AudioEnabled.Value && StarAudioEnabled.Value);}}
+        internal StarFeedbackMode StarModeFor(GameEventType type){return StarAudioPolicy.ModeFor(GameEventTypes.StarLevel(type),StarMode);}
+        internal float VolumeFor(GameEventType type)
+        {int star=GameEventTypes.StarLevel(type);return star==1 || star==2?0:RewardOutput.SafeVolume(SoundVolume.Value)*
+            (star==3?RewardOutput.SafeVolume(Star3Volume.Value):star==4?RewardOutput.SafeVolume(Star4Volume.Value):1);}
         private static StarFeedbackMode OutputMode(bool haptics,bool audio)
         {return haptics?(audio?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly):(audio?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);}
         internal void ToggleAllOutput()
@@ -162,7 +182,7 @@ namespace OC2Haptic.Config
         }
         internal bool IsEventEnabled(GameEventType type)
         {
-            if(GameEventTypes.IsStar(type))return StarMode!=StarFeedbackMode.Disabled;
+            if(GameEventTypes.IsStar(type))return EventSwitches[type].Value && StarModeFor(type)!=StarFeedbackMode.Disabled;
             if(GameEventTypes.IsHazard(type) && !HazardHapticsEnabled.Value)return false;
             ConfigEntry<bool> entry;return EventSwitches.TryGetValue(type,out entry) && entry.Value;
         }

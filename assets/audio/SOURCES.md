@@ -1,5 +1,7 @@
 # Ultra Victory v3 audio sources
 
+The v1.7 user-supplied simple/cool pair is documented separately in [user-v1.7/SOURCES.md](user-v1.7/SOURCES.md). Its stated non-commercial condition is separate from the legacy GPL/SoundFont records below; do not apply this page's asset declarations to that pair.
+
 Imported2026-11-21 from the user-supplied Overcooked2_Haptics_Ultra_Victory_v3 directory. All12WAV copied unchanged: no trimming, re-encoding, gain edits or crowd overlays. The user explicitly retired the previous joyful-cartoon-jazz and crisp-reward sets; only the three new packs ship.
 
 | Pack | Star | WAV | Duration ms | Original SHA256 |

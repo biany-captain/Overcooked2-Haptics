@@ -197,7 +197,7 @@ namespace OC2Haptic.UI
             DrawStrength(18,y,width-36,metrics.Master,"相对音量",settings.SoundVolume);
             y+=metrics.Master+8;
             int nextTab=GUI.SelectionGrid(new Rect(18,y,width-36,metrics.Tabs),tab,new[]{"设置","星级测试"},2,buttonStyle);
-            if(nextTab!=tab){stopPreviews();tab=nextTab;packDropdown=false;scroll=Vector2.zero;outerScroll=Vector2.zero;status=tab==1?"每个星级可独立试音、试震或同时测试。":"所有事件统一使用总震动强度。";}
+            if(nextTab!=tab){stopPreviews();tab=nextTab;packDropdown=false;scroll=Vector2.zero;outerScroll=Vector2.zero;status=tab==1?"一二星只试震；三星、四星可试音或同时测试。":"所有事件统一使用总震动强度。";}
             y+=metrics.Tabs+8;
             GUI.Label(new Rect(18, y, width - 36, metrics.Top), TopText(), noteStyle);
             y += metrics.Top + 10;
@@ -226,9 +226,9 @@ namespace OC2Haptic.UI
         private string TopText()
         {
             return tab==0?"F10 一键全关 / 全开，保留下方功能偏好。\n功能开关只管自动反馈；手动测试仍服从两个总控。\n危险预警不含拒单 / 订单超时，细项沿用配置。"
-                :"手动测试绕过功能开关，仍服从两个总控。\n音量跟随游戏主音量 / 音效，相对100%为原声。";
+                :"一二星仅震动；三星短音，四星音乐可选。\n手动测试绕过功能开关，仍服从两个总控。\n音量跟随游戏主音量 / 音效，相对100%为原声。";
         }
-        private int ContentRows(){return tab==0?FeatureRows+Types.Length:1+(packDropdown?soundPacks.Length:0)+StarTypes.Length;}
+        private int ContentRows(){return tab==0?FeatureRows+Types.Length:2+(packDropdown?soundPacks.Length:0)+StarTypes.Length;}
         private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
         private void DrawEventSettings(float width,float row,bool originalEnabled)
         {
@@ -251,18 +251,19 @@ namespace OC2Haptic.UI
         }
         private void DrawStarTests(float width,float row,bool originalEnabled)
         {
-            if(GUI.Button(new Rect(4,0,width-8,row-8),"音效包："+SelectedPackName()+(packDropdown?"  ▲":"  ▼"),buttonStyle))packDropdown=!packDropdown;
+            GUI.Label(new Rect(4,0,width-8,row-8),"三星短音效独立，不随四星选项切换。",labelStyle);
+            if(GUI.Button(new Rect(4,row,width-8,row-8),"四星音效："+SelectedPackName()+(packDropdown?"  ▲":"  ▼"),buttonStyle))packDropdown=!packDropdown;
             int extra=packDropdown?soundPacks.Length:0;
             for(int i=0;i<extra;i++)
             {
-                bool selected=string.Equals(settings.SoundPackId.Value,soundPacks[i].Id,StringComparison.OrdinalIgnoreCase);
-                if(GUI.Button(new Rect(14,(i+1)*row,width-28,row-8),(selected?"● ":"  ")+soundPacks[i].Name,buttonStyle))
+                bool selected=string.Equals(settings.Star4Selection.Value,soundPacks[i].Id,StringComparison.OrdinalIgnoreCase);
+                if(GUI.Button(new Rect(14,(i+2)*row,width-28,row-8),(selected?"● ":"  ")+soundPacks[i].Name,buttonStyle))
                 {
-                    stopPreviews();settings.SoundPackId.Value=soundPacks[i].Id;packDropdown=false;
-                    status="已选择「"+soundPacks[i].Name+"」，下方可试听一到四星。";
+                    stopPreviews();settings.Star4Selection.Value=soundPacks[i].Id;packDropdown=false;
+                    status="已选择四星「"+soundPacks[i].Name+"」，三星短音保持独立。";
                 }
             }
-            float header=(1+extra)*row;
+            float header=(2+extra)*row;
             var modes=new[]{StarFeedbackMode.AudioOnly,StarFeedbackMode.HapticsOnly,StarFeedbackMode.HapticsAndAudio};
             var labels=new[]{"试音","试震","同时测试"};
             for(int i=0;i<StarTypes.Length;i++)
@@ -270,6 +271,13 @@ namespace OC2Haptic.UI
                 float y=header+i*row;
                 GUI.Label(new Rect(4,y,84,row-8),StarNames[i],labelStyle);
                 float buttonWidth=(width-100)/3;
+                if(i<2)
+                {
+                    GUI.Label(new Rect(96,y,buttonWidth,row-8),"不播放音效",noteStyle);
+                    GUI.enabled=originalEnabled && CanPreview(StarTypes[i],StarFeedbackMode.HapticsOnly);
+                    if(GUI.Button(new Rect(96+buttonWidth,y,2*buttonWidth-4,row-8),"试震",buttonStyle))Preview(StarTypes[i],StarNames[i],StarFeedbackMode.HapticsOnly);
+                    GUI.enabled=originalEnabled;continue;
+                }
                 for(int j=0;j<modes.Length;j++)
                 {
                     GUI.enabled=originalEnabled && CanPreview(StarTypes[i],modes[j]);
@@ -280,7 +288,7 @@ namespace OC2Haptic.UI
         }
         private string SelectedPackName()
         {
-            foreach(var pack in soundPacks)if(string.Equals(pack.Id,settings.SoundPackId.Value,StringComparison.OrdinalIgnoreCase))return pack.Name;
+            foreach(var pack in soundPacks)if(string.Equals(pack.Id,settings.Star4Selection.Value,StringComparison.OrdinalIgnoreCase))return pack.Name;
             return "所选包不可用（仅震动）";
         }
         private void DrawStrength(float x,float y,float width,float height,string name,ConfigEntry<float> entry)
@@ -319,7 +327,7 @@ namespace OC2Haptic.UI
             foreach (string name in Names) result.Row = Mathf.Max(result.Row, TextHeight(toggleStyle, name, width - 164) + 8);
             if(tab==1)
             {
-                result.Row=Mathf.Max(result.Row,TextHeight(buttonStyle,"音效包："+SelectedPackName()+"  ▼",width-60)+8);
+                result.Row=Mathf.Max(result.Row,TextHeight(buttonStyle,"四星音效："+SelectedPackName()+"  ▼",width-60)+8);
                 foreach(var pack in soundPacks)result.Row=Mathf.Max(result.Row,TextHeight(buttonStyle,"● "+pack.Name,width-80)+8);
             }
             result.TotalHeight = 42 + result.Device + 8 + 2*(result.MainRow + 10 + result.Master+8)+result.Tabs+8+result.Top + 10 +
@@ -341,7 +349,7 @@ namespace OC2Haptic.UI
         {
             if(type.HasValue && GameEventTypes.IsStar(type.Value))
             {
-                StarFeedbackMode requested=previewMode??settings.FeedbackMode;
+                StarFeedbackMode requested=StarAudioPolicy.ModeFor(GameEventTypes.StarLevel(type.Value),previewMode??settings.FeedbackMode);
                 bool haptics=requested==StarFeedbackMode.HapticsOnly || requested==StarFeedbackMode.HapticsAndAudio;
                 bool audio=requested==StarFeedbackMode.AudioOnly || requested==StarFeedbackMode.HapticsAndAudio;
                 return (haptics || audio) && (!audio || settings.AudioEnabled.Value) &&

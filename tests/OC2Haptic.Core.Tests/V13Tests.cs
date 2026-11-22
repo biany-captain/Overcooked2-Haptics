@@ -102,8 +102,8 @@ internal static class V13Tests
         Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.Count==3);
         Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.TotalDurationMs==205);
         Check(EventFeedback.For(GameEventType.ComboLevel4).Pattern.Count==7);
-        Check(EventFeedback.For(GameEventType.StarMilestone4).Pattern.TotalDurationMs==660);
-        Check(EventFeedback.OneStarHapticsOnly.Count==3);
+        Check(EventFeedback.For(GameEventType.StarMilestone4).Pattern.TotalDurationMs==630);
+        Check(EventFeedback.OneStarHapticsOnly.Count==1);
         for(int i=1;i<=4;i++) Check(EventFeedback.For((GameEventType)((int)GameEventType.StarMilestone1+i-1)).Pattern.TotalDurationMs<=850);
     }
     private static void EditablePatterns()
@@ -120,7 +120,7 @@ internal static class V13Tests
         var b=new Motors(); var e=new HapticEngine(b); var a=new Sound { Fail=true }; var o=new RewardOutput(e,a);
         Check(o.Emit(0,"s",GameEventType.StarMilestone1,null,0,.75f,.65f)); e.Tick(0); Check(b.Nonzero>0);
         o.Mode=StarFeedbackMode.AudioOnly; Check(a.Stops==0 && b.LastZero); a.Fail=false;
-        int previous=b.Nonzero; Check(o.Emit(0,"a",GameEventType.StarMilestone2,null,1000,.75f,.65f)); e.Tick(1000);
+        int previous=b.Nonzero; Check(o.Emit(0,"a",GameEventType.StarMilestone3,null,1000,.75f,.65f)); e.Tick(1000);
         Check(b.Nonzero==previous && Math.Abs(a.Volume-.65f)<.00001);
         o.Mode=StarFeedbackMode.Disabled; Check(!o.Emit(0,"off",GameEventType.StarMilestone3,null,2000,.75f,1));
         Check(RewardOutput.SafeVolume(float.NaN)==0 && RewardOutput.SafeVolume(2)==1 && RewardOutput.SafeVolume(-1)==0);
@@ -149,7 +149,7 @@ internal static class V13Tests
     private static void AudioExceptions()
     {
         var b=new Motors();var e=new HapticEngine(b);var sound=new Sound{ThrowOnPlay=true,ThrowOnStop=true};var output=new RewardOutput(e,sound);
-        Check(output.Emit(0,"safe",GameEventType.StarMilestone1,null,0,.75f,.65f));e.Tick(0);Check(b.Nonzero>0);
+        Check(output.Emit(0,"safe",GameEventType.StarMilestone3,null,0,.75f,.65f));e.Tick(0);Check(b.Nonzero>0 && sound.Plays==1);
         output.Stop();Check(b.LastZero);
     }
     private static void CalibrationReplay()
