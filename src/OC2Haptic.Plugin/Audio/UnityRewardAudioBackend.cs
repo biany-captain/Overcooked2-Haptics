@@ -89,7 +89,7 @@ namespace OC2Haptic.Audio
                 }
                 source.outputAudioMixerGroup=group;source.ignoreListenerPause=manualPreview();
                 Stop();source.PlayOneShot(pack.Clips[star-1],RewardOutput.SafeVolume(volume));playingStar=star;
-                if(star==4)gameMusic.Begin(manager);
+                if(star==4)gameMusic.Begin(manager,group);
                 log("Reward audio | pack="+id+" star="+star+" durationMs="+pack.Durations[star-1]+" volume="+volume+" manual="+manualPreview()+" accepted=True");
                 return true;
             }
@@ -98,7 +98,7 @@ namespace OC2Haptic.Audio
         private void RequireMainThread()
         {if(Thread.CurrentThread.ManagedThreadId!=mainThread)throw new InvalidOperationException("Reward audio requires Unity main thread.");}
         internal void TickMusic()
-        {if(playingStar==4 && source!=null && source.isPlaying)gameMusic.Tick();else gameMusic.End();}
+        {if(playingStar==4 && source!=null && source.isPlaying)gameMusic.Tick();else gameMusic.Idle();}
         public void Stop(){if(source!=null)source.Stop();playingStar=0;gameMusic.End();}
         private static void DestroyClips(PreparedPack pack)
         {foreach(var clip in pack.Clips)if(clip!=null)UnityEngine.Object.Destroy(clip);Array.Clear(pack.Clips,0,4);Array.Clear(pack.Durations,0,4);}

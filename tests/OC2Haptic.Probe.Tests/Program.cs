@@ -16,7 +16,8 @@ internal static class Program
             { "actual PC score getters retain NGP gate", ActualBoundaries },
             { "unchanged client state cannot hide a differing payload", MismatchMustLog },
             { "candidate client hazard signatures and cooking state data exist", HazardSignatures },
-            { "actual music and SFX mixer controls have separate names", MusicControls }
+            { "actual music and SFX mixer controls have separate names", MusicControls },
+            { "actual game audio sources use known shared parent and music group", MusicSourceBindings }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -38,6 +39,17 @@ internal static class Program
             byte[] body=getter.GetMethodBody().GetILAsByteArray();
             Check(body.Length==6 && body[0]==0x72 && body[5]==0x2a && getter.Module.ResolveString(BitConverter.ToInt32(body,1))==name);
         }
+    }
+    private static void MusicSourceBindings()
+    {
+        var flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
+        var type=typeof(AudioManager);
+        Check(type.GetField("m_sharedSource",flags).FieldType.FullName=="UnityEngine.GameObject");
+        Check(type.GetField("m_musAudioGroup",flags).FieldType.FullName=="UnityEngine.Audio.AudioMixerGroup");
+        var group=type.GetNestedType("AudioGroup",BindingFlags.Public|BindingFlags.NonPublic);
+        var method=type.GetMethod("AddSource",flags,null,new[]{group,typeof(int)},null);
+        byte[] body=method.GetMethodBody().GetILAsByteArray();
+        Check(body.Length>=6 && body[1]==0x7b && method.Module.ResolveField(BitConverter.ToInt32(body,2)).Name=="m_sharedSource");
     }
     private static void MissingDirectory()
     {

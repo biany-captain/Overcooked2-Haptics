@@ -1,3 +1,5 @@
+E:\Codex\厨房mod\src\OC2Haptic.Plugin\GameEvents\ScoreSourceProbe.cs(160,37): warning CS0649: 从未对字段“ScoreSourceProbe.Observation.ConfirmedKitchenType”赋值，字段将一直保持其默认值 [E:\Codex\厨房mod\tests\OC2Haptic.Probe.Tests\OC2Haptic.Probe.Tests.csproj]
+E:\Codex\厨房mod\src\OC2Haptic.Plugin\GameEvents\ScoreSourceProbe.cs(159,29): warning CS0649: 从未对字段“ScoreSourceProbe.Observation.RoundKey”赋值，字段将一直保持其默认值 null [E:\Codex\厨房mod\tests\OC2Haptic.Probe.Tests\OC2Haptic.Probe.Tests.csproj]
 PASS missing progress/directory produces unavailable level without game lookup
 PASS selected variant resolves actual level by identity
 PASS missing PC star boundaries remain unavailable
@@ -5,4 +7,5 @@ PASS actual PC score getters retain NGP gate
 PASS unchanged client state cannot hide a differing payload
 PASS candidate client hazard signatures and cooking state data exist
 PASS actual music and SFX mixer controls have separate names
-RESULT 7/7 probe integration passed
+PASS actual game audio sources use known shared parent and music group
+RESULT 8/8 probe integration passed
