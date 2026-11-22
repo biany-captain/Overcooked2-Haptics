@@ -9,6 +9,7 @@ namespace OC2Haptic.Config
     internal sealed class HapticConfig
     {
         internal readonly ConfigEntry<bool> HapticsEnabled, AudioEnabled, RespectGameFocus;
+        internal readonly ConfigEntry<bool> StarHapticsEnabled, StarAudioEnabled, HazardHapticsEnabled;
         internal readonly ConfigEntry<bool> DebugLogEvents, ScoreSourceProbe;
         internal readonly ConfigEntry<bool> TeamDeliveryFallback, TeamHazardFallback;
         internal readonly ConfigEntry<float> MasterIntensity, SoundVolume;
@@ -45,7 +46,14 @@ namespace OC2Haptic.Config
                 new ConfigDescription("Actual game pad number, independent of XInput. -1 unbound.", new AcceptableValueRange<int>(-1, 14))));
             var legacySuccess=config.Bind("Events","DeliverySuccess",true,"Legacy coarse success preference.");
             var comboEnabled=Output(config.Bind("Combo","Enabled",true,"Verified upgrade feedback only; ordinary success remains independent."));
-            var starsEnabled=Output(config.Bind("Stars","Enabled",true,"Real-score milestone haptics/audio; previews remain available."));
+            var starsEnabled=config.Bind("Stars","Enabled",true,"Retired combined star switch; migrates to two feature channels.");
+            StarHapticsEnabled=Output(config.Bind("Stars","HapticsEnabled",starsEnabled.Value,
+                "Automatic star haptics, also subject to the haptic master. Explicit previews remain available."));
+            StarAudioEnabled=Output(config.Bind("Stars","AudioEnabled",starsEnabled.Value,
+                "Automatic star audio, also subject to the audio master. Explicit previews remain available."));
+            config.Remove(starsEnabled.Definition);
+            HazardHapticsEnabled=Output(config.Bind("Hazards","HapticsEnabled",true,
+                "Automatic burn-warning, burned and fire haptics as a group. Individual Events switches still apply; excludes rejected/expired orders. Explicit previews remain available."));
             config.Remove(config.Bind("Combo","TriggerMode",ComboTriggerMode.OnLevelUp,"Retired selector; v1.6 requires upgrade-only mode A.").Definition);
             TeamDeliveryFallback=Output(config.Bind("Routing","AllowTeamDeliveryFallback",false,
                 "Explicit fallback for ordinary delivery/failed/expired team alerts when actor cannot be proven. Never enables guessed Combo or all-controller broadcast."));
@@ -66,7 +74,7 @@ namespace OC2Haptic.Config
             {
                 config.Remove(config.Bind("EventStrength",type.ToString(),1f,"Retired extra event multiplier; use master intensity.").Definition);
                 if (type == GameEventType.DeliverySuccess || type==GameEventType.TestPulse) continue;
-                EventSwitches[type]=GameEventTypes.IsStar(type)?starsEnabled:GameEventTypes.IsCombo(type)?comboEnabled:
+                if(!GameEventTypes.IsStar(type))EventSwitches[type]=GameEventTypes.IsCombo(type)?comboEnabled:
                     Output(config.Bind("Events",type.ToString(),IsDeliverySuccess(type)?legacySuccess.Value:EventFeedback.For(type).DefaultEnabled,
                         "Automatic candidate feedback. Explicit tests bypass this event switch but always obey channel masters. Unverified hooks are not acceptance."));
                 Patterns[type] = Output(config.Bind("Patterns", type.ToString(), PatternCodec.Format(EventFeedback.For(type).Pattern),
@@ -124,9 +132,11 @@ namespace OC2Haptic.Config
         internal void UnwatchOutputChanges(EventHandler callback) { foreach (var watch in watchers) watch(callback, false); }
         internal float Intensity { get { return RewardOutput.SafeVolume(MasterIntensity.Value); } }
         internal bool AnyOutputEnabled { get { return HapticsEnabled.Value || AudioEnabled.Value; } }
-        internal StarFeedbackMode FeedbackMode { get { return HapticsEnabled.Value
-            ?(AudioEnabled.Value?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly)
-            :(AudioEnabled.Value?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled); } }
+        internal StarFeedbackMode FeedbackMode { get { return OutputMode(HapticsEnabled.Value,AudioEnabled.Value); } }
+        internal StarFeedbackMode StarMode {get{return OutputMode(HapticsEnabled.Value && StarHapticsEnabled.Value,
+            AudioEnabled.Value && StarAudioEnabled.Value);}}
+        private static StarFeedbackMode OutputMode(bool haptics,bool audio)
+        {return haptics?(audio?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly):(audio?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);}
         internal void ToggleAllOutput()
         {
             bool next=!AnyOutputEnabled;
@@ -146,11 +156,15 @@ namespace OC2Haptic.Config
         internal HapticPattern PatternFor(GameEventType type,StarFeedbackMode? previewMode=null)
         {
             if(type==GameEventType.TestPulse)return EventFeedback.For(type).Pattern;
-            if (type == GameEventType.StarMilestone1 && (previewMode??FeedbackMode) == StarFeedbackMode.HapticsOnly) return tailPattern;
+            if (type == GameEventType.StarMilestone1 && (previewMode??StarMode) == StarFeedbackMode.HapticsOnly) return tailPattern;
             HapticPattern pattern;
             return parsed.TryGetValue(type, out pattern) ? pattern : null;
         }
         internal bool IsEventEnabled(GameEventType type)
-        {ConfigEntry<bool> entry;return EventSwitches.TryGetValue(type,out entry) && entry.Value;}
+        {
+            if(GameEventTypes.IsStar(type))return StarMode!=StarFeedbackMode.Disabled;
+            if(GameEventTypes.IsHazard(type) && !HazardHapticsEnabled.Value)return false;
+            ConfigEntry<bool> entry;return EventSwitches.TryGetValue(type,out entry) && entry.Value;
+        }
     }
 }

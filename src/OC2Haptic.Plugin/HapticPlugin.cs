@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.5.0")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.5.1")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -69,6 +69,8 @@ namespace OC2Haptic
                 rewards=new RewardOutput(engine,rewardAudio,message=>Logger.LogInfo(message),rewardAudio.DurationMs);
                 coordinator=new FeedbackCoordinator(engine,rewards);
                 coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);
+                coordinator.SetFeatureSwitches(settings.StarHapticsEnabled.Value,settings.StarAudioEnabled.Value,
+                    settings.HazardHapticsEnabled.Value,clock.Elapsed.TotalMilliseconds);
                 hooks = new ThrowHooks(Logger);
                 catchHooks = new CatchHooks(Logger);
                 kitchenHooks = new KitchenHooks(Logger);
@@ -78,7 +80,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.5.0-alpha v1.6 candidate | x86/net35 | F6 management menu / F10 all-off/all-on (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.5.1-alpha v1.6 candidate | x86/net35 | F6 feature switches / F10 all-off/all-on (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -391,6 +393,15 @@ namespace OC2Haptic
 
         private void OnOutputSettingsChanged(object sender, EventArgs args)
         {
+            if(sender==settings.StarHapticsEnabled || sender==settings.StarAudioEnabled || sender==settings.HazardHapticsEnabled)
+            {
+                double now=clock.Elapsed.TotalMilliseconds;
+                coordinator.SetFeatureSwitches(settings.StarHapticsEnabled.Value,settings.StarAudioEnabled.Value,settings.HazardHapticsEnabled.Value,now);
+                if(sender==settings.HazardHapticsEnabled)hazards.DeferReminders(now);
+                Logger.LogInfo("Feature switches | starHaptics="+settings.StarHapticsEnabled.Value+" starAudio="+settings.StarAudioEnabled.Value+
+                    " hazardHaptics="+settings.HazardHapticsEnabled.Value);
+                return;
+            }
             if(sender==settings.HapticsEnabled || sender==settings.AudioEnabled)
             {
                 pendingFeedback.Clear();coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);hazards.DeferReminders(clock.Elapsed.TotalMilliseconds);

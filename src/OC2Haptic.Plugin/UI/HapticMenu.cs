@@ -18,6 +18,7 @@ namespace OC2Haptic.UI
             "烧焦预警 · 候选", "食物烧焦 · 自动默认关", "起火 · 候选", "持续火警 · 候选" };
         private static readonly GameEventType[] StarTypes={GameEventType.StarMilestone1,GameEventType.StarMilestone2,GameEventType.StarMilestone3,GameEventType.StarMilestone4};
         private static readonly string[] StarNames={"一星","二星","三星","四星"};
+        private const int FeatureRows=3;
         private const string BottomNote = "菜单打开时只屏蔽当前绑定厨师的操作。\n关卡仍会运行；F6 或右上角 × 关闭菜单。";
         private const string Footer = "修改即时保存  ·  手动试震不计入真实游戏事件";
         private readonly UnityEngine.Object owner;
@@ -224,21 +225,29 @@ namespace OC2Haptic.UI
 
         private string TopText()
         {
-            return tab==0?"F10 一键全关 / 全开；两个开关也控制手动测试。\n音量跟随游戏主音量 / 音效，相对100%为原声。"
-                :"两个总开关同样控制下方测试，关闭后对应按钮不可用。\n音效包统一四星；主菜单 / 暂停中可单独测试。";
+            return tab==0?"F10 一键全关 / 全开，保留下方功能偏好。\n功能开关只管自动反馈；手动测试仍服从两个总控。\n危险预警不含拒单 / 订单超时，细项沿用配置。"
+                :"手动测试绕过功能开关，仍服从两个总控。\n音量跟随游戏主音量 / 音效，相对100%为原声。";
         }
-        private int ContentRows(){return tab==0?Types.Length:1+(packDropdown?soundPacks.Length:0)+StarTypes.Length;}
+        private int ContentRows(){return tab==0?FeatureRows+Types.Length:1+(packDropdown?soundPacks.Length:0)+StarTypes.Length;}
         private int VisibleRows(){return tab==0?Math.Min(ContentRows(),10):ContentRows();}
         private void DrawEventSettings(float width,float row,bool originalEnabled)
         {
+            DrawFeatureSwitch(0,width,row,"星级庆祝 · 震动",settings.StarHapticsEnabled);
+            DrawFeatureSwitch(row,width,row,"星级庆祝 · 音效",settings.StarAudioEnabled);
+            DrawFeatureSwitch(2*row,width,row,"危险预警 · 震动",settings.HazardHapticsEnabled);
             for(int i=0;i<Types.Length;i++)
             {
-                float y=i*row;
+                float y=(i+FeatureRows)*row;
                 GUI.Label(new Rect(4,y,width-112,row-8),Names[i],labelStyle);
                 GUI.enabled=originalEnabled && CanPreview(Types[i]);
                 if(GUI.Button(new Rect(width-96,y,92,row-8),"试震",buttonStyle))Preview(Types[i],Names[i]);
                 GUI.enabled=originalEnabled;
             }
+        }
+        private void DrawFeatureSwitch(float y,float width,float row,string text,ConfigEntry<bool> entry)
+        {
+            bool next=GUI.Toggle(new Rect(4,y,width-8,row-8),entry.Value,text,toggleStyle);
+            if(next!=entry.Value)entry.Value=next;
         }
         private void DrawStarTests(float width,float row,bool originalEnabled)
         {

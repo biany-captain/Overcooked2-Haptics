@@ -11,6 +11,7 @@ namespace OC2Haptic.Core
         private readonly Func<int,OutputDevice> describeDevice;
         private readonly State[] states={new State(),new State(),new State(),new State(),new State()};
         private readonly Dictionary<string,double> sounds=new Dictionary<string,double>();
+        private bool starHapticsEnabled=true,starAudioEnabled=true,hazardHapticsEnabled=true;
         public string LastDropReason {get;private set;}
         public FeedbackCoordinator(HapticEngine engine,RewardOutput rewards,OutputDeviceRegistry devices=null,Func<int,OutputDevice> describeDevice=null)
         {this.engine=engine;this.rewards=rewards;this.devices=devices??new OutputDeviceRegistry();
@@ -31,6 +32,17 @@ namespace OC2Haptic.Core
             if(string.IsNullOrEmpty(key) || double.IsNaN(now) || double.IsInfinity(now) || now<0)return Drop("invalid event key/time");
             bool physical=index>=0 && index<4,star=GameEventTypes.IsStar(type);
             EventFeedback feedback=EventFeedback.For(type);
+            if(!manual)
+            {
+                if(GameEventTypes.IsHazard(type) && !hazardHapticsEnabled)return Drop("hazard feedback disabled");
+                if(star)
+                {
+                    // Reuse the output channel mask without changing the global masters.
+                    preview=starHapticsEnabled?(starAudioEnabled?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly)
+                        :(starAudioEnabled?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);
+                    if(preview.Value==StarFeedbackMode.Disabled)return Drop("star feedback disabled");
+                }
+            }
             bool negative=feedback.Category==FeedbackCategory.Negative || feedback.Category==FeedbackCategory.Emergency;
             if(!physical && !star && !negative)return Drop("unbound physical output");
             State state=states[physical?index:4];Accrue(state,now);
@@ -46,7 +58,7 @@ namespace OC2Haptic.Core
             if(haptics && Used(state,bucket,now)+requested>Limit(bucket))
             {if(!star)return Drop("per-device active-time budget");intensity=0;haptics=false;LastDropReason="motor budget exhausted; star audio may continue";}
             Prune(sounds,now);
-            if(star && !manual && sounds.ContainsKey(key))preview=StarFeedbackMode.HapticsOnly;
+            if(star && !manual && sounds.ContainsKey(key))preview=haptics?StarFeedbackMode.HapticsOnly:StarFeedbackMode.Disabled;
             int audioBefore=rewards.AudioEmissionSequence;
             bool accepted=rewards.Emit(index,key,type,pattern,now,intensity,volume,false,preview);
             // Emit may cancel a lower star even when the new pattern produces no output.
@@ -97,6 +109,19 @@ namespace OC2Haptic.Core
             foreach(var state in states)Accrue(state,now);
             rewards.Mode=mode;
             if(mode==StarFeedbackMode.AudioOnly || mode==StarFeedbackMode.Disabled)foreach(var state in states)state.Active=null;
+        }
+        public void SetFeatureSwitches(bool starHaptics,bool starAudio,bool hazardHaptics,double now)
+        {
+            bool stopStars=starHapticsEnabled && !starHaptics,stopHazards=hazardHapticsEnabled && !hazardHaptics;
+            for(int index=0;index<4;index++)
+            {
+                State state=states[index];Accrue(state,now);
+                if(state.Active!=null && ((stopStars && GameEventTypes.IsStar(state.Active.Type)) ||
+                    (stopHazards && GameEventTypes.IsHazard(state.Active.Type))))
+                {engine.Cancel(index);state.Active=null;}
+            }
+            if(starAudioEnabled && !starAudio)rewards.Interrupt();
+            starHapticsEnabled=starHaptics;starAudioEnabled=starAudio;hazardHapticsEnabled=hazardHaptics;
         }
         public void Cancel(GameEventType type,int entity,double now)
         {

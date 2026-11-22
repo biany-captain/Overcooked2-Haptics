@@ -119,6 +119,13 @@ HapticsEnabled = true
 # Default value: true
 AudioEnabled = true
 
+[Hazards]
+
+## Automatic burn-warning, burned and fire haptics as a group. Individual Events switches still apply; excludes rejected/expired orders. Explicit previews remain available.
+# Setting type: Boolean
+# Default value: true
+HapticsEnabled = true
+
 [Hotkeys]
 
 ## All-off if either channel is on; all-on when both are off. F6 channel switches remain independent.
@@ -257,7 +264,12 @@ SoundPackId = turbo_swing
 
 [Stars]
 
-## Real-score milestone haptics/audio; previews remain available.
+## Automatic star haptics, also subject to the haptic master. Explicit previews remain available.
 # Setting type: Boolean
 # Default value: true
-Enabled = true
+HapticsEnabled = true
+
+## Automatic star audio, also subject to the audio master. Explicit previews remain available.
+# Setting type: Boolean
+# Default value: true
+AudioEnabled = true

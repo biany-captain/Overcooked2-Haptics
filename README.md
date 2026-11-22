@@ -1,8 +1,10 @@
-# OC2 Haptic — 0.5.0-alpha · v1.6候选
+# OC2 Haptic — 0.5.1-alpha · v1.6候选
 
 Windows《胡闹厨房2》XInput触觉增强MOD，在现有项目上增量开发。原有1～4星庆祝、三套12首音乐、F6中文管理页、F10、音量跟随游戏和个人绑定继续保留。
 
-**当前状态：0.4.2菜单/两总控、旧版核心事件与G星级音乐已有用户实测；0.5.0的新上菜波形、Combo A、危险Hook及协调策略通过软件检查，仍需本轮真实关卡和硬件验收。** 不把编译、模拟或菜单预览当成真实起火/NGP四星通过。
+**当前状态：0.4.2菜单/两总控、旧版核心事件与G星级音乐已有用户实测；0.5.0通过软件检查，用户确认已测项目正常、触感合适。本轮日志保留星级及火警等手动预览，真实Combo A与危险自动触发仍待补充可核对的关卡证据。** 不把编译、模拟或菜单预览当成真实起火/NGP四星通过。
+
+0.5.1按用户确认新增三个功能开关：星级震动、星级音效、危险预警震动；软件验证通过，新增控制项待实机测试。见[设计](docs/design-feature-switches.md)与[针对性清单](docs/batch-test-0.5.1.md)。
 
 [仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式v1.6](docs/haptic-redesign-v1.6.md) · [本轮确认](docs/design-v1.6.md) · [审计](docs/audit-v1.6.md) · [报告](docs/test-report.md) · [整批测试](docs/batch-test-v1.6.md) · [路线图](docs/roadmap.md)
 
@@ -52,16 +54,17 @@ SDL3仅有[扩展与独占契约](docs/backend-extension.md)及模拟验证，�
 1. 正常退出游戏，保留现有BepInEx与其他MOD。将安装包 `BepInEx/plugins/OC2Haptic/` 复制到游戏对应目录；只复制DLL将缺失新安装所需音乐。已有0.4.2音频未变，可仅升级自身DLL。
 2. 不用示例cfg覆盖个人配置。启动会将精确匹配的旧默认波形迁移到v1.6，自定义精度和无效波形原文保留；旧默认与新值对照见报告。
 3. 配置为 `BepInEx/config/dev.oc2haptic.feedback.cfg`，设置 `Devices.XInputIndex=0..3`、`LocalGamePadSlot=真实游戏Pad`。F6通用试震确认目标；无把握时保持-1。
-4. 检查 `OC2Haptic initialized | 0.5.0-alpha v1.6 candidate` 和候选Hook安装日志。安装成功不等于Hook/硬件验收通过，按整批测试清单记录。
+4. 检查 `OC2Haptic initialized | 0.5.1-alpha v1.6 candidate` 和候选Hook安装日志。安装成功不等于Hook/硬件验收通过，按整批测试清单记录。
 
 ## F6与配置
 
 - 页面保留震动总开关＋总强度、音效总开关＋相对音量，两个滑杆均0–100%。F10任一路开启时全关，两路关闭时全开；F6始终可打开。
+- 「设置」顶部新增三个自动反馈开关：星级庆祝·震动、星级庆祝·音效、危险预警·震动。星级可选只音效、只震动或两者；两项都关时恢复普通上菜/Combo仲裁。危险组包含近烧焦/已烧焦/首次起火/持续提醒，不含拒单和订单超时，仍服从各事件cfg。关闭只停止相应输出；开启不补播。F10保留三项偏好。
 - 「设置」中逐项试震；「星级测试」保留四星的试音/试震/同时测试及音效包下拉。手动测试可比较默认关闭的自动事件，但必须服从两个总控、预算与冷却。
 - 不自动暂停，只屏蔽绑定本地厨师并显示鼠标。关闭恢复操作；关卡仍运行，调试可先手动暂停。关菜单/失焦立即停止，不补播。
 - `General`：HapticsEnabled、AudioEnabled、MasterIntensity；保留个人值。
 - `Events`：各自动反馈开关，ThrowSuccess/CatchSuccess/FoodBurned默认false；持续火灾用FireReminder可关闭。
-- `Combo.Enabled`控制分级，方案固定A；`Stars.Enabled`控制真实星级自动反馈，星级音乐/波形及手动测试保留。无需恢复事件倍率或四种模式菜单。
+- `Combo.Enabled`控制分级，方案固定A；`Stars.HapticsEnabled`、`Stars.AudioEnabled`和`Hazards.HapticsEnabled`对应三项功能开关。旧`Stars.Enabled`迁移为星级两项，有明确新值时优先新值。无需恢复事件倍率或四种模式菜单。
 - `Routing.AllowTeamDeliveryFallback`、`AllowTeamHazardFallback`默认false，不能开启猜测Combo或全设备广播。
 - `Patterns`可编辑片段，严格校验范围/长度/时长；非法值只静音对应震动，改设置时日志提示。手动编辑cfg先退出游戏，菜单修改即时保存；没有cfg文件监视热重载。
 

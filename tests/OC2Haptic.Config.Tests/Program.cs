@@ -129,7 +129,46 @@ internal static class Program
         // Single segments remain capped at500ms even for extended negative patterns.
         if(!customCorrect){failed++;Console.WriteLine("FAIL v16 exact custom and invalid patterns preserved independently");}
         else Console.WriteLine("PASS v16 exact custom and invalid patterns preserved independently");
-        Console.WriteLine("RESULT " + (content.Length+11 - failed) + "/" + (content.Length+11) + " config migration passed");
+        string featuresPath=Path.Combine(root,"feature-switches.cfg");
+        File.WriteAllText(featuresPath,"[Stars]\nEnabled = false\nHapticsEnabled = true\n[Hazards]\nHapticsEnabled = false\n[Events]\nFireReminder = false\n");
+        var features=new HapticConfig(new ConfigFile(featuresPath,false));
+        bool migratedFeatures=features.StarHapticsEnabled.Value && !features.StarAudioEnabled.Value && !features.HazardHapticsEnabled.Value &&
+            !HasSetting(featuresPath,"Stars","Enabled") && features.StarMode==StarFeedbackMode.HapticsOnly;
+        var oldStars=new HapticConfig(new ConfigFile(explicitPath,false));
+        migratedFeatures=migratedFeatures && !oldStars.StarHapticsEnabled.Value && !oldStars.StarAudioEnabled.Value;
+        if(!migratedFeatures){failed++;Console.WriteLine("FAIL legacy star switch migrates with explicit channel precedence");}
+        else Console.WriteLine("PASS legacy star switch migrates with explicit channel precedence");
+        bool modes=true;
+        for(int bits=0;bits<16;bits++)
+        {
+            features.HapticsEnabled.Value=(bits&1)!=0;features.AudioEnabled.Value=(bits&2)!=0;
+            features.StarHapticsEnabled.Value=(bits&4)!=0;features.StarAudioEnabled.Value=(bits&8)!=0;
+            bool h=(bits&5)==5,a=(bits&10)==10;
+            StarFeedbackMode mode=h?(a?StarFeedbackMode.HapticsAndAudio:StarFeedbackMode.HapticsOnly):(a?StarFeedbackMode.AudioOnly:StarFeedbackMode.Disabled);
+            modes=modes && features.StarMode==mode && features.IsEventEnabled(GameEventType.StarMilestone1)==(h||a);
+        }
+        features.StarHapticsEnabled.Value=false;features.StarAudioEnabled.Value=true;
+        features.ToggleAllOutput();features.ToggleAllOutput();
+        var savedFeatures=new HapticConfig(new ConfigFile(featuresPath,false));
+        modes=modes && !savedFeatures.StarHapticsEnabled.Value && savedFeatures.StarAudioEnabled.Value && !savedFeatures.HazardHapticsEnabled.Value;
+        var tracker=new StarMilestoneTracker();ScoreThresholds limits;ScoreThresholds.TryCreate(new[]{10,20,30},out limits);
+        tracker.Prime(new ScoreSnapshot("feature-round",0,0,limits,true,0));
+        features.StarHapticsEnabled.Value=false;features.StarAudioEnabled.Value=false;
+        int milestone=tracker.Observe(new ScoreSnapshot("feature-round",0,10,limits,true,10),features.IsEventEnabled(GameEventType.StarMilestone1));
+        modes=modes && CelebrationCoordinator.Select(GameEventType.DeliveryOrdered,milestone)==GameEventType.DeliveryOrdered;
+        features.StarAudioEnabled.Value=true;
+        modes=modes && tracker.Observe(new ScoreSnapshot("feature-round",0,10,limits,true,20),features.IsEventEnabled(GameEventType.StarMilestone1))==0;
+        if(!modes){failed++;Console.WriteLine("FAIL feature modes masters F10 persistence and disabled milestone fallback");}
+        else Console.WriteLine("PASS feature modes masters F10 persistence and disabled milestone fallback");
+        features.HazardHapticsEnabled.Value=false;
+        bool hazardsOff=true;foreach(var type in new[]{GameEventType.BurnWarning,GameEventType.FoodBurned,GameEventType.FireStart,GameEventType.FireReminder})
+            hazardsOff=hazardsOff && !features.IsEventEnabled(type);
+        hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.DeliveryFailure) && features.IsEventEnabled(GameEventType.OrderExpired);
+        features.HazardHapticsEnabled.Value=true;
+        hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.FireStart) && !features.IsEventEnabled(GameEventType.FireReminder) && !features.IsEventEnabled(GameEventType.FoodBurned);
+        if(!hazardsOff){failed++;Console.WriteLine("FAIL hazard group preserves individual switches and negative deliveries");}
+        else Console.WriteLine("PASS hazard group preserves individual switches and negative deliveries");
+        Console.WriteLine("RESULT " + (content.Length+14 - failed) + "/" + (content.Length+14) + " config migration passed");
         return failed == 0 ? 0 : 1;
     }
     private static bool HasSetting(string path,string section,string key)
