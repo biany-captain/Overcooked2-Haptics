@@ -12,11 +12,14 @@ namespace OC2Haptic.Core
         private readonly HashSet<T> selected=new HashSet<T>();
         private readonly List<T> finished=new List<T>();
         public int ActiveCount {get{return originals.Count;}}
+        public bool Focused {get;private set;}
         public string LastError {get;private set;}
         public TemporaryMusicMute(Func<T,bool> alive,Func<T,bool> music,Func<T,bool?> read,Func<T,bool,bool> write)
-        {this.alive=alive;this.music=music;this.read=read;this.write=write;}
+        {this.alive=alive;this.music=music;this.read=read;this.write=write;Focused=true;}
+        public bool SetFocused(bool focused){Focused=focused;return focused || End();}
         public bool Apply(IEnumerable<T> sources)
         {
+            if(!Focused)return End();
             selected.Clear();LastError="";bool success=true;
             foreach(T source in sources)
             {

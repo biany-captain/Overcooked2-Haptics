@@ -46,7 +46,7 @@ namespace OC2Haptic.Audio
         }
         internal void Tick()
         {
-            if(!requested || failed){Restore(false);return;}
+            if(!requested || failed || !mute.Focused){Restore(false);return;}
             try
             {
                 float sfx;
@@ -59,6 +59,12 @@ namespace OC2Haptic.Audio
             catch(Exception error){Fail(error.Message);}
         }
         internal void End(){requested=false;Restore(true);}
+        internal void SetFocused(bool focused)
+        {
+            bool active=mute.ActiveCount>0;
+            if(!mute.SetFocused(focused))Restore(true);
+            else if(!focused && active)log("Game BGM sources restored on focus loss.");
+        }
         internal void Idle(){requested=false;Restore(false);}
         private void Restore(bool force)
         {

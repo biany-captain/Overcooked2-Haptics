@@ -67,6 +67,7 @@ namespace OC2Haptic
                 rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>manualPreview,()=>settings.Star4Selection.Value,
                     ()=>settings.Star3AudioFile.Value,()=>settings.Star4AudioFile.Value);
                 rewardAudio.Prepare(Path.Combine(Path.GetDirectoryName(Info.Location),"audio"));
+                rewardAudio.SetMusicFocus(focused);
                 rewards=new RewardOutput(engine,rewardAudio,message=>Logger.LogInfo(message),rewardAudio.DurationMs);
                 coordinator=new FeedbackCoordinator(engine,rewards);
                 coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);
@@ -475,7 +476,9 @@ namespace OC2Haptic
         {
             focused=value;
             if(value)hazards.DeferReminders(clock.Elapsed.TotalMilliseconds);
-            if(!value && settings!=null && settings.RespectGameFocus.Value){Stop("focus lost");CloseMenuSafely();}
+            FeedbackFocus.Apply(value,settings!=null && settings.RespectGameFocus.Value,
+                musicFocus=>{if(rewardAudio!=null)rewardAudio.SetMusicFocus(musicFocus);},
+                ()=>{Stop("focus lost");CloseMenuSafely();});
         }
         private void SuspendRewardState(){combos.Reset();stars.Suspend();captures.Clear();}
         private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();hazards.Reset();cookingProbeStates.Clear();if(coordinator!=null)coordinator.Reset(clock.Elapsed.TotalMilliseconds);}

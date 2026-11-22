@@ -97,6 +97,7 @@ PASS music source changing to SFX is restored immediately
 PASS destroyed music source retires without native access
 PASS music source failures retain ownership while other sources restore
 PASS music source mute respects external unmute at release
+PASS music source focus restore is independent of background feedback opt out
 PASS v16 coordinator stale normal and unmapped targets stay silent
 PASS v16 coordinator cooldown and dedup are per device
 PASS v16 coordinator normal budget excludes gaps and isolates devices
@@ -122,4 +123,4 @@ PASS v16 cooking warning burned and removal are separate edges
 PASS v16 only a proved single team output can infer delivery device
 PASS v16 hazard cancellation does not stop unrelated output
 PASS v16 first score epoch preserves current hazard while true replacement stops it
-RESULT 124/124 passed
+RESULT 125/125 passed

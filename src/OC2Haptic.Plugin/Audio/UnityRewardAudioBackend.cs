@@ -99,6 +99,7 @@ namespace OC2Haptic.Audio
         {if(Thread.CurrentThread.ManagedThreadId!=mainThread)throw new InvalidOperationException("Reward audio requires Unity main thread.");}
         internal void TickMusic()
         {if(playingStar==4 && source!=null && source.isPlaying)gameMusic.Tick();else gameMusic.Idle();}
+        internal void SetMusicFocus(bool focused){gameMusic.SetFocused(focused);}
         public void Stop(){if(source!=null)source.Stop();playingStar=0;gameMusic.End();}
         private static void DestroyClips(PreparedPack pack)
         {foreach(var clip in pack.Clips)if(clip!=null)UnityEngine.Object.Destroy(clip);Array.Clear(pack.Clips,0,4);Array.Clear(pack.Durations,0,4);}

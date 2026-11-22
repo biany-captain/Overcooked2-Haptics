@@ -6,7 +6,8 @@
 - Keep minimal controls,100% gain initially, immediate arbitration and danger/independent-negative stop. Four-star sound dropdown retains customcool plus original three shorter choices, explicitly permitted by user; third sound has its own cfg path. Old12 files remain; old1/2/3 music no longer preloads/plays automatically.
 - Bounded PCM11s with per-policy custom duration checks; no new runtime decoder/dependency. Hard silence in core/player, missing files mute only audio,0ms star cooldown retains commit dedup. Per-level audio-only1/2 fallback avoids swallowing delivery; known defaults migrate exactly with logs and preserve custom values/preferences.
 - New asset condition is user-stated noncommercial use, separately recorded pending source/full license. Not covered by old asset GPL record. No trimming/looping/volume edits.
-- Core116/116, actual cfg20/20, actual game build0warnings/errors; new native star/music acceptance pending. No new multiplayer/SDL/HUD scope.
+- Four-star playback temporarily mutes only native Music-source mute flags, tracking new/departing/destroyed sources and restoring independently on completion/interruption/focus/cleanup; game volume parameters/settings and SFX remain untouched. Preserve pending failed restores for bounded main-thread retry. BGM focus cleanup is independent of background-feedback opt-out.
+- Core125/125, actual cfg20/20, metadata8/8, actual game build0warnings/errors. Independent review findings fixed via RED→GREEN; new native star/music/source binding acceptance pending. No new multiplayer/SDL/HUD scope.
 
 ## 0.5.1-alpha — 2026-11-22
 

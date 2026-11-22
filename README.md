@@ -2,7 +2,7 @@
 
 Windows《胡闹厨房2》XInput触觉增强MOD。在原项目上增量开发，保留Combo A、长低频负反馈、危险协调器、F6/F10和已验收的精简控制。
 
-**当前状态：0.6.0软件核心124/124、实际配置20/20、实际数据/音乐参数探针8/8，Unity/net35/x86编译零警告/错误。新星级规则、音乐与临时BGM静音等待真实游戏/手柄验收。** 0.5.1三个功能开关四项测试已有用户报告通过，相关历史证据保留。模拟、配置结构检查和编译不等于Hook/硬件通过。
+**当前状态：0.6.0软件核心125/125、实际配置20/20、实际数据/音乐参数探针8/8，Unity/net35/x86编译零警告/错误。新星级规则、音乐与临时BGM静音等待真实游戏/手柄验收。** 0.5.1三个功能开关四项测试已有用户报告通过，相关历史证据保留。模拟、配置结构检查和编译不等于Hook/硬件通过。
 
 [仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [v1.7需求](docs/requirements-star-feedback-v1.7.md) · [已确认增量方案](docs/design-star-feedback-v1.7.md) · [审计](docs/audit-star-feedback-v1.7.md) · [报告](docs/test-report.md) · [测试清单](docs/batch-test-v1.7.md) · [路线图](docs/roadmap.md)
 

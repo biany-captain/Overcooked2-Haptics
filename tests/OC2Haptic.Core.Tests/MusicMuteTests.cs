@@ -12,6 +12,7 @@ internal static class MusicMuteTests
         tests.Add("destroyed music source retires without native access", Destroyed);
         tests.Add("music source failures retain ownership while other sources restore", RestoreFailure);
         tests.Add("music source mute respects external unmute at release", ExternalChange);
+        tests.Add("music source focus restore is independent of background feedback opt out", Focus);
     }
     private static void Check(bool value){if(!value)throw new Exception("music source mute mismatch");}
     private sealed class Source
@@ -64,5 +65,15 @@ internal static class MusicMuteTests
         Check(scope.End() && !a.Muted);
         Check(scope.Apply(new[]{a}));a.Muted=false;Check(scope.Apply(new[]{a}) && a.Muted);
         Check(scope.End() && !a.Muted);
+    }
+    private static void Focus()
+    {
+        var a=new Source();var scope=Scope();int stops=0;Check(scope.Apply(new[]{a}));
+        FeedbackFocus.Apply(false,false,value=>{scope.SetFocused(value);},()=>stops++);
+        Check(!a.Muted && stops==0 && scope.Apply(new[]{a}) && !a.Muted);
+        FeedbackFocus.Apply(true,false,value=>{scope.SetFocused(value);},()=>stops++);
+        Check(scope.Apply(new[]{a}) && a.Muted && stops==0);
+        FeedbackFocus.Apply(false,true,value=>{scope.SetFocused(value);},()=>stops++);
+        Check(!a.Muted && stops==1);
     }
 }
