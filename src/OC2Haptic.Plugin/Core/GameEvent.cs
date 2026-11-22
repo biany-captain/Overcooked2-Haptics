@@ -3,12 +3,14 @@ namespace OC2Haptic.Core
     public enum EventConfidence { InputIntent, ConfirmedState }
     public enum GameEventType { ThrowSuccess, CatchSuccess, DeliverySuccess, DeliveryFailure, OrderExpired,
         DeliveryOrdered, DeliveryOutOfOrder, DeliveryUnclassified, ComboLevel2, ComboLevel3, ComboLevel4,
-        StarMilestone1, StarMilestone2, StarMilestone3, StarMilestone4 }
+        StarMilestone1, StarMilestone2, StarMilestone3, StarMilestone4,
+        BurnWarning, FoodBurned, FireStart, FireReminder, TestPulse }
     public static class GameEventTypes
     {
         public static bool IsStar(GameEventType type) { return type >= GameEventType.StarMilestone1 && type <= GameEventType.StarMilestone4; }
         public static int StarLevel(GameEventType type) { return IsStar(type) ? (int)type - (int)GameEventType.StarMilestone1 + 1 : 0; }
         public static bool IsCombo(GameEventType type) { return type >= GameEventType.ComboLevel2 && type <= GameEventType.ComboLevel4; }
+        public static bool IsHazard(GameEventType type) { return type>=GameEventType.BurnWarning && type<=GameEventType.FireReminder; }
     }
     public enum EventScope { LocalPlayer, LocalTeam, AllLocal, Unknown }
 
@@ -49,6 +51,21 @@ namespace OC2Haptic.Core
         public readonly int XInputIndex;
         public ControllerBinding(int localPad, int xInputIndex) { LocalPad = localPad; XInputIndex = xInputIndex; }
     }
+    public struct OutputParticipant
+    {
+        public readonly int Team,Pad;public readonly bool Local,Keyboard;
+        public OutputParticipant(int team,int pad,bool local,bool keyboard){Team=team;Pad=pad;Local=local;Keyboard=keyboard;}
+    }
+    public static class LocalOutputMap
+    {
+        public static bool IsSoleOutput(System.Collections.Generic.IEnumerable<OutputParticipant> participants,int team,int boundPad)
+        {
+            if(team<0 || team>1 || boundPad<0)return false;bool found=false;
+            foreach(var p in participants)
+            {if(p.Team!=team)continue;if(!p.Local || p.Keyboard || p.Pad!=boundPad)return false;found=true;}
+            return found;
+        }
+    }
 
     public static class EventRouter
     {
@@ -69,7 +86,7 @@ namespace OC2Haptic.Core
             if (personal) return gameEvent.Scope == EventScope.LocalPlayer;
             bool teamResult = gameEvent.EventType == GameEventType.DeliverySuccess ||
                 gameEvent.EventType == GameEventType.DeliveryFailure || gameEvent.EventType == GameEventType.OrderExpired ||
-                (gameEvent.EventType >= GameEventType.DeliveryOrdered && gameEvent.EventType <= GameEventType.StarMilestone4);
+                (gameEvent.EventType >= GameEventType.DeliveryOrdered && gameEvent.EventType <= GameEventType.StarMilestone4) || GameEventTypes.IsHazard(gameEvent.EventType);
             if (!teamResult || gameEvent.Scope != EventScope.LocalTeam || !gameEvent.TeamIdentity.HasValue ||
                 !gameEvent.LocalTeamIdentity.HasValue || gameEvent.TeamIdentity.Value < 0 || gameEvent.TeamIdentity.Value > 1 ||
                 gameEvent.TeamIdentity != gameEvent.LocalTeamIdentity) return false;

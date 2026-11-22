@@ -157,6 +157,7 @@ namespace OC2Haptic.GameEvents
             internal readonly Sample Before, Payload;
             internal readonly LevelContext Context;
             internal string RoundKey;
+            internal GameEventType? ConfirmedKitchenType;
             internal Observation(long sequence, int generation, int flowId, double timestamp, KitchenFlowMessage message,
                 Sample before, Sample payload, LevelContext context)
             {

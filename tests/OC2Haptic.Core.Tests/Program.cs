@@ -38,10 +38,10 @@ internal static class Program
             { "unbound or mismatched gamepad never resolves", UnboundRouting },
             { "keyboard remote unknown and input-intent events never resolve", UnsafeRouting },
             { "native backend rejects invalid indices and nonfinite strengths", NativeBoundary },
-            { "candidate catch profile has two pulses within 115ms", CatchProfile },
+            { "v16 candidate catch profile has two pulses within205ms", CatchProfile },
             { "stage C successful delivery has two pulses and a silent gap", DeliveryProfile },
-            { "stage C failed delivery is a 220ms low motor pulse", FailedProfile },
-            { "stage C expired order is a 250ms dual motor pulse", ExpiredProfile },
+            { "v16 rejected delivery is430ms fading low motor feedback", FailedProfile },
+            { "v16 expired order is505ms separated low motor feedback", ExpiredProfile },
             { "stage C team routing rejects wrong or unknown local team", TeamRouting },
             { "stage C catch retains personal binding rules", CatchRouting },
             { "stage C invalid-order failures can repeat after cooldown", InvalidOrderFailure },
@@ -65,6 +65,9 @@ internal static class Program
         MenuStrengthTests.Add(tests);
         SoundPackTests.Add(tests);
         V14Tests.Add(tests);
+        V16Tests.Add(tests);
+        CoordinatorTests.Add(tests);
+        HazardTests.Add(tests);
         int failed = 0;
         int run = 0;
         foreach (var test in tests)
@@ -280,11 +283,11 @@ internal static class Program
     private static void CatchProfile()
     {
         var b = new FakeBackend(); var e = new HapticEngine(b); var f = EventFeedback.For(GameEventType.CatchSuccess);
-        Check(f.Priority == 25 && f.CooldownMs == 120, "catch policy changed");
+        Check(f.Priority == 20 && f.CooldownMs == 300, "catch policy changed");
         e.Play(0, "catch", f.Pattern, f.Priority, f.CooldownMs, 0, .75f); e.Tick(0);
-        Near(.165f, b.Last.Left); Near(.075f, b.Last.Right);
-        e.Tick(35); Near(0,b.Last.Right);e.Tick(70);Near(.225f,b.Last.Right);
-        e.Tick(114);Near(.225f,b.Last.Right);e.Tick(115);Near(0,b.Last.Right);
+        Near(0, b.Last.Left); Near(.24f, b.Last.Right);
+        e.Tick(65); Near(0,b.Last.Right);e.Tick(125);Near(.2925f,b.Last.Right);
+        e.Tick(204);Near(.2925f,b.Last.Right);e.Tick(205);Near(0,b.Last.Right);
     }
 
     private static void DeliveryProfile()
@@ -300,19 +303,21 @@ internal static class Program
     private static void FailedProfile()
     {
         var b = new FakeBackend(); var e = new HapticEngine(b); var f = EventFeedback.For(GameEventType.DeliveryFailure);
-        Check(f.Priority == 55, "failure priority changed");
+        Check(f.Priority == 80, "failure priority changed");
         e.Play(0, "failure", f.Pattern, f.Priority, f.CooldownMs, 0, .75f); e.Tick(0);
-        Near(.255f, b.Last.Left); Near(0, b.Last.Right);
-        e.Tick(219); Near(.255f, b.Last.Left); e.Tick(220); Near(0, b.Last.Left);
+        Near(.54f, b.Last.Left); Near(.015f, b.Last.Right);
+        e.Tick(210); Near(.3525f,b.Last.Left);Near(0,b.Last.Right);
+        e.Tick(305);Near(.18f,b.Last.Left);e.Tick(429);Near(.18f,b.Last.Left);e.Tick(430);Near(0,b.Last.Left);
     }
 
     private static void ExpiredProfile()
     {
         var b = new FakeBackend(); var e = new HapticEngine(b); var f = EventFeedback.For(GameEventType.OrderExpired);
-        Check(f.Priority == 85, "expiry priority changed");
+        Check(f.Priority == 83, "expiry priority changed");
         e.Play(0, "expiry", f.Pattern, f.Priority, f.CooldownMs, 0, .75f); e.Tick(0);
-        Near(.3f, b.Last.Left); Near(.225f, b.Last.Right);
-        e.Tick(249); Near(.225f, b.Last.Right); e.Tick(250); Near(0, b.Last.Right);
+        Near(.4575f, b.Last.Left); Near(.015f, b.Last.Right);
+        e.Tick(190);Near(0,b.Last.Left);e.Tick(275);Near(.4125f,b.Last.Left);Near(0,b.Last.Right);
+        e.Tick(504);Near(.4125f,b.Last.Left);e.Tick(505);Near(0,b.Last.Left);
     }
 
     private static void TeamRouting()
@@ -338,8 +343,8 @@ internal static class Program
         var b = new FakeBackend(); var e = new HapticEngine(b); var f = EventFeedback.For(GameEventType.DeliveryFailure);
         var first = TeamEvent(GameEventType.DeliveryFailure, -1, 0, 0);
         Check(e.Play(0, f.Key(first), f.Pattern, f.Priority, f.CooldownMs, 0, 1), "first invalid-order failure rejected");
-        e.Tick(0); e.Tick(220);
-        Check(e.Play(0, f.Key(TeamEvent(GameEventType.DeliveryFailure, -1, 0, 0, 300)), f.Pattern, f.Priority, f.CooldownMs, 300, 1), "invalid sentinel was deduped forever");
+        e.Tick(0); e.Tick(430);
+        Check(e.Play(0, f.Key(TeamEvent(GameEventType.DeliveryFailure, -1, 0, 0, 1200)), f.Pattern, f.Priority, f.CooldownMs, 1200, 1), "invalid sentinel was deduped forever");
     }
 
     private static void ExpiryInterruptsGap()
@@ -348,9 +353,9 @@ internal static class Program
         var success = EventFeedback.For(GameEventType.DeliverySuccess); var expiry = EventFeedback.For(GameEventType.OrderExpired);
         e.Play(0, "success", success.Pattern, success.Priority, 120, 0, 1); e.Tick(0); e.Tick(70);
         Check(e.Play(0, "expiry", expiry.Pattern, expiry.Priority, 120, 100, 1), "expiry did not interrupt");
-        e.Tick(150); Near(.4f, b.Last.Left); Near(.3f, b.Last.Right);
-        e.Tick(350); Near(0, b.Last.Right); int count = b.Commands.Count;
-        e.Tick(500); Check(b.Commands.Count == count, "success second pulse replayed");
+        e.Tick(150); Near(.61f, b.Last.Left); Near(.02f, b.Last.Right);
+        e.Tick(350); Near(0, b.Last.Right);e.Tick(375);Near(.55f,b.Last.Left);e.Tick(605);Near(0,b.Last.Left);int count=b.Commands.Count;
+        e.Tick(800); Check(b.Commands.Count == count, "success second pulse replayed");
     }
 
     private static void DuplicateOrder()
@@ -400,7 +405,7 @@ internal static class Program
     private static void MenuCloseStops()
     {
         var b = new FakeBackend(); var e = new HapticEngine(b); var menu = new HapticMenuState(e); menu.Toggle();
-        menu.Preview(GameEventType.OrderExpired, 0, true, .75f, 0); e.Tick(0); Near(.3f, b.Last.Left);
+        menu.Preview(GameEventType.OrderExpired, 0, true, .75f, 0); e.Tick(0); Near(.4575f, b.Last.Left);
         menu.Close(); Near(0, b.Last.Left); int count = b.Commands.Count;
         e.Tick(500); Check(b.Commands.Count == count, "closed menu replayed a pulse");
     }

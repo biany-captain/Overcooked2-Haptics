@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0-alpha — 2026-11-22 · v1.6 candidate
+
+- Adopt confirmed Combo A: trusted upgrades only; same-tier/capped or unclassified success uses one90ms cue. Out-of-order requires a previously confirmed combo; actual rejection remains separate.
+- Import validated/generated balanced v1.6 defaults: out-of-order315ms, rejection430ms, expiry505ms, burn-warning450ms, fire820ms and470ms reminders. Negative/emergency ceiling950ms; action500ms/star850ms retained. Exact old defaults migrate; custom precision, invalid-profile mute and personal settings remain.
+- Centralize routing, staleness, dedup, per-device cooldown/active-time budgets, preemption/cancellation and stop. Hooks enqueue; no stale replay. Same-message arbitration stays immediate. One team audio emission can accompany separately mapped outputs in core tests.
+- Retain1–4-star haptics and all12 music files. Same-delivery star replaces ordinary/Combo; independent later rejection/expiry can interrupt celebration, as user confirmed. Positive success no longer uses a numeric-priority audio interruption threshold.
+- Add inspected-build-only client fire/cooking candidate hooks, aggregate incident edges, max5-second reminder frequency, clear/cancel and applied-state probe. FoodBurned remains defaultoff. Real hook/comfort acceptance is pending; no new game mechanism or score changes.
+- Default automatic throw/catch off, keep hooks/previews. Keep F6 two masters/two sliders; fine switches in cfg. Preserve gameSFX following/current relative100%, overriding stale65% source wording. Uninstalled0.4.3 left-fill/unified-motor drafts superseded by user's v1.6 dual-channel choice.
+- Add future backend descriptor/verified-identity exclusivity contract and fake SDL descriptor test; no SDL native/Steam Input runtime or broad multiplayer claim. Unknown multi/online owner never gets guessed Combo.
+
 ## 0.4.2-alpha — 2026-11-21
 
 - Simplify F6 to independent haptic/audio masters with master intensity/relative volume. Keep pack selection and all event/star previews; remove per-event toggles/gains and the redundant four-mode selector.

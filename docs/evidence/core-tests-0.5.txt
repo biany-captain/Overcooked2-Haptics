@@ -1,0 +1,104 @@
+PASS throw pulse lasts 65 ms and applies master multiplier
+PASS test pulse lasts 80 ms
+PASS cooldown survives completed pulse
+PASS duplicate events within 20 ms do not repeat output
+PASS higher priority interrupts without replaying the old pulse
+PASS lower priority cannot replace an active pulse
+PASS multi-segment pattern includes a silent gap
+PASS late tick stops instead of replaying stale segments
+PASS zero master intensity produces no nonzero command
+PASS stop clears pending effects and only touches owned slots
+PASS disconnect clears pending effect before reconnect
+PASS disconnect observed by Play clears old pulse even during cooldown
+PASS disconnect observed by a new event clears old pulse
+PASS stop retires ownership before an unrelated controller can reuse a slot
+PASS disconnect retires ownership before a later stop
+PASS invalid controller indices never reach backend
+PASS nonfinite master intensity is rejected
+PASS pattern rejects negative or excessive durations
+PASS matched local gamepad resolves selected controller
+PASS unbound or mismatched gamepad never resolves
+PASS keyboard remote unknown and input-intent events never resolve
+PASS native backend rejects invalid indices and nonfinite strengths
+PASS v16 candidate catch profile has two pulses within205ms
+PASS stage C successful delivery has two pulses and a silent gap
+PASS v16 rejected delivery is430ms fading low motor feedback
+PASS v16 expired order is505ms separated low motor feedback
+PASS stage C team routing rejects wrong or unknown local team
+PASS stage C catch retains personal binding rules
+PASS stage C invalid-order failures can repeat after cooldown
+PASS stage C expiry interrupts success gap without replay
+PASS stage C repeated order callback cannot duplicate a pulse
+PASS menu opening does not automatically vibrate
+PASS menu previews require open menu and global enable
+PASS menu event preview uses the existing double-pulse profile
+PASS menu generic test stops at 80ms on real-time ticks
+PASS menu closing cancels pending preview with no replay
+PASS menu invalid or unbound output never reaches backend
+PASS menu input ownership change releases old participant immediately
+PASS menu unchanged participant keeps one owned token
+PASS menu cleanup releases remaining participants after one release fails
+PASS score probe accepts positive strictly increasing level thresholds
+PASS score probe rejects missing invalid or unordered thresholds
+PASS score probe keeps threshold snapshots independent of mutable input
+PASS score probe requires explicit four-star availability
+PASS v13 combo first and four tiers use authoritative raw values
+PASS v13 combo unknown cannot infer levels from boolean or tips
+PASS v13 combo duplicate and reused order IDs retain real deliveries
+PASS v13 combo reset teams mode and disabled grading
+PASS v13 stars precise crossings highest only and no loss replay
+PASS v13 stars join restart teams thresholds and unavailable data
+PASS v13 stars disabled and stale snapshots never replay
+PASS v13 synchronous delivery combo star arbitration chooses one
+PASS v13 profiles distinct rhythms and strict duration limits
+PASS v13 editable patterns reject invalid unsafe values
+PASS v13 audio failure preserves rumble and modes stop output
+PASS v13 danger interrupts celebration without replay
+PASS v13 1000 duplicate delivery callbacks remain bounded in output
+PASS v13 nested capture finalizers release only their own frame
+PASS v13 thrown audio failures cannot break rumble or cleanup
+PASS v13 real calibration replay selects first and third star only
+PASS v13 level-up reads reliable pre-commit and reset snapshots
+PASS v13 star history survives loss toggle rebind and recovery
+PASS v13 star history survives threshold changes and distrust
+PASS v13 round identity survives toggles but changes at actual boundaries
+PASS menu strength default gain preserves profiles
+PASS menu strength saturation preserves balance and timing
+PASS menu strength zero never owns or blocks motors
+PASS menu strength nonfinite gains safely mute
+PASS menu strength explicit star tests preserve automatic mode
+PASS channel masters gate actions and explicit previews
+PASS channel haptics off preserves active music
+PASS channel audio off preserves active motors
+PASS sound pack PCM16 stereo decodes signed samples and unknown chunks
+PASS sound pack rejects truncated compressed oversized or invalid WAV
+PASS sound pack catalog excludes retired sets and isolates malformed manifests
+PASS sound pack supplied assets preserve full approved durations
+PASS sound pack permits full4050ms music and enforces5000ms boundary
+PASS v14 formal star pulses retain exact offsets within850ms
+PASS v14 long audio blocks lower star while higher star replaces it
+PASS v14 ordinary action does not stop musical tail
+PASS v14 failed audio still permits haptics and later stop
+PASS v14 queued feedback waits for drain and cancellation discards pending
+PASS v14 higher zero-gain star cancels previous star motors
+PASS v16 JSON is the exact candidate profile contract
+PASS v16 extended negative limit does not relax normal or star limits
+PASS v16 Combo A only confirmed upgrade and prior break
+PASS v16 coordinator stale normal and unmapped targets stay silent
+PASS v16 coordinator cooldown and dedup are per device
+PASS v16 coordinator normal budget excludes gaps and isolates devices
+PASS v16 coordinator negative budget cannot block first emergency
+PASS v16 coordinator preemption charges elapsed work and never replays
+PASS v16 coordinator one team sound with separate mapped motors
+PASS v16 coordinator stop and channel change remain independent
+PASS v16 backend registry rejects unknown cross backend and duplicate identity
+PASS v16 coordinator accepts a future backend descriptor with exclusive identity
+PASS v16 success does not interrupt star and independent failure does
+PASS v16 star with exhausted motor budget keeps audio and reports zero motor window
+PASS v16 fire spread is one incident and reminders have five second floor
+PASS v16 fire clear removes queued relevance and no resume replay
+PASS v16 cooking warning burned and removal are separate edges
+PASS v16 only a proved single team output can infer delivery device
+PASS v16 hazard cancellation does not stop unrelated output
+PASS v16 first score epoch preserves current hazard while true replacement stops it
+RESULT 103/103 passed

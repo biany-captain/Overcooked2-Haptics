@@ -13,6 +13,7 @@ New-Item -ItemType Directory -Path $pluginDir, $configDir -Force | Out-Null
 Copy-Item -LiteralPath $dll -Destination (Join-Path $pluginDir 'OC2Haptic.dll')
 Copy-Item -LiteralPath (Join-Path $projectRoot 'assets\audio') -Destination (Join-Path $pluginDir 'audio') -Recurse
 Copy-Item -LiteralPath (Join-Path $projectRoot 'config\OC2Haptic.cfg.example') -Destination $configDir
+Copy-Item -LiteralPath (Join-Path $projectRoot 'config\haptic_patterns_v1.6.json') -Destination $configDir
 foreach ($file in @('README.md', 'CHANGELOG.md')) { Copy-Item -LiteralPath (Join-Path $projectRoot $file) -Destination $staging }
 $docsDir = Join-Path $staging 'docs'
 New-Item -ItemType Directory -Path $docsDir -Force | Out-Null
@@ -23,7 +24,8 @@ $evidenceDir = Join-Path $projectRoot 'docs\evidence'
 Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\roadmap.md') -Destination $docsDir
 Copy-Item -LiteralPath (Join-Path $projectRoot 'docs\review-v14.md') -Destination $docsDir
 foreach($file in @('test-report-0.4.md','test-report-0.4.1.md','design-ultra-v3.md','batch-test-0.4.1.md','review-ultra-v3.md',
-    'design-simple-controls.md','batch-test-0.4.2.md','review-simple-controls.md')) {
+    'design-simple-controls.md','batch-test-0.4.2.md','review-simple-controls.md','test-report-0.4.2.md',
+    'haptic-redesign-v1.6.md','codex-v1.6-incremental.md','audit-v1.6.md','design-v1.6.md','backend-extension.md','batch-test-v1.6.md','review-v1.6.md')) {
     Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\'+$file)) -Destination $docsDir
 }
 if (Test-Path -LiteralPath $evidenceDir) { Copy-Item -LiteralPath $evidenceDir -Destination (Join-Path $docsDir 'evidence') -Recurse }

@@ -1,28 +1,32 @@
-# Test report — 0.4.2-alpha simplified controls
+# Test report — 0.5.0-alpha / v1.6 candidate
 
-2026-11-21. User approved two independent master switches plus master intensity/relative volume, removal of individual event switches/gains and four-mode UI, retention of all previews/packs, and F10 all-off/all-on. No new Hook, waveform timing, priority, music edit or multiplayer feature.
+2026-11-22. Incremental work on a79b635. User confirmed v1.6 standard low/high channels, Combo A, simple F6 with cfg fine switches, proven single-output routing and no guessed multi-player Combo. Independent later rejection/expiry may interrupt celebration; same delivery still selects only star/Combo/ordinary. Preserve personal intensity, game-master/SFX following and relative100%, sound pack and all12 music files. The uninstalled0.4.3 draft was superseded, never delivered.
 
-## Verification
+## Software evidence
 
-- Core83/83 PASS, including three new regressions first observed RED0/3: actions/explicit previews cannot bypass channel masters; haptics-off leaves current music playing; audio-off leaves current motor task running. Re-enabling does not replay. Existing routing, cooldown, queue, milestone and replacement tests remain green.
-- Actual BepInEx config13/13 PASS. New keys initially caused expected missing-API RED. Check legacy modes/global-off, explicit new-key precedence, F10 from a mixed state then all-on, persistence, retired event switches and gains removed, custom precise patterns/master/relative volume/pack/binding/hotkeys retained. An intermediate test oracle mistakenly matched TriggerMode when checking retired Mode; correcting the match to the complete key line fixed that test, with no production change.
-- Actual game-managed-data probe5/5 PASS; score/classification/threshold sources unchanged.
-- Actual Unity2017.4/net35/x86 build0 warnings/errors, assembly0.4.2.0; no new dependency.
+- Core103/103 PASS, evidence/core-tests-0.5.txt. Tests cover exact JSON profiles/metadata/policy values, negative950 vs action500/star850 limits, Combo upgrades/cap/reset/unknown prior break; per-device staleness, dedup, cross-key cooldown, active-time budgets excluding gaps, elapsed preemption, independent devices, one team sound, channel/stop behavior; verified/unknown backend identities and future SDL descriptor; fire spread/clear/reminders/cooking/removal, mapping and first-score-vs-current-hazard lifecycle. Existing meaningful engine/star/music regressions remain.
+- Actual BepInEx cfg15/15 PASS, evidence/config-tests-0.5.txt. Known old defaults migrate; exact custom precision/invalid values remain. Throw/catch/burned defaultoff, modeA fixed, generic80ms preserved, relative volume/master/pack/hotkeys remain. Legacy coarse success preference is retained when present; event switches now intentionally live only in cfg.
+- Actual game-managed-data probe6/6 PASS, evidence/probe-tests-0.5.txt. Previous score/threshold/NGP checks plus existence/signatures of client hazard methods and cooking-state data. These are metadata/data checks, not an executed Unity hook.
+- Actual Unity2017.4/net35/x86 build0 warnings/errors; assembly0.5.0.0. Source JSON/generated profile check passes. No runtime library/native dependency added. evidence/build-0.5.txt.
 
-Evidence: evidence/core-tests-0.4.2.txt, config-tests-0.4.2.txt, probe-tests-0.4.2.txt, build-0.4.2.txt. These checks do not execute the Unity menu or prove device behavior.
+New profile/config/coordinator/hazard tests first failed for missing APIs; profile/config then passed. Cross-key cooldown was separately reproduced RED0/1 and fixed. Exhausted motor-budget stars correctly retain audio and report motorWindowMs=0 (RED0/1→GREEN1/1); initial score epoch no longer cancels an existing current-round hazard (RED missingAPI→GREEN1/1). Old catch/failure/expiry assertions were updated to the explicitly selected v1.6 contract; unknown prior combo now degrades rather than guesses out-of-order. Shared star priority86 uses actual ordinal for higher-star replacement, not numeric priority alone.
 
-## Behavior and migration
+## Static game audit
 
-General.HapticsEnabled and AudioEnabled control both automatic and explicit output. Existing internal enum is derived from these flags, not an editable third control. Disabling one flag stops only that channel, clears pending feedback and does not re-poll/reset the device into stopping the other channel. Both disabled suppress output while score snapshots continue consuming crossed milestones. F10 turns all-off if either channel is on, otherwise all-on. Old combined Enabled and star Mode migrate once; explicit new keys win. Extra EventStrength and per-event switches are removed; custom waveform values remain. Original fixed0.85 Combo baseline is retained, not an extra user multiplier.
+Current game assembly MVID114d606a-29d5-472c-8ebe-c2c20fbe3be3. ClientFlammable.ApplyServerEvent uses onFire state and private Ignite/Extinguish; candidates patch those completed transitions. ClientCookingHandler.ApplyServerUpdate applies/caches CookingStateMessage state; postfix checks applied state, not just input intent. OnDisable cleanup is observed. FoodBurned default remains false until distinct real-event evidence and user approval.
 
-Menu retains two tabs, all event/star previews and the whole-pack dropdown; corresponding disabled-channel buttons are unavailable. Existing pause/focus/menu-close/scene/device cleanup remains. No arbitrary external programs, native UI automation or game mechanism changes.
+Existing score source already provides before/payload/after within one client message; retain user-approved immediate arbitration, not a blanket80ms delay. Fallback success/rejection/expiry hooks mark capture ownership; confirmed negative callbacks emit once from completion. A failed callback outside capture retains independent fallback.
 
-## Existing acceptance and remaining work
+Delivery messages do not identify the chef directly. Only proven single local output is inferred; unknown multi/online Combo stays silent. Explicit cfg permits ordinary team fallback to the selected binding only. Hazard routing is current Campaign/local-team candidate; no competitive-world guess. See audit-v1.6.md and hook-research.md.
 
-User now explicitly confirms G star/music system works. Native0.4.1 log shows12 clips prepared and TurboSwing1–4 combined previews, with clean shutdown; see test-report-0.4.1.md and evidence/runtime-feedback-0.4.1.txt. Prior0.3 real-event evidence remains valid for recorded cases. Do not infer realNGP4, every style, blind-listening accuracy, hardware synchronization or all compatibility cases from manual previews.
+## Acceptance levels
 
-Current0.4.2 menu layout, independent controls and physical behavior: pending user test via batch-test-0.4.2.md. D cooking/burning/advance warnings unimplemented; E multi-controller/online deferred. Known startup invalid-pattern warning omission remains; rejected waveform still mutes.
+Prior0.4.2 user confirmed “新菜单及两个总控均正常”; logs/cfg corroborate load/previews/F10/migration, with selective physical stop based on user report. G star/music was separately accepted. Historical report/evidence retained in test-report-0.4.2.md and runtime-menu-0.4.2.txt.
+
+All new0.5.0 waveform comfort, real ComboA classifications/ownership, real fire/cooking hook operation, reminder timing/clear, and new negative-vs-celebration interruption are UNTESTED natively. Follow batch-test-v1.6.md. Menu previews, static IL and fake-backend tests cannot certify actual food burned, real2/4/NGP milestones, multi-controller/online/virtual-device physical dedup,15-minute comfort,85% blind accuracy or physical latency. SDL3 is an extension/ownership contract only, no native SDL implementation loaded.
+
+Budget is elapsed nonzero planned-command time, not measured motor energy. Main-thread stalls/forced kill/driver failure cannot guarantee physical stop deadlines. Startup invalid-pattern warning omission from earlier version remains; invalid patterns mute and changed settings log warnings. Unknown actor mapping intentionally may drop feedback and logs why; no automatic broadcast. Low-end/other-device behavior is not inferred from XInput availability.
 
 ## Delivery
 
-Fresh read-only final review of7e2ced2..9ace5bb found no Critical/Important/Minor issues (review-simple-controls.md). Runtime/source ZIP inspection confirms12 unchangedWAV/12MIDI/credits; only ownDLL in runtime, zeroDLL in source; no retiredaudio/cache/game assemblies. Installed0.4.2.0 after a fresh game-stopped check and cold backup. Candidate/installedDLL match, personalcfg bytes unchanged, audio files untouched; tested cfg migration runs on next launch. Native0.4.2 acceptance remains pending. Original requirement snapshot remains unchanged; docs/roadmap.md maps A–G progress and later confirmed overrides. Delivery commits go to the existing feature branch/draftPR; no main merge.
+Candidate DLL and local packaging are prepared from verified source. Final independent review, installation and remote Git status will be recorded after actual checks; no premature native or deployment claim. Existing game/audio/config files have not been modified by this build step. Original supplied documents are retained verbatim; chat-confirmed overrides are explicit in design-v1.6.md. Earlier Git action was not executed because automatic approval review hit a usage limit; no bypass was attempted.

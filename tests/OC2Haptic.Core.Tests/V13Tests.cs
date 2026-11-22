@@ -46,7 +46,7 @@ internal static class V13Tests
         var t=new ComboTracker();
         Check(t.Resolve(P(1,true,0,0),true,ComboTriggerMode.EveryOrderedDelivery,4).Type==GameEventType.DeliveryUnclassified);
         Check(t.Resolve(P(2,true,4,8,trusted:false),true,ComboTriggerMode.EveryOrderedDelivery,4).Type==GameEventType.DeliveryUnclassified);
-        Check(t.Resolve(P(3,false,0,0),true,ComboTriggerMode.EveryOrderedDelivery,4).Type==GameEventType.DeliveryOutOfOrder);
+        Check(t.Resolve(P(3,false,0,0),true,ComboTriggerMode.EveryOrderedDelivery,4).Type==GameEventType.DeliveryUnclassified);
     }
     private static void ComboIds()
     {
@@ -100,7 +100,7 @@ internal static class V13Tests
     private static void Profiles()
     {
         Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.Count==3);
-        Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.TotalDurationMs==115);
+        Check(EventFeedback.For(GameEventType.CatchSuccess).Pattern.TotalDurationMs==205);
         Check(EventFeedback.For(GameEventType.ComboLevel4).Pattern.Count==7);
         Check(EventFeedback.For(GameEventType.StarMilestone4).Pattern.TotalDurationMs==660);
         Check(EventFeedback.OneStarHapticsOnly.Count==3);
@@ -129,7 +129,7 @@ internal static class V13Tests
     {
         var b=new Motors(); var e=new HapticEngine(b); var a=new Sound(); var o=new RewardOutput(e,a);
         Check(o.Emit(0,"star",GameEventType.StarMilestone4,null,0,.75f,.65f)); e.Tick(0); o.Interrupt();
-        var danger=EventFeedback.For(GameEventType.OrderExpired); Check(e.Play(0,"danger",danger.Pattern,85,120,10,.75f));
+        var danger=EventFeedback.For(GameEventType.FireStart); Check(e.Play(0,"danger",danger.Pattern,danger.Priority,danger.CooldownMs,10,.75f));
         Check(!o.Emit(0,"blocked",GameEventType.StarMilestone1,null,11,.75f,.65f)); Check(a.Plays==1 && a.Stops>0);
         e.Tick(1000); Check(b.LastZero);
     }

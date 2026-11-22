@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
 using BepInEx;
 using OC2Haptic.Config;
 using OC2Haptic.Core;
@@ -14,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.4.2")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.5.0")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -27,6 +28,12 @@ namespace OC2Haptic
         private CatchHooks catchHooks;
         private KitchenHooks kitchenHooks;
         private ScoreProbeHooks scoreProbeHooks;
+        private HazardHooks hazardHooks;
+        private readonly HazardStateTracker hazards=new HazardStateTracker();
+        private readonly Dictionary<int,CookingUIController.State> cookingProbeStates=new Dictionary<int,CookingUIController.State>();
+        private FeedbackCoordinator coordinator;
+        private bool hazardFaulted;
+        private long previewSequence,hazardSequence;
         private ScoreSourceProbe scoreProbe;
         private bool scoreProbeFaulted;
         private readonly CaptureStack<ScoreSourceProbe.Observation> captures=new CaptureStack<ScoreSourceProbe.Observation>();
@@ -60,16 +67,18 @@ namespace OC2Haptic
                 rewardAudio=new UnityRewardAudioBackend(message=>Logger.LogInfo(message),()=>manualPreview,()=>settings.SoundPackId.Value);
                 rewardAudio.Prepare(Path.Combine(Path.GetDirectoryName(Info.Location),"audio"));
                 rewards=new RewardOutput(engine,rewardAudio,message=>Logger.LogInfo(message),rewardAudio.DurationMs);
-                rewards.Mode=settings.FeedbackMode;
+                coordinator=new FeedbackCoordinator(engine,rewards);
+                coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);
                 hooks = new ThrowHooks(Logger);
                 catchHooks = new CatchHooks(Logger);
                 kitchenHooks = new KitchenHooks(Logger);
                 scoreProbeHooks = new ScoreProbeHooks(Logger);
+                hazardHooks = new HazardHooks(Logger);
                 scoreProbe = new ScoreSourceProbe(message => Logger.LogInfo(message), () => clock.Elapsed.TotalMilliseconds);
-                menu = new HapticMenu(this, settings, engine, () => clock.Elapsed.TotalMilliseconds, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
+                menu = new HapticMenu(this, settings, engine, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.4.2-alpha | x86/net35 | F6 management menu / F10 all-off/all-on (configurable)");
+                Logger.LogInfo("OC2Haptic initialized | 0.5.0-alpha v1.6 candidate | x86/net35 | F6 management menu / F10 all-off/all-on (configurable)");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -81,6 +90,7 @@ namespace OC2Haptic
             Current = this;
             Array.Clear(faultedEvents, 0, faultedEvents.Length);
             scoreProbeFaulted = false;
+            hazardFaulted=false;hazards.Reset();cookingProbeStates.Clear();
             scoreProbe.Reset("plugin enabled");
             SuspendRewardState();
             currentFlow = null; flowOwner = null; nextFlowLookupMs = 0;
@@ -90,6 +100,7 @@ namespace OC2Haptic
             InstallAdapter("CatchSuccess", catchHooks.Install);
             InstallAdapter("Kitchen", kitchenHooks.Install);
             InstallAdapter("Score capture", scoreProbeHooks.Install);
+            InstallAdapter("Candidate hazards",hazardHooks.Install);
         }
 
         private void InstallAdapter(string name, Action install)
@@ -109,6 +120,7 @@ namespace OC2Haptic
                 if (!wasInRound && inRound) scoreProbe.Reset("round began");
                 if (wasInRound && !inRound) {scoreProbe.Reset("round ended");EndRewardRound();}
                 if ((wasInRound && !inRound) || (!wasPaused && paused)) Stop("round ended or game paused");
+                if(wasPaused && !paused)hazards.DeferReminders(now);
                 wasInRound = inRound; wasPaused = paused;
 
                 if (settings.MenuKey.Value != KeyCode.None && Input.GetKeyDown(settings.MenuKey.Value) && !menuFaulted)
@@ -126,6 +138,8 @@ namespace OC2Haptic
                     Logger.LogInfo("All feedback " + (settings.AnyOutputEnabled ? "enabled" : "disabled"));
                 }
                 if (now >= nextPollMs) { PollSelectedDevice(); nextPollMs = now + 250; }
+                if(!hazardFaulted && hazards.ReminderDue(now) && GameplayOutputAllowed(now))
+                    DispatchHazard(GameEventType.FireReminder,hazards.Incident,"ClientFlammable:active-incident");
                 pendingFeedback.Drain(DispatchNow);
                 if (!settings.HapticsEnabled.Value) return;
                 // Explicit menu previews must reach zero even while the game's own time is paused.
@@ -187,7 +201,7 @@ namespace OC2Haptic
         {
             if (!ready || faultedEvents[(int)type]) return;
             GameEvent gameEvent = PlayerResolver.FromTeam(type, team, orderId, settings.LocalPadSlot.Value,
-                clock.Elapsed.TotalMilliseconds, source);
+                clock.Elapsed.TotalMilliseconds, source,RequireSingleDeliveryDevice(type));
             if (gameEvent == null) { LogUnresolved(type, "bound local team unavailable; eventTeam=" + team + " order=" + orderId); return; }
             Dispatch(gameEvent);
         }
@@ -196,17 +210,21 @@ namespace OC2Haptic
         internal ScoreSourceProbe.Observation CaptureScoreProbe(ClientKitchenFlowControllerBase flow, KitchenFlowMessage message)
         {
             // In the installed Unity2017 assembly GetHashCode returns Scene.m_Handle; handle itself is internal.
-            if(rewardRound.Observe(SceneManager.GetActiveScene().GetHashCode(),flow.GetInstanceID(),flow.InRound))
-            {combos.Reset();stars.Reset();captures.Clear();pendingFeedback.Clear();}
+            bool previousRound=rewardRound.Key!=null;
+            if(coordinator.ObserveRound(rewardRound,SceneManager.GetActiveScene().GetHashCode(),flow.GetInstanceID(),flow.InRound,clock.Elapsed.TotalMilliseconds))
+            {combos.Reset();stars.Reset();captures.Clear();if(previousRound){pendingFeedback.Clear();hazards.Reset();cookingProbeStates.Clear();}}
             var frame=scoreProbe.Before(flow,message);
             if(frame!=null){frame.RoundKey=flow.InRound?rewardRound.Key:null;captures.Push(frame);}return frame;
         }
         internal void ReleaseScoreCapture(ScoreSourceProbe.Observation frame){captures.Release(frame);}
-        internal bool OwnsSuccessCapture(ClientKitchenFlowControllerBase flow,int team,uint order)
+        internal bool OwnsKitchenCapture(ClientKitchenFlowControllerBase flow,GameEventType type,int team,uint order)
         {
             var frame=captures.Current;
-            return IsScoreCaptureEnabled && frame!=null && frame.FlowId==flow.GetInstanceID() &&
-                frame.Kind==KitchenFlowMessage.MsgType.Delivery && frame.Success && (int)frame.Team==team && frame.OrderId==order;
+            if(!IsScoreCaptureEnabled || frame==null || frame.FlowId!=flow.GetInstanceID() || (int)frame.Team!=team)return false;
+            bool match=type==GameEventType.DeliveryUnclassified?frame.Kind==KitchenFlowMessage.MsgType.Delivery && frame.Success && frame.OrderId==order:
+                type==GameEventType.DeliveryFailure?frame.Kind==KitchenFlowMessage.MsgType.Delivery && !frame.Success:
+                type==GameEventType.OrderExpired && frame.Kind==KitchenFlowMessage.MsgType.OrderExpired && frame.OrderId==order;
+            if(match)frame.ConfirmedKitchenType=type;return match;
         }
         internal void CompleteScoreProbe(ClientKitchenFlowControllerBase flow, ScoreSourceProbe.Observation observation)
         {
@@ -223,18 +241,22 @@ namespace OC2Haptic
             var thresholds=observation.Context.Thresholds;
             if(observation.Before!=null)stars.Prime(new ScoreSnapshot(round,team,observation.Before.Score,thresholds,trusted,observation.Timestamp));
             int milestone=stars.Observe(new ScoreSnapshot(round,team,after==null?0:after.Score,thresholds,trusted,observation.Timestamp),
-                GameplayOutputAllowed(observation.Timestamp));
+                settings.IsEventEnabled(GameEventType.StarMilestone1) && GameplayOutputAllowed(observation.Timestamp));
             GameEventType? delivery=null;string key=round+":"+team+":score:"+observation.Sequence;
             ComboResult result=null;
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && observation.Success)
             {
                 var payload=new DeliveryPayload(comboRound,team,unchecked((int)observation.OrderId),after==null?-1:after.Deliveries,
                     observation.WasCombo,after==null?0:after.Multiplier,after==null?0:after.Combo,trusted,observation.Timestamp);
-                result=combos.Resolve(payload,true,settings.ComboMode.Value,settings.MaxHapticTier.Value);
+                result=combos.Resolve(payload,settings.IsEventEnabled(GameEventType.ComboLevel2),settings.ComboMode,settings.MaxHapticTier.Value);
                 if(result.Duplicate)return;
                 delivery=result.Type;key=payload.Key;
             }
-            else if(after!=null)combos.ObserveState(comboRound,team,after.Multiplier,trusted);
+            else
+            {
+                if(after!=null)combos.ObserveState(comboRound,team,after.Multiplier,trusted);
+                delivery=observation.ConfirmedKitchenType;
+            }
             var selected=CelebrationCoordinator.Select(delivery,milestone);
             if(settings.DebugLogEvents.Value || !trusted)
                 Logger.LogInfo("Reward decision | session="+round+" team="+team+" order="+observation.OrderId+
@@ -243,9 +265,42 @@ namespace OC2Haptic
                     " selected="+selected+" star="+milestone+" confidence="+(trusted?"VerifiedClientState":"Unknown")+" arbitration=SameClientMessage");
             if(!selected.HasValue)return;
             GameEvent gameEvent=PlayerResolver.FromTeam(selected.Value,team,unchecked((int)observation.OrderId),settings.LocalPadSlot.Value,
-                observation.Timestamp,"ClientKitchenFlowControllerBase.ApplyServerEvent:committed");
-            if(gameEvent!=null)Dispatch(gameEvent,key+":"+selected.Value);
+                observation.Timestamp,"ClientKitchenFlowControllerBase.ApplyServerEvent:committed",RequireSingleDeliveryDevice(selected.Value));
+            if(gameEvent!=null)Dispatch(gameEvent,key);else LogUnresolved(selected.Value,"delivery device not provable; no automatic broadcast");
         }
+        private bool RequireSingleDeliveryDevice(GameEventType type)
+        {return GameEventTypes.IsCombo(type) || (!GameEventTypes.IsStar(type) && !settings.TeamDeliveryFallback.Value);}
+        internal void ObserveFire(ClientFlammable source,bool active)
+        {
+            if(!ready || hazardFaulted || source==null)return;
+            double now=clock.Elapsed.TotalMilliseconds;var transition=hazards.ObserveFire(source.GetInstanceID(),active,now);
+            if(transition.Started || transition.Cleared || settings.DebugLogEvents.Value)
+                Logger.LogInfo("Hazard probe | source=ClientFlammable entity="+source.GetInstanceID()+" active="+active+" incident="+transition.Incident+
+                    " started="+transition.Started+" cleared="+transition.Cleared+" confidence=AppliedClientStateCandidate");
+            if(transition.Cleared)
+            {coordinator.Cancel(GameEventType.FireStart,transition.Incident,now);coordinator.Cancel(GameEventType.FireReminder,transition.Incident,now);}
+            if(transition.Started && GameplayOutputAllowed(now))DispatchHazard(GameEventType.FireStart,transition.Incident,"ClientFlammable.Ignite:confirmed-state");
+        }
+        internal void ObserveCooking(ClientCookingHandler source,CookingUIController.State state)
+        {
+            if(!ready || hazardFaulted || source==null)return;
+            int entity=source.GetInstanceID();CookingUIController.State previous;
+            if(!cookingProbeStates.TryGetValue(entity,out previous) || previous!=state)
+                Logger.LogInfo("Hazard probe | source=ClientCookingHandler entity="+entity+" state="+state+" confidence=AppliedClientStateCandidate");
+            if(state==CookingUIController.State.Idle)cookingProbeStates.Remove(entity);else cookingProbeStates[entity]=state;
+            var stage=state==CookingUIController.State.OverDoing?CookingHazardState.Warning:state==CookingUIController.State.Ruined?CookingHazardState.Burned:CookingHazardState.None;
+            var selected=hazards.ObserveCooking(entity,stage);double now=clock.Elapsed.TotalMilliseconds;
+            if(stage!=CookingHazardState.Warning)coordinator.Cancel(GameEventType.BurnWarning,entity,now);
+            if(selected.HasValue && GameplayOutputAllowed(now))DispatchHazard(selected.Value,entity,"ClientCookingHandler.ApplyServerUpdate:confirmed-state");
+        }
+        private void DispatchHazard(GameEventType type,int entity,string source)
+        {
+            var e=PlayerResolver.FromHazard(type,entity,settings.LocalPadSlot.Value,clock.Elapsed.TotalMilliseconds,source,settings.TeamHazardFallback.Value);
+            if(e!=null)Dispatch(e,rewardRound.Key+":hazard:"+entity+":"+type+":"+(++hazardSequence));
+            else LogUnresolved(type,"campaign local hazard target unavailable; no guessed broadcast");
+        }
+        internal void StopFaultedHazards(Exception error)
+        {if(hazardFaulted)return;hazardFaulted=true;hazards.Reset();cookingProbeStates.Clear();StopOutput();Logger.LogError("Hazard candidates disabled after adapter error; other events continue: "+error);}
         internal void StopFaultedScoreProbe(Exception error)
         {
             if (scoreProbeFaulted) return;
@@ -266,13 +321,13 @@ namespace OC2Haptic
             double now=clock.Elapsed.TotalMilliseconds;
             int eventIndex = (int)gameEvent.EventType;
             observedEvents[eventIndex]++;
-            int output = EventRouter.Resolve(gameEvent, new ControllerBinding(settings.LocalPadSlot.Value, settings.XInputIndex.Value));
-            bool allowed = GameplayOutputAllowed(now) &&
-                EventRouter.IsLocalTarget(gameEvent,settings.LocalPadSlot.Value);
+            var binding=new ControllerBinding(settings.LocalPadSlot.Value,settings.XInputIndex.Value);
+            int output = EventRouter.Resolve(gameEvent,binding);
+            bool allowed = settings.IsEventEnabled(gameEvent.EventType) && GameplayOutputAllowed(now) &&
+                (!GameEventTypes.IsHazard(gameEvent.EventType) || (!hazardFaulted && hazards.IsCurrent(gameEvent.EventType,gameEvent.EntityIdentity)));
             EventFeedback feedback = EventFeedback.For(gameEvent.EventType);
-            float intensity=settings.Intensity*(GameEventTypes.IsCombo(gameEvent.EventType)?.85f:1);
-            bool accepted = allowed && rewards.Emit(output,correlation??feedback.Key(gameEvent),gameEvent.EventType,
-                settings.PatternFor(gameEvent.EventType),now,intensity,settings.SoundVolume.Value,false);
+            bool accepted = coordinator.Emit(gameEvent,binding,correlation??feedback.Key(gameEvent),settings.PatternFor(gameEvent.EventType),
+                now,settings.Intensity,settings.SoundVolume.Value,allowed);
             if (accepted) scheduledEvents[eventIndex]++;
             string identity = gameEvent.PlayerIdentity + ":" + gameEvent.LocalPad + ":" + gameEvent.IsKeyboard + ":" + output + ":" + gameEvent.TeamIdentity;
             if (settings.DebugLogEvents.Value || lastProbeIdentity[eventIndex] != identity)
@@ -282,7 +337,7 @@ namespace OC2Haptic
                     " | player=" + gameEvent.PlayerIdentity + " gamePad=" + gameEvent.LocalPad + " keyboard=" + gameEvent.IsKeyboard +
                     " team=" + gameEvent.TeamIdentity + " localTeam=" + gameEvent.LocalTeamIdentity +
                     " entity=" + gameEvent.EntityIdentity + " source=" + gameEvent.SourceHook +
-                    " | XInput=" + output + " allowed=" + allowed + " accepted=" + accepted);
+                    " | XInput=" + output + " allowed=" + allowed + " accepted=" + accepted+" reason="+coordinator.LastDropReason);
             }
         }
 
@@ -295,7 +350,7 @@ namespace OC2Haptic
         {
             if (faultedEvents[(int)type]) return;
             faultedEvents[(int)type] = true;
-            engine.StopAll();
+            StopOutput();
             Logger.LogError(type + " adapter disabled after a fault; other event adapters remain available: " + error);
         }
 
@@ -338,14 +393,14 @@ namespace OC2Haptic
         {
             if(sender==settings.HapticsEnabled || sender==settings.AudioEnabled)
             {
-                pendingFeedback.Clear();rewards.Mode=settings.FeedbackMode;
+                pendingFeedback.Clear();coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);hazards.DeferReminders(clock.Elapsed.TotalMilliseconds);
                 if(!settings.AnyOutputEnabled)SuspendRewardState();
                 return;
             }
             Stop("output settings changed");
-            settings.RefreshPatterns();rewards.Mode=settings.FeedbackMode;
+            settings.RefreshPatterns();coordinator.SetMode(settings.FeedbackMode,clock.Elapsed.TotalMilliseconds);
             if(settings.InvalidPatterns.Length>0)Logger.LogWarning("Invalid haptic patterns muted: "+settings.InvalidPatterns);
-            if(sender==settings.XInputIndex || sender==settings.LocalPadSlot)SuspendRewardState();
+            if(sender==settings.XInputIndex || sender==settings.LocalPadSlot){SuspendRewardState();coordinator.Reset(clock.Elapsed.TotalMilliseconds);}
             if (sender == settings.XInputIndex || sender == settings.LocalPadSlot) CloseMenuSafely();
             deviceConnected = null; nextPollMs = 0; Array.Clear(lastProbeIdentity, 0, lastProbeIdentity.Length);
             if (float.IsNaN(settings.MasterIntensity.Value) || float.IsInfinity(settings.MasterIntensity.Value))
@@ -376,7 +431,9 @@ namespace OC2Haptic
         private void StopOutput()
         {
             pendingFeedback.Clear();
-            if (rewards != null) rewards.Stop();
+            hazards.DeferReminders(clock.Elapsed.TotalMilliseconds);
+            if(coordinator!=null)coordinator.Stop(clock.Elapsed.TotalMilliseconds);
+            else if (rewards != null) rewards.Stop();
             else if(engine!=null)engine.StopAll();
         }
 
@@ -385,10 +442,11 @@ namespace OC2Haptic
             Stop("plugin disabled");
             if (scoreProbe != null) scoreProbe.Reset("plugin disabled");
             SuspendRewardState();
+            hazards.Reset();cookingProbeStates.Clear();
             CloseMenuSafely();
             if (Current == this) Current = null;
             if (subscribed) { SceneManager.activeSceneChanged -= OnSceneChanged; subscribed = false; }
-            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks, scoreProbeHooks })
+            foreach (IDisposable adapter in new IDisposable[] { hooks, catchHooks, kitchenHooks, scoreProbeHooks, hazardHooks })
             {
                 if (adapter == null) continue;
                 try { adapter.Dispose(); }
@@ -401,20 +459,20 @@ namespace OC2Haptic
         private void OnApplicationFocus(bool value)
         {
             focused=value;
+            if(value)hazards.DeferReminders(clock.Elapsed.TotalMilliseconds);
             if(!value && settings!=null && settings.RespectGameFocus.Value){Stop("focus lost");CloseMenuSafely();}
         }
         private void SuspendRewardState(){combos.Reset();stars.Suspend();captures.Clear();}
-        private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();}
+        private void EndRewardRound(){rewardRound.End();combos.Reset();stars.Reset();captures.Clear();hazards.Reset();cookingProbeStates.Clear();if(coordinator!=null)coordinator.Reset(clock.Elapsed.TotalMilliseconds);}
         private bool PreviewEvent(GameEventType type,StarFeedbackMode? previewMode)
         {
             if(!ready || !settings.AnyOutputEnabled || (!focused && settings.RespectGameFocus.Value))return false;
             manualPreview=true;
             try
             {
-                if(previewMode.HasValue)rewards.Stop();
-                float intensity=settings.Intensity*(GameEventTypes.IsCombo(type)?.85f:1);
-                return rewards.Emit(settings.XInputIndex.Value,"preview:"+type,type,settings.PatternFor(type,previewMode),clock.Elapsed.TotalMilliseconds,
-                    intensity,settings.SoundVolume.Value,false,previewMode);
+                if(previewMode.HasValue)StopOutput();
+                return coordinator.Preview(type,settings.XInputIndex.Value,"preview:"+type+":"+(++previewSequence),settings.PatternFor(type,previewMode),
+                    clock.Elapsed.TotalMilliseconds,settings.Intensity,settings.SoundVolume.Value,previewMode);
             }
             finally {manualPreview=false;}
         }

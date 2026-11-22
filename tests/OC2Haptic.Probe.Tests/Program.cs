@@ -14,7 +14,8 @@ internal static class Program
             { "selected variant resolves actual level by identity", SelectedVariant },
             { "missing PC star boundaries remain unavailable", MissingBoundaries },
             { "actual PC score getters retain NGP gate", ActualBoundaries },
-            { "unchanged client state cannot hide a differing payload", MismatchMustLog }
+            { "unchanged client state cannot hide a differing payload", MismatchMustLog },
+            { "candidate client hazard signatures and cooking state data exist", HazardSignatures }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -60,6 +61,14 @@ internal static class Program
         Check(ScoreSourceProbe.ShouldLog(true, true, false));
         Check(!ScoreSourceProbe.ShouldLog(true, true, true));
         Check(ScoreSourceProbe.ShouldLog(false, true, true));
+    }
+    private static void HazardSignatures()
+    {
+        var flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
+        Check(typeof(ClientFlammable).GetMethod("Ignite",flags,null,Type.EmptyTypes,null)!=null);
+        Check(typeof(ClientFlammable).GetMethod("Extinguish",flags,null,new[]{typeof(bool),typeof(bool)},null)!=null);
+        Check(typeof(CookingStateMessage).GetField("m_cookingState").FieldType==typeof(CookingUIController.State));
+        Check((int)CookingUIController.State.OverDoing==3 && (int)CookingUIController.State.Ruined==4);
     }
     private static FieldInfo PcField()
     {

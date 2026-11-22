@@ -5,6 +5,7 @@
     <GameRoot Condition="'$(GameRoot)' == ''">$(OC2_GAME_DIR)</GameRoot>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/OC2Haptic.Plugin/Core/GameEvent.cs" Link="Core/GameEvent.cs" />
     <Compile Include="../../src/OC2Haptic.Plugin/Core/ScoreThresholds.cs" Link="ScoreThresholds.cs" />
     <Compile Include="../../src/OC2Haptic.Plugin/GameEvents/ScoreSourceProbe.cs" Link="ScoreSourceProbe.cs" />
     <Compile Include="../../src/OC2Haptic.Plugin/GameEvents/ScoreProbeMetadata.cs" Link="ScoreProbeMetadata.cs" />

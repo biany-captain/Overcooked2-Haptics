@@ -11,9 +11,11 @@ namespace OC2Haptic.UI
     {
         private static readonly GameEventType[] Types = { GameEventType.ThrowSuccess, GameEventType.CatchSuccess,
             GameEventType.DeliveryOrdered,GameEventType.DeliveryOutOfOrder,GameEventType.DeliveryUnclassified,
-            GameEventType.DeliveryFailure,GameEventType.OrderExpired,GameEventType.ComboLevel2,GameEventType.ComboLevel3,GameEventType.ComboLevel4 };
-        private static readonly string[] Names = { "投掷成功", "接住食材 · 双段", "顺序上菜 / Combo ×1", "乱序成功上菜", "成功上菜 · 未分类",
-            "上菜失败", "订单超时", "Combo ×2", "Combo ×3", "Combo ×4+" };
+            GameEventType.DeliveryFailure,GameEventType.OrderExpired,GameEventType.ComboLevel2,GameEventType.ComboLevel3,GameEventType.ComboLevel4,
+            GameEventType.BurnWarning,GameEventType.FoodBurned,GameEventType.FireStart,GameEventType.FireReminder };
+        private static readonly string[] Names = { "投掷 · 自动默认关", "接住 · 自动默认关", "成功上菜 · 短震", "乱序成功 · 轻双段", "成功 · 安全降级",
+            "真正拒单 · 长拖尾", "订单超时 · 两重击", "Combo ×2 升级", "Combo ×3 升级", "Combo ×4 升级",
+            "烧焦预警 · 候选", "食物烧焦 · 自动默认关", "起火 · 候选", "持续火警 · 候选" };
         private static readonly GameEventType[] StarTypes={GameEventType.StarMilestone1,GameEventType.StarMilestone2,GameEventType.StarMilestone3,GameEventType.StarMilestone4};
         private static readonly string[] StarNames={"一星","二星","三星","四星"};
         private const string BottomNote = "菜单打开时只屏蔽当前绑定厨师的操作。\n关卡仍会运行；F6 或右上角 × 关闭菜单。";
@@ -21,7 +23,6 @@ namespace OC2Haptic.UI
         private readonly UnityEngine.Object owner;
         private readonly HapticConfig settings;
         private readonly HapticMenuState state;
-        private readonly Func<double> now;
         private readonly Action<string> log;
         private readonly Func<GameEventType,StarFeedbackMode?,bool> previewEvent;
         private readonly Action stopPreviews;
@@ -43,12 +44,12 @@ namespace OC2Haptic.UI
         private string status = "点击试震，可直接比较现有触觉节奏。";
 
         internal HapticMenu(UnityEngine.Object owner, HapticConfig settings, HapticEngine engine,
-            Func<double> now, Action<string> log, Func<GameEventType,StarFeedbackMode?,bool> previewEvent, Action stopPreviews,RewardSoundPack[] soundPacks)
+            Action<string> log, Func<GameEventType,StarFeedbackMode?,bool> previewEvent, Action stopPreviews,RewardSoundPack[] soundPacks)
         {
-            this.owner = owner; this.settings = settings; this.now = now; this.log = log;
+            this.owner = owner; this.settings = settings; this.log = log;
             this.previewEvent=previewEvent;this.stopPreviews=stopPreviews;
             this.soundPacks=soundPacks;
-            state = new HapticMenuState(engine);
+            state = new HapticMenuState(engine,stopPreviews);
             acquireInput = AcquireInput;
         }
 
@@ -58,7 +59,6 @@ namespace OC2Haptic.UI
         {
             if (state.IsOpen) { Close(); return; }
             state.Toggle();
-            stopPreviews();
             previousCursorVisible = Cursor.visible;
             previousCursorLock = Cursor.lockState;
             ownsCursor = true;
@@ -105,7 +105,6 @@ namespace OC2Haptic.UI
             bool wasOpen = state.IsOpen;
             state.Close();
             packDropdown=false;
-            stopPreviews();
             try
             {
                 inputs.Clear();
@@ -344,7 +343,7 @@ namespace OC2Haptic.UI
 
         private void Preview(GameEventType? type, string name,StarFeedbackMode? previewMode=null)
         {
-            bool accepted = type.HasValue?previewEvent(type.Value,previewMode):state.Preview(type, settings.XInputIndex.Value, settings.HapticsEnabled.Value, settings.Intensity, now());
+            bool accepted = previewEvent(type??GameEventType.TestPulse,previewMode);
             status = accepted ? "已安排「" + name + "」手动预览。" : "未播放：检查连接、模式，或等待当前反馈结束。";
             log("Menu preview | type=" + (type.HasValue ? type.Value.ToString() : "Generic80ms") +
                 " mode="+(previewMode.HasValue?previewMode.Value.ToString():"Automatic")+" accepted=" + accepted + " XInput=" + settings.XInputIndex.Value + " master=" + settings.Intensity+

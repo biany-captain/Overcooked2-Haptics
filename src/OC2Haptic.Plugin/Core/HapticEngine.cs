@@ -35,6 +35,7 @@ namespace OC2Haptic.Core
             if (state.Pattern != null && nowMs - state.StartedMs >= state.Pattern.TotalDurationMs) Finish(index);
             if (state.Pattern != null && priority <= state.Priority) return false;
             state.Pattern = pattern;
+            state.Key = eventKey;
             state.StartedMs = nowMs;
             state.Priority = priority;
             state.Intensity = masterIntensity;
@@ -93,11 +94,14 @@ namespace OC2Haptic.Core
             OutputState state = outputs[index];
             return state.Pattern != null && nowMs - state.StartedMs < state.Pattern.TotalDurationMs && state.Priority >= priority;
         }
+        public bool IsPlaying(int index,string key,double nowMs)
+        {return index>=0 && index<outputs.Length && outputs[index].Pattern!=null && outputs[index].Key==key && nowMs-outputs[index].StartedMs<outputs[index].Pattern.TotalDurationMs;}
 
         private void Finish(int index)
         {
             OutputState state = outputs[index];
             state.Pattern = null;
+            state.Key = null;
             if (state.Touched) backend.SetMotors(index, 0, 0);
             state.Touched = false;
             state.LastLeft = 0; state.LastRight = 0;
@@ -120,6 +124,7 @@ namespace OC2Haptic.Core
             internal int Priority;
             internal float Intensity;
             internal bool Touched;
+            internal string Key;
             internal float LastLeft;
             internal float LastRight;
             internal readonly Dictionary<string, double> RecentEvents = new Dictionary<string, double>();

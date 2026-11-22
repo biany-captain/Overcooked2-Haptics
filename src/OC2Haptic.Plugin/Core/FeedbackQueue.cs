@@ -7,10 +7,11 @@ namespace OC2Haptic.Core
     public sealed class FeedbackQueue
     {
         private readonly Queue<Entry> entries=new Queue<Entry>();
-        public void Enqueue(GameEvent gameEvent,string correlation){entries.Enqueue(new Entry{Event=gameEvent,Correlation=correlation});}
-        public void Clear(){entries.Clear();}
+        private readonly object gate=new object();
+        public void Enqueue(GameEvent gameEvent,string correlation){lock(gate)entries.Enqueue(new Entry{Event=gameEvent,Correlation=correlation});}
+        public void Clear(){lock(gate)entries.Clear();}
         public void Drain(Action<GameEvent,string> emit)
-        {while(entries.Count>0){Entry entry=entries.Dequeue();emit(entry.Event,entry.Correlation);}}
+        {while(true){Entry entry;lock(gate){if(entries.Count==0)return;entry=entries.Dequeue();}emit(entry.Event,entry.Correlation);}}
         private struct Entry{internal GameEvent Event;internal string Correlation;}
     }
 }

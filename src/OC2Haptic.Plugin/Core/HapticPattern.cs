@@ -23,20 +23,20 @@ namespace OC2Haptic.Core
     public sealed class HapticPattern
     {
         private readonly HapticSegment[] segments;
-        private readonly bool celebration;
-        public HapticPattern(params HapticSegment[] segments) : this(false, segments) { }
-        private HapticPattern(bool celebration, params HapticSegment[] segments)
+        public int MaxDurationMs {get;private set;}
+        public HapticPattern(params HapticSegment[] segments) : this(500, segments) { }
+        private HapticPattern(int maximum, params HapticSegment[] segments)
         {
             if (segments == null || segments.Length == 0) throw new ArgumentException("A pattern needs segments.", "segments");
             int total = 0;
             foreach (HapticSegment segment in segments)
             {
-                if (segment.DurationMs <= 0 || total > (celebration ? 850 : 500) - segment.DurationMs)
+                if (segment.DurationMs <= 0 || total > maximum - segment.DurationMs)
                     throw new ArgumentException("Pattern exceeds its action/celebration duration limit.", "segments");
                 total += segment.DurationMs;
             }
             this.segments = (HapticSegment[])segments.Clone();
-            this.celebration=celebration;
+            MaxDurationMs=maximum;
             foreach(var segment in segments)if(segment.Left>0 || segment.Right>0)HasMotorOutput=true;
             TotalDurationMs = total;
         }
@@ -52,9 +52,10 @@ namespace OC2Haptic.Core
             var scaled=new HapticSegment[segments.Length];
             for(int i=0;i<segments.Length;i++)scaled[i]=new HapticSegment(
                 Math.Min(1,segments[i].Left*gain),Math.Min(1,segments[i].Right*gain),segments[i].DurationMs);
-            return new HapticPattern(celebration,scaled);
+            return new HapticPattern(MaxDurationMs,scaled);
         }
-        public static HapticPattern Celebration(params HapticSegment[] segments) { return new HapticPattern(true, segments); }
+        public static HapticPattern Celebration(params HapticSegment[] segments) { return new HapticPattern(850, segments); }
+        public static HapticPattern Extended(params HapticSegment[] segments) { return new HapticPattern(950, segments); }
         public int TotalDurationMs { get; private set; }
         public HapticSegment SegmentAt(int index) { return segments[index]; }
     }

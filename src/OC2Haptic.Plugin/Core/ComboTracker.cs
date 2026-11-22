@@ -34,7 +34,8 @@ namespace OC2Haptic.Core
             state.LastKey=p.Key;state.LastOrdinal=p.Ordinal;
             bool ordered=p.Authoritative && p.WasCombo && p.Multiplier>=1 && p.RawStreak>=1;
             bool unordered=p.Authoritative && !p.WasCombo && p.Multiplier==0 && p.RawStreak==0;
-            if(!ordered) {state.Tier=null;return new ComboResult(unordered?GameEventType.DeliveryOutOfOrder:GameEventType.DeliveryUnclassified,null,p.RawStreak,false);}
+            if(!ordered) {bool hadCombo=state.Tier.HasValue && state.Tier.Value>0;state.Tier=unordered?(int?)0:null;
+                return new ComboResult(unordered && hadCombo?GameEventType.DeliveryOutOfOrder:GameEventType.DeliveryUnclassified,null,p.RawStreak,false);}
             int tier=Math.Min(Math.Max(maxTier,1),Math.Min(p.Multiplier,4));
             bool levelUp=state.Tier.HasValue && tier>state.Tier.Value;state.Tier=tier;
             var type=GameEventType.DeliveryOrdered;

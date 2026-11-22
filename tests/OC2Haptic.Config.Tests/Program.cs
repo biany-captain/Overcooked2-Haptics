@@ -27,8 +27,9 @@ internal static class Program
         {
             string path=Path.Combine(root,"delivery-"+i+".cfg");File.WriteAllText(path,deliveryConfigs[i]);
             var settings=new HapticConfig(new ConfigFile(path,false));
-            bool correct=!File.ReadAllText(path).Contains("[Events]") && settings.HapticsEnabled.Value && settings.AudioEnabled.Value;
-            if(!correct){failed++;Console.WriteLine("FAIL retired event switches removed "+i);}else Console.WriteLine("PASS retired event switches removed "+i);
+            bool correct=settings.IsEventEnabled(GameEventType.DeliveryOrdered)==(i==1) && !settings.IsEventEnabled(GameEventType.DeliveryOutOfOrder) &&
+                !settings.IsEventEnabled(GameEventType.DeliveryUnclassified) && !HasSetting(path,"Events","DeliverySuccess");
+            if(!correct){failed++;Console.WriteLine("FAIL legacy coarse preference migrates to cfg event switches "+i);}else Console.WriteLine("PASS legacy coarse preference migrates to cfg event switches "+i);
         }
         string gainPath=Path.Combine(root,"gain-preserve.cfg");
         File.WriteAllText(gainPath,"[General]\nMasterIntensity = 0.4\n[StarFeedback]\nMode = AudioOnly\nSoundVolume = 0.7\n[EventStrength]\nStarMilestone1 = 1.5\n");
@@ -44,7 +45,7 @@ internal static class Program
         File.WriteAllText(invalidPath,"[EventStrength]\nThrowSuccess = Infinity\n");
         var clamped=new HapticConfig(new ConfigFile(invalidPath,false));
         bool clampCorrect=!File.ReadAllText(invalidPath).Contains("[EventStrength]") &&
-            clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right==.32f;
+            clamped.PatternFor(GameEventType.ThrowSuccess).SegmentAt(0).Right==.33f;
         if(!clampCorrect){failed++;Console.WriteLine("FAIL retired nonfinite gain cannot affect output");}
         else Console.WriteLine("PASS retired nonfinite gain cannot affect output");
         string musicPath=Path.Combine(root,"v14-preserve.cfg");
@@ -86,7 +87,7 @@ internal static class Program
             bool h=mode=="HapticsAndAudio" || mode=="HapticsOnly" || mode=="BadMode";
             bool a=mode=="HapticsAndAudio" || mode=="AudioOnly" || mode=="BadMode";
             channelsCorrect=channelsCorrect && migrated.HapticsEnabled.Value==h && migrated.AudioEnabled.Value==a &&
-                !File.ReadAllText(path).Contains("\nMode =") && !File.ReadAllText(path).Contains("\nEnabled =");
+                !HasSetting(path,"StarFeedback","Mode") && !HasSetting(path,"General","Enabled");
         }
         string offPath=Path.Combine(root,"channels-off.cfg");
         File.WriteAllText(offPath,"[General]\nEnabled = false\n[StarFeedback]\nMode = HapticsAndAudio\n");
@@ -102,10 +103,40 @@ internal static class Program
             explicitChannels.Intensity==.42f && explicitChannels.SoundVolume.Value==.37f && explicitChannels.SoundPackId.Value=="kitchen_rock";
         var reloaded=new HapticConfig(new ConfigFile(explicitPath,false));
         explicitCorrect=explicitCorrect && reloaded.HapticsEnabled.Value && reloaded.AudioEnabled.Value &&
-            !File.ReadAllText(explicitPath).Contains("\nEnabled =");
+            !HasSetting(explicitPath,"General","Enabled");
         if(!explicitCorrect){failed++;Console.WriteLine("FAIL explicit channel precedence F10 and persistence");}
         else Console.WriteLine("PASS explicit channel precedence F10 and persistence");
-        Console.WriteLine("RESULT " + (content.Length+9 - failed) + "/" + (content.Length+9) + " config migration passed");
+        const string oldThree="0,0.3,55;0,0,50;0,0.35,60;0,0,50;0.22,0.43,80";
+        const string oldFour="0,0.31,55;0,0,40;0,0.35,55;0,0,40;0,0.39,55;0,0,40;0.25,0.48,95";
+        string v16Path=Path.Combine(root,"v16-upgrade.cfg");
+        File.WriteAllText(v16Path,"[General]\nMasterIntensity = 0.42\n[StarFeedback]\nSoundVolume = 0.37\nSoundPackId = future-pack\n[Combo]\nTriggerMode = EveryOrderedDelivery\n[Patterns]\nComboLevel3 = "+oldThree+"\nComboLevel4 = "+oldFour+"\nOrderExpired = 0.4,0.3,250\n");
+        var v16=new HapticConfig(new ConfigFile(v16Path,false));
+        bool v16Correct=v16.ComboMode==ComboTriggerMode.OnLevelUp && !v16.IsEventEnabled(GameEventType.ThrowSuccess) &&
+            !v16.IsEventEnabled(GameEventType.CatchSuccess) && !v16.IsEventEnabled(GameEventType.FoodBurned) &&
+            v16.PatternFor(GameEventType.DeliveryOrdered).TotalDurationMs==90 && v16.PatternFor(GameEventType.DeliveryFailure).TotalDurationMs==430 &&
+            v16.PatternFor(GameEventType.OrderExpired).TotalDurationMs==505 && v16.PatternFor(GameEventType.ComboLevel3).TotalDurationMs==375 &&
+            v16.PatternFor(GameEventType.ComboLevel4).TotalDurationMs==490 && v16.PatternFor(GameEventType.FireStart).TotalDurationMs==820 &&
+            v16.Intensity==.42f && v16.SoundVolume.Value==.37f && v16.SoundPackId.Value=="future-pack" && v16.PatternFor(GameEventType.TestPulse).TotalDurationMs==80;
+        if(!v16Correct){failed++;Console.WriteLine("FAIL v16 defaults known profiles and Combo A migrate without resetting global preferences");}
+        else Console.WriteLine("PASS v16 defaults known profiles and Combo A migrate without resetting global preferences");
+        string customPath=Path.Combine(root,"v16-custom.cfg");
+        const string customThree="0.0004,0.3,55;0,0,50;0,0.35,60;0,0,50;0.22,0.43,80";
+        File.WriteAllText(customPath,"[Patterns]\nComboLevel3 = "+customThree+"\nComboLevel4 = "+oldFour+"\nDeliveryFailure = invalid\nOrderExpired = 0.5,0,505\n");
+        var custom=new HapticConfig(new ConfigFile(customPath,false));
+        bool customCorrect=custom.Patterns[GameEventType.ComboLevel3].Value==customThree && custom.PatternFor(GameEventType.ComboLevel3).SegmentAt(0).Left==.0004f &&
+            custom.PatternFor(GameEventType.ComboLevel4).SegmentAt(6).Right==.79f && custom.Patterns[GameEventType.DeliveryFailure].Value=="invalid" &&
+            custom.PatternFor(GameEventType.DeliveryFailure)==null && custom.PatternFor(GameEventType.OrderExpired)==null;
+        // Single segments remain capped at500ms even for extended negative patterns.
+        if(!customCorrect){failed++;Console.WriteLine("FAIL v16 exact custom and invalid patterns preserved independently");}
+        else Console.WriteLine("PASS v16 exact custom and invalid patterns preserved independently");
+        Console.WriteLine("RESULT " + (content.Length+11 - failed) + "/" + (content.Length+11) + " config migration passed");
         return failed == 0 ? 0 : 1;
+    }
+    private static bool HasSetting(string path,string section,string key)
+    {
+        string current="";foreach(string line in File.ReadAllLines(path))
+        {string text=line.Trim();if(text.StartsWith("[") && text.EndsWith("]"))current=text.Substring(1,text.Length-2);
+            else if(current==section && text.StartsWith(key+" ="))return true;}
+        return false;
     }
 }

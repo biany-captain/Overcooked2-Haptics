@@ -1,0 +1,2 @@
+OC2Haptic-0.5.0-alpha.zip: WAV12/MIDI12, DLL1, candidate/spec present, source-identical audio, no cache/game binaries.
+OC2Haptic-0.5.0-alpha-source.zip: WAV12/MIDI12, DLL0, candidate/spec present, source-identical audio, no cache/game binaries.
