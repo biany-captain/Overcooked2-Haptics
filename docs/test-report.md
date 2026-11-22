@@ -20,4 +20,6 @@ The three new controls, their layout/persistence and actual-game selective autom
 
 ## Delivery
 
-Final independent delta review, package validation and installation are recorded when completed. Existing branch/draft PR is retained; no main merge or public release. Preserve personal config bytes during installation; migration occurs on first startup, without replacing the selected pack, volume, intensity, binding or custom patterns.
+Independent read-only delta review of e883cee..7d4e7df found no clear Critical/Important/Minor issues. See review-feature-switches.md. Retain the existing star replacement rule: audio-only stars may end a preceding lower-priority motor task early; selective cancellation when changing a switch remains independent. Actual UI/game/hardware acceptance is pending.
+
+Runtime/source ZIP checks passed: ownDLL1/sourceDLL0, unchanged12WAV/12MIDI with credits, canonical JSON and new controls design/checklist/review, no caches/game binaries. See evidence/packages-0.5.1.txt. With the game stopped, backed up the old ownDLL/cfg and installed0.5.1.0 only; installed DLL matches the verified artifact, personal cfg bytes unchanged, audio untouched. First startup performs tested configuration migration. Existing authorized feature branch/draft PR is retained; no main merge or public release. Native user checklist is the remaining acceptance step.
