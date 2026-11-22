@@ -22,9 +22,11 @@ namespace OC2Haptic.Audio
         private GameObject audioObject;
         private AudioSource source;
         private bool faulted;
+        private int playingStar;
+        private readonly GameMusicMute gameMusic;
         internal RewardSoundPack[] Packs {get;private set;}
         internal UnityRewardAudioBackend(Action<string> log,Func<bool> manualPreview,Func<string> selectedPack,Func<string> thirdPath,Func<string> fourthPath)
-        {this.log=log;this.manualPreview=manualPreview;this.selectedPack=selectedPack;this.thirdPath=thirdPath;this.fourthPath=fourthPath;}
+        {this.log=log;this.manualPreview=manualPreview;this.selectedPack=selectedPack;this.thirdPath=thirdPath;this.fourthPath=fourthPath;gameMusic=new GameMusicMute(log);}
 
         internal void Prepare(string root)
         {
@@ -44,6 +46,8 @@ namespace OC2Haptic.Audio
                         using(var file=File.OpenRead(path))pcm=PcmWaveReader.Read(file);
                         if(!StarAudioPolicy.DurationAllowed(star,pcm.DurationMs,pack.Id!=RewardSoundPack.CustomStarId))
                             throw new FormatException("Audio duration does not match the selected v1.7 star policy.");
+                        if(star==3 && (pcm.DurationMs<800 || pcm.DurationMs>1300))
+                            log("Custom third-star audio outside recommended0.8-1.3s; retained | durationMs="+pcm.DurationMs);
                         loaded.Clips[star-1]=Upload(pack.Id,star,pcm.Samples,pcm.Channels,pcm.SampleRate);
                         loaded.Durations[star-1]=pcm.DurationMs;
                         log("Reward audio prepared | pack="+pack.Id+" star="+star+" durationMs="+pcm.DurationMs+" rate="+pcm.SampleRate+" channels="+pcm.Channels);
@@ -84,7 +88,8 @@ namespace OC2Haptic.Audio
                     source.spatialBlend=0;source.volume=1;source.ignoreListenerVolume=false;
                 }
                 source.outputAudioMixerGroup=group;source.ignoreListenerPause=manualPreview();
-                source.Stop();source.PlayOneShot(pack.Clips[star-1],RewardOutput.SafeVolume(volume));
+                Stop();source.PlayOneShot(pack.Clips[star-1],RewardOutput.SafeVolume(volume));playingStar=star;
+                if(star==4)gameMusic.Begin(manager);
                 log("Reward audio | pack="+id+" star="+star+" durationMs="+pack.Durations[star-1]+" volume="+volume+" manual="+manualPreview()+" accepted=True");
                 return true;
             }
@@ -92,7 +97,9 @@ namespace OC2Haptic.Audio
         }
         private void RequireMainThread()
         {if(Thread.CurrentThread.ManagedThreadId!=mainThread)throw new InvalidOperationException("Reward audio requires Unity main thread.");}
-        public void Stop(){if(source!=null)source.Stop();}
+        internal void TickMusic()
+        {if(playingStar==4 && source!=null && source.isPlaying)gameMusic.Tick();else gameMusic.End();}
+        public void Stop(){if(source!=null)source.Stop();playingStar=0;gameMusic.End();}
         private static void DestroyClips(PreparedPack pack)
         {foreach(var clip in pack.Clips)if(clip!=null)UnityEngine.Object.Destroy(clip);Array.Clear(pack.Clips,0,4);Array.Clear(pack.Durations,0,4);}
         public void Dispose(){Stop();foreach(var pack in prepared.Values)DestroyClips(pack);if(audioObject!=null)UnityEngine.Object.Destroy(audioObject);}

@@ -158,6 +158,8 @@ namespace OC2Haptic
             }
         }
 
+        private void LateUpdate(){if(ready && rewardAudio!=null)rewardAudio.TickMusic();}
+
         private void OnGUI()
         {
             if (!ready || menuFaulted || menu == null) return;
@@ -327,7 +329,7 @@ namespace OC2Haptic
             observedEvents[eventIndex]++;
             var binding=new ControllerBinding(settings.LocalPadSlot.Value,settings.XInputIndex.Value);
             int output = EventRouter.Resolve(gameEvent,binding);
-            bool allowed = settings.IsEventEnabled(gameEvent.EventType) && GameplayOutputAllowed(now) &&
+            bool allowed = settings.ShouldDispatch(gameEvent.EventType) && GameplayOutputAllowed(now) &&
                 (!GameEventTypes.IsHazard(gameEvent.EventType) || (!hazardFaulted && hazards.IsCurrent(gameEvent.EventType,gameEvent.EntityIdentity)));
             EventFeedback feedback = EventFeedback.For(gameEvent.EventType);
             bool accepted = coordinator.Emit(gameEvent,binding,correlation??feedback.Key(gameEvent),settings.PatternFor(gameEvent.EventType),

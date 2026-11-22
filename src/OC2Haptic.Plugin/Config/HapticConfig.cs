@@ -186,5 +186,7 @@ namespace OC2Haptic.Config
             if(GameEventTypes.IsHazard(type) && !HazardHapticsEnabled.Value)return false;
             ConfigEntry<bool> entry;return EventSwitches.TryGetValue(type,out entry) && entry.Value;
         }
+        internal bool ShouldDispatch(GameEventType type)
+        {return GameEventTypes.IsHazard(type)?EventSwitches[type].Value:IsEventEnabled(type);}
     }
 }

@@ -163,7 +163,8 @@ internal static class Program
         features.HazardHapticsEnabled.Value=false;
         bool hazardsOff=true;foreach(var type in new[]{GameEventType.BurnWarning,GameEventType.FoodBurned,GameEventType.FireStart,GameEventType.FireReminder})
             hazardsOff=hazardsOff && !features.IsEventEnabled(type);
-        hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.DeliveryFailure) && features.IsEventEnabled(GameEventType.OrderExpired);
+        hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.DeliveryFailure) && features.IsEventEnabled(GameEventType.OrderExpired) &&
+            features.ShouldDispatch(GameEventType.FireStart) && !features.ShouldDispatch(GameEventType.FoodBurned);
         features.HazardHapticsEnabled.Value=true;
         hazardsOff=hazardsOff && features.IsEventEnabled(GameEventType.FireStart) && !features.IsEventEnabled(GameEventType.FireReminder) && !features.IsEventEnabled(GameEventType.FoodBurned);
         if(!hazardsOff){failed++;Console.WriteLine("FAIL hazard group preserves individual switches and negative deliveries");}

@@ -74,6 +74,7 @@ namespace OC2Haptic.Core
             if(first && log!=null)log("Audio backend failed; haptics and cleanup continue: "+error);
         }
         public void Interrupt(){audioUntil=0;audioStar=0;try{audio.Stop();}catch(Exception error){AudioFailed(error);}}
+        public bool Interrupt(double now){bool active=now<audioUntil;Interrupt();return active;}
         public void Stop(){engine.StopAll();Interrupt();}
     }
 }

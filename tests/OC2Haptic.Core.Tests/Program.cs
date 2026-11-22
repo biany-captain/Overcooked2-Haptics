@@ -67,6 +67,7 @@ internal static class Program
         V14Tests.Add(tests);
         V16Tests.Add(tests);
         V17Tests.Add(tests);
+        MusicMuteTests.Add(tests);
         CoordinatorTests.Add(tests);
         HazardTests.Add(tests);
         int failed = 0;

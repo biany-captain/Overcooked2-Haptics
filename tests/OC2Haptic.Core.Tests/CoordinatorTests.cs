@@ -24,6 +24,7 @@ internal static class CoordinatorTests
         tests.Add("feature switches block hazards without suppressing rejection or music", FeatureHazards);
         tests.Add("feature switches do not block explicit previews or bypass global masters", FeaturePreviews);
         tests.Add("feature switches audio-only team dedup never restores star motors", FeatureTeamAudio);
+        tests.Add("v17 exhausted negative budget cannot block immediate celebration stop", BudgetAudioStop);
     }
     private static GameEvent E(GameEventType type,double at,int pad=0,int entity=1)
     {return new GameEvent(type,EventScope.LocalTeam,at,pad,pad,entity,true,false,EventConfidence.ConfirmedState,"fixture",0,0);}
@@ -177,7 +178,8 @@ internal static class CoordinatorTests
     {
         var r=new Rig();Check(r.Emit(E(GameEventType.StarMilestone4,0),"star",0));r.Engine.Tick(0);
         r.Coordinator.SetFeatureSwitches(true,true,false,20);
-        Check(!r.Emit(E(GameEventType.FireStart,30),"disabled-fire",30));Check(r.Sound.Playing && r.Motors.Right[0]>0);
+        Check(r.Sound.Playing && r.Motors.Right[0]>0);
+        Check(r.Emit(E(GameEventType.FireStart,30),"disabled-fire",30));Check(!r.Sound.Playing && r.Motors.Left[0]==0 && r.Motors.Right[0]==0);
         Check(r.Emit(E(GameEventType.DeliveryFailure,40),"rejection",40));r.Engine.Tick(40);Check(!r.Sound.Playing && r.Motors.Left[0]>.7f);
         var h=new Rig();Check(h.Emit(E(GameEventType.FireStart,0),"fire",0));h.Engine.Tick(0);
         h.Coordinator.SetFeatureSwitches(true,true,false,20);Check(h.Motors.Left[0]==0);
@@ -206,5 +208,17 @@ internal static class CoordinatorTests
         Check(r.Emit(E(GameEventType.StarMilestone3,0),"same",0));
         Check(!r.Emit(E(GameEventType.StarMilestone3,10,1),"same",10,output:1));r.Engine.Tick(10);
         Check(r.Sound.Plays==1 && r.Motors.Writes==0);
+    }
+    private static void BudgetAudioStop()
+    {
+        var r=new Rig();for(int i=0;i<5;i++){Check(r.Emit(E(GameEventType.DeliveryFailure,i*1500),"budget"+i,i*1500));r.Engine.Tick(i*1500+430);}
+        Check(r.Emit(E(GameEventType.StarMilestone4,7000),"star",7000));r.Engine.Tick(7000);Check(r.Sound.Playing);
+        Check(r.Emit(E(GameEventType.DeliveryFailure,7500),"urgent-new-failure",7500));r.Engine.Tick(7500);
+        Check(!r.Sound.Playing && r.Motors.Left[0]==0 && r.Motors.Right[0]==0);
+        var c=new Rig();Check(c.Emit(E(GameEventType.DeliveryFailure,0),"initial",0));c.Engine.Tick(430);
+        Check(c.Emit(E(GameEventType.StarMilestone4,1000),"celebration",1000));
+        Check(c.Emit(E(GameEventType.DeliveryFailure,1100),"independent-in-cooldown",1100) && !c.Sound.Playing);
+        Check(c.Emit(E(GameEventType.StarMilestone4,1150),"later-celebration",1150));
+        Check(!c.Emit(E(GameEventType.DeliveryFailure,1160),"independent-in-cooldown",1160) && c.Sound.Playing);
     }
 }

@@ -14,6 +14,7 @@ internal static class V17Tests
         tests.Add("v17 zero cooldown stars still deduplicate committed correlation", Dedup);
         tests.Add("v17 audio duration and custom descriptors keep legacy four star choices", Assets);
         tests.Add("v17 supplied PCM assets meet approved durations without clipping", ActualAudio);
+        tests.Add("v17 custom third star advisory duration is not a hard mute", AdvisoryDuration);
     }
     private static void Check(bool value){if(!value)throw new Exception("v17 behavior mismatch");}
     private sealed class Motors:IControllerRumbleBackend
@@ -72,7 +73,7 @@ internal static class V17Tests
     private static void Assets()
     {
         Check(!StarAudioPolicy.CanPlay(1) && !StarAudioPolicy.CanPlay(2) && StarAudioPolicy.CanPlay(3) && StarAudioPolicy.CanPlay(4));
-        Check(StarAudioPolicy.DurationAllowed(3,900,false) && !StarAudioPolicy.DurationAllowed(3,2300,false));
+        Check(StarAudioPolicy.DurationAllowed(3,900,false) && !StarAudioPolicy.DurationAllowed(3,11001,false));
         Check(StarAudioPolicy.DurationAllowed(4,10667,false) && !StarAudioPolicy.DurationAllowed(4,3850,false) && StarAudioPolicy.DurationAllowed(4,3850,true));
         var custom=RewardSoundPack.Custom("three.wav","four.wav");
         Check(custom.Id==RewardSoundPack.CustomStarId && custom.FileFor(1)==null && custom.FileFor(3)=="three.wav" && custom.FileFor(4)=="four.wav");
@@ -87,4 +88,6 @@ internal static class V17Tests
             float peak=0;foreach(float value in pcm.Samples){Check(Math.Abs(value)<1);peak=Math.Max(peak,Math.Abs(value));}Check(peak>.1f);
         }
     }
+    private static void AdvisoryDuration()
+    {Check(StarAudioPolicy.DurationAllowed(3,750,false) && StarAudioPolicy.DurationAllowed(3,1400,false));}
 }

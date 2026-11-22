@@ -11,6 +11,6 @@ namespace OC2Haptic.Core
                 ?StarFeedbackMode.HapticsOnly:StarFeedbackMode.Disabled;
         }
         public static bool DurationAllowed(int star,int ms,bool legacyFour)
-        {return star==3?ms>=800 && ms<=1300:star==4 && ms>0 && ms<=11000 && (legacyFour || ms>=9000);}
+        {return star==3?ms>0 && ms<=11000:star==4 && ms>0 && ms<=11000 && (legacyFour || ms>=9000);}
     }
 }

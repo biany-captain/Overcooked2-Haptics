@@ -32,9 +32,9 @@ namespace OC2Haptic.Core
             if(string.IsNullOrEmpty(key) || double.IsNaN(now) || double.IsInfinity(now) || now<0)return Drop("invalid event key/time");
             bool physical=index>=0 && index<4,star=GameEventTypes.IsStar(type);
             EventFeedback feedback=EventFeedback.For(type);
+            bool hazardMotorsDisabled=!manual && GameEventTypes.IsHazard(type) && !hazardHapticsEnabled;
             if(!manual)
             {
-                if(GameEventTypes.IsHazard(type) && !hazardHapticsEnabled)return Drop("hazard feedback disabled");
                 if(star)
                 {
                     // Reuse the output channel mask without changing the global masters.
@@ -48,19 +48,30 @@ namespace OC2Haptic.Core
             State state=states[physical?index:4];Accrue(state,now);
             double previous;
             if(state.Keys.TryGetValue(key,out previous) && ((star && !manual) || now-previous<feedback.CooldownMs))return Drop("event duplicate");
-            if(state.Cooldowns.TryGetValue(type,out previous) && now-previous<feedback.CooldownMs)return Drop("per-device event cooldown");
+            // Audio/celebration cancellation precedes motor-only suppression. A new
+            // confirmed incident must remain audible even when no new rumble can run.
+            bool interrupted=negative && rewards.Interrupt(now);
+            if(negative && physical && state.Active!=null && GameEventTypes.IsStar(state.Active.Type))
+            {engine.Cancel(index);state.Active=null;}
+            if(state.Cooldowns.TryGetValue(type,out previous) && now-previous<feedback.CooldownMs)
+            {
+                if(!interrupted)return Drop("per-device event cooldown");
+                state.Keys[key]=now;Prune(state.Keys,now);LastDropReason="motor cooldown; celebration stopped";return true;
+            }
             bool haptics=rewards.Mode==StarFeedbackMode.HapticsAndAudio || rewards.Mode==StarFeedbackMode.HapticsOnly;
             if(star && preview.HasValue)haptics=haptics && (preview.Value==StarFeedbackMode.HapticsAndAudio || preview.Value==StarFeedbackMode.HapticsOnly);
+            if(hazardMotorsDisabled){intensity=0;LastDropReason="hazard motors disabled; audio priority retained";}
             haptics=haptics && physical && pattern!=null && pattern.HasMotorOutput && intensity>0;
-            if(haptics && !devices.TryClaim(index,describeDevice(index)))return Drop("backend ownership unresolved");
+            if(haptics && !devices.TryClaim(index,describeDevice(index)))
+            {if(!negative)return Drop("backend ownership unresolved");intensity=0;haptics=false;LastDropReason="motor ownership unresolved; audio priority retained";}
             int bucket=Bucket(feedback.Category);
             int requested=pattern==null?0:ActiveMs(pattern,0,pattern.TotalDurationMs);
             if(haptics && Used(state,bucket,now)+requested>Limit(bucket))
-            {if(!star)return Drop("per-device active-time budget");intensity=0;haptics=false;LastDropReason="motor budget exhausted; star audio may continue";}
+            {if(!star && !negative)return Drop("per-device active-time budget");intensity=0;haptics=false;LastDropReason="motor budget exhausted; audio priority retained";}
             Prune(sounds,now);
             if(star && !manual && sounds.ContainsKey(key))preview=haptics?StarFeedbackMode.HapticsOnly:StarFeedbackMode.Disabled;
             int audioBefore=rewards.AudioEmissionSequence;
-            bool accepted=rewards.Emit(index,key,type,pattern,now,intensity,volume,false,preview);
+            bool accepted=rewards.Emit(index,key,type,pattern,now,intensity,volume,false,preview) || interrupted;
             // Emit may cancel a lower star even when the new pattern produces no output.
             if(physical && state.Active!=null && !engine.IsPlaying(index,state.Active.Key,now))state.Active=null;
             if(!accepted)return Drop("output mode, device or priority refused");

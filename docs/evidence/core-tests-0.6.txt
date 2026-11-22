@@ -90,6 +90,10 @@ PASS v17 ten second celebration releases motors before normal actions and danger
 PASS v17 zero cooldown stars still deduplicate committed correlation
 PASS v17 audio duration and custom descriptors keep legacy four star choices
 PASS v17 supplied PCM assets meet approved durations without clipping
+PASS v17 custom third star advisory duration is not a hard mute
+PASS music mute restores initial level and leaves SFX untouched
+PASS music mute tracks game updates without clobbering later external changes
+PASS music mute preserves initially muted level and isolates unavailable mixer
 PASS v16 coordinator stale normal and unmapped targets stay silent
 PASS v16 coordinator cooldown and dedup are per device
 PASS v16 coordinator normal budget excludes gaps and isolates devices
@@ -108,10 +112,11 @@ PASS feature switches cancel only affected active channels without replay
 PASS feature switches block hazards without suppressing rejection or music
 PASS feature switches do not block explicit previews or bypass global masters
 PASS feature switches audio-only team dedup never restores star motors
+PASS v17 exhausted negative budget cannot block immediate celebration stop
 PASS v16 fire spread is one incident and reminders have five second floor
 PASS v16 fire clear removes queued relevance and no resume replay
 PASS v16 cooking warning burned and removal are separate edges
 PASS v16 only a proved single team output can infer delivery device
 PASS v16 hazard cancellation does not stop unrelated output
 PASS v16 first score epoch preserves current hazard while true replacement stops it
-RESULT 116/116 passed
+RESULT 121/121 passed

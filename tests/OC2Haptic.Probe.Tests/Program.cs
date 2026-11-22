@@ -15,7 +15,8 @@ internal static class Program
             { "missing PC star boundaries remain unavailable", MissingBoundaries },
             { "actual PC score getters retain NGP gate", ActualBoundaries },
             { "unchanged client state cannot hide a differing payload", MismatchMustLog },
-            { "candidate client hazard signatures and cooking state data exist", HazardSignatures }
+            { "candidate client hazard signatures and cooking state data exist", HazardSignatures },
+            { "actual music and SFX mixer controls have separate names", MusicControls }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -25,6 +26,18 @@ internal static class Program
         }
         Console.WriteLine("RESULT " + (tests.Count - failed) + "/" + tests.Count + " probe integration passed");
         return failed == 0 ? 0 : 1;
+    }
+    private static void MusicControls()
+    {
+        var flags=BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic;
+        Check(typeof(AudioManager).GetField("m_audioMixer",flags)!=null);
+        foreach(string name in new[]{"MusicVolume","SFXVolume"})
+        {
+            Type type=typeof(AudioManager).Assembly.GetType(name,true);
+            var getter=type.GetProperty("MixerControlName",flags).GetGetMethod(true);
+            byte[] body=getter.GetMethodBody().GetILAsByteArray();
+            Check(body.Length==6 && body[0]==0x72 && body[5]==0x2a && getter.Module.ResolveString(BitConverter.ToInt32(body,1))==name);
+        }
     }
     private static void MissingDirectory()
     {
