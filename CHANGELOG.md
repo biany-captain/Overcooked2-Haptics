@@ -5,7 +5,7 @@
 - Add the three approved F6 automatic-feature switches: star haptics, star audio and grouped hazard haptics. Keep global masters/sliders, all explicit previews and all music/waveforms.
 - Intersect star channels with their masters; disabled stars no longer take precedence over ordinary delivery/Combo. Stop only the affected active channel, without replay. Explicit previews bypass features while obeying masters/cooldowns/budgets; F10 preserves feature preferences.
 - Group burn-warning/burned/fire/reminders without enabling default-off FoodBurned or suppressing rejected/expired orders. Defer recurring fire reminders on group change. Migrate legacy Stars.Enabled with explicit new-key precedence; preserve personal settings.
-- Software: core110/110, actual cfg18/18, Unity/net35/x86 build0 warnings/errors. Native controls acceptance pending. Retain0.5.0 user preview/comfort acceptance separately from unobserved real automatic events.
+- Software: core110/110, actual cfg18/18, Unity/net35/x86 build0 warnings/errors. User subsequently confirmed all four native controls checks normal; retained logs partially corroborate toggles/previews, not every gameplay step. Retain0.5.0 user preview/comfort acceptance separately from unobserved real automatic events. v1.7 is under requirements audit only.
 
 ## 0.5.0-alpha — 2026-11-22 · v1.6 candidate
 

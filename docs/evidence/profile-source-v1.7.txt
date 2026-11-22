@@ -1,0 +1,5 @@
+v1.7 source configuration sanity, 2026-11-22
+Supplied Python script executed in the original read-only source directory. This is not a product integration, game Hook or controller test.
+PASS: 18 sets of structural/product-invariant checks; no real-game or controller tests performed
+Independent parsed comparison: zero changed non-star event records against config/haptic_patterns_v1.6.json.
+Candidate star totals: 55 / 145 / 250 / 630 ms. No v1.7 product code/build/installation yet.

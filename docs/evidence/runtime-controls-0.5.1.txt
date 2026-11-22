@@ -1,0 +1,56 @@
+OC2Haptic 0.5.1 controls acceptance, reviewed 2026-11-22
+User explicitly reports all four requested native controls checks normal: layout/F10/persistence; real-star selective channels and ordinary fallback; hazards disabled without disabling rejection/expiry; manual-preview bypass plus global-master gates.
+Evidence boundary: the retained session independently shows feature toggles and manual previews, zero own warnings/errors and zero real-event totals. It does not independently trace every reported real-game check.
+User-reported acceptance is recorded separately from partial log corroboration.
+
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.5.1-alpha v1.6 candidate | x86/net35 | F6 feature switches / F10 all-off/all-on (configurable)
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Haptic menu opened; local input suppressed, no automatic vibration.
+[Info   :OC2 Haptic] Menu layout | width=520 height=908 noteHeight=61 rowHeight=40
+[Info   :OC2 Haptic] Feature switches | starHaptics=False starAudio=True hazardHaptics=True
+[Info   :OC2 Haptic] Feature switches | starHaptics=True starAudio=True hazardHaptics=True
+[Info   :OC2 Haptic] Menu preview | type=FoodBurned mode=Automatic accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Menu preview | type=FireReminder mode=Automatic accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Menu preview | type=FireStart mode=Automatic accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=2 durationMs=1570 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=2 startMs=26127.0335 motorWindowMs=285 mode=HapticsAndAudio plannedAudioEndMs=27697.0335
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone2 mode=HapticsAndAudio accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=1 durationMs=1050 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=1 startMs=27730.6338 motorWindowMs=180 mode=HapticsAndAudio plannedAudioEndMs=28780.6338
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone1 mode=HapticsAndAudio accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=2 durationMs=1570 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=2 startMs=29199.0441 motorWindowMs=285 mode=HapticsAndAudio plannedAudioEndMs=30769.0441
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone2 mode=HapticsAndAudio accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=3 durationMs=2300 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=3 startMs=31860.1938 motorWindowMs=425 mode=HapticsAndAudio plannedAudioEndMs=34160.1938
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone3 mode=HapticsAndAudio accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Reward audio | pack=turbo_swing star=4 durationMs=3850 volume=1 manual=True accepted=True
+[Info   :OC2 Haptic] Reward timeline | star=4 startMs=36347.1641 motorWindowMs=660 mode=HapticsAndAudio plannedAudioEndMs=40197.1641
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone4 mode=HapticsAndAudio accepted=True XInput=0 master=1 haptics=True audio=True
+[Info   :OC2 Haptic] Haptic menu closed; local input and cursor restored.
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliverySuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryFailure observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=OrderExpired observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryOrdered observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryOutOfOrder observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryUnclassified observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel2 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel3 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel4 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone1 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone2 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone3 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone4 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=BurnWarning observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=FoodBurned observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=FireStart observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=FireReminder observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=TestPulse observed=0 scheduled=0

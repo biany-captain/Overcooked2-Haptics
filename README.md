@@ -4,7 +4,7 @@ Windows《胡闹厨房2》XInput触觉增强MOD，在现有项目上增量开发
 
 **当前状态：0.4.2菜单/两总控、旧版核心事件与G星级音乐已有用户实测；0.5.0通过软件检查，用户确认已测项目正常、触感合适。本轮日志保留星级及火警等手动预览，真实Combo A与危险自动触发仍待补充可核对的关卡证据。** 不把编译、模拟或菜单预览当成真实起火/NGP四星通过。
 
-0.5.1按用户确认新增三个功能开关：星级震动、星级音效、危险预警震动；软件验证通过，新增控制项待实机测试。见[设计](docs/design-feature-switches.md)与[针对性清单](docs/batch-test-0.5.1.md)。
+0.5.1新增星级震动、星级音效、危险预警震动三个功能开关，用户确认针对性清单“四项均正常”；留存日志对开关变化/手动预览提供部分旁证，未独立追踪所有关卡步骤。见[设计](docs/design-feature-switches.md)与[验收](docs/batch-test-0.5.1.md)。v1.7新星级规则正在审计，尚未安装。
 
 [仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [正式v1.6](docs/haptic-redesign-v1.6.md) · [本轮确认](docs/design-v1.6.md) · [审计](docs/audit-v1.6.md) · [报告](docs/test-report.md) · [整批测试](docs/batch-test-v1.6.md) · [路线图](docs/roadmap.md)
 
