@@ -95,10 +95,12 @@ PASS v16 backend registry rejects unknown cross backend and duplicate identity
 PASS v16 coordinator accepts a future backend descriptor with exclusive identity
 PASS v16 success does not interrupt star and independent failure does
 PASS v16 star with exhausted motor budget keeps audio and reports zero motor window
+PASS v16 audio-only negative interrupts celebration without bound XInput
+PASS v16 refused higher star retires cancelled motor budget immediately
 PASS v16 fire spread is one incident and reminders have five second floor
 PASS v16 fire clear removes queued relevance and no resume replay
 PASS v16 cooking warning burned and removal are separate edges
 PASS v16 only a proved single team output can infer delivery device
 PASS v16 hazard cancellation does not stop unrelated output
 PASS v16 first score epoch preserves current hazard while true replacement stops it
-RESULT 103/103 passed
+RESULT 105/105 passed

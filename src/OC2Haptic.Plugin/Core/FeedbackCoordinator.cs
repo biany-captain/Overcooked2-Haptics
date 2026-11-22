@@ -30,9 +30,11 @@ namespace OC2Haptic.Core
             LastDropReason="";
             if(string.IsNullOrEmpty(key) || double.IsNaN(now) || double.IsInfinity(now) || now<0)return Drop("invalid event key/time");
             bool physical=index>=0 && index<4,star=GameEventTypes.IsStar(type);
-            if(!physical && !star)return Drop("unbound physical output");
+            EventFeedback feedback=EventFeedback.For(type);
+            bool negative=feedback.Category==FeedbackCategory.Negative || feedback.Category==FeedbackCategory.Emergency;
+            if(!physical && !star && !negative)return Drop("unbound physical output");
             State state=states[physical?index:4];Accrue(state,now);
-            EventFeedback feedback=EventFeedback.For(type);double previous;
+            double previous;
             if(state.Keys.TryGetValue(key,out previous) && now-previous<feedback.CooldownMs)return Drop("event duplicate");
             if(state.Cooldowns.TryGetValue(type,out previous) && now-previous<feedback.CooldownMs)return Drop("per-device event cooldown");
             bool haptics=rewards.Mode==StarFeedbackMode.HapticsAndAudio || rewards.Mode==StarFeedbackMode.HapticsOnly;
@@ -47,6 +49,8 @@ namespace OC2Haptic.Core
             if(star && !manual && sounds.ContainsKey(key))preview=StarFeedbackMode.HapticsOnly;
             int audioBefore=rewards.AudioEmissionSequence;
             bool accepted=rewards.Emit(index,key,type,pattern,now,intensity,volume,false,preview);
+            // Emit may cancel a lower star even when the new pattern produces no output.
+            if(physical && state.Active!=null && !engine.IsPlaying(index,state.Active.Key,now))state.Active=null;
             if(!accepted)return Drop("output mode, device or priority refused");
             state.Keys[key]=now;state.Cooldowns[type]=now;Prune(state.Keys,now);
             if(!manual && rewards.AudioEmissionSequence!=audioBefore)sounds[key]=now;

@@ -17,6 +17,8 @@ internal static class CoordinatorTests
         tests.Add("v16 coordinator accepts a future backend descriptor with exclusive identity", Extension);
         tests.Add("v16 success does not interrupt star and independent failure does", MusicPriority);
         tests.Add("v16 star with exhausted motor budget keeps audio and reports zero motor window", AudioBudget);
+        tests.Add("v16 audio-only negative interrupts celebration without bound XInput", UnboundNegative);
+        tests.Add("v16 refused higher star retires cancelled motor budget immediately", CancelledBudget);
     }
     private static GameEvent E(GameEventType type,double at,int pad=0,int entity=1)
     {return new GameEvent(type,EventScope.LocalTeam,at,pad,pad,entity,true,false,EventConfidence.ConfirmedState,"fixture",0,0);}
@@ -124,5 +126,23 @@ internal static class CoordinatorTests
         var r=new Rig();for(int i=0;i<3;i++){Check(r.Preview(0,"budget"+i,Pulse(400),i*1000));r.Engine.Tick(i*1000+400);}
         Check(r.Emit(E(GameEventType.StarMilestone1,3000),"audio-without-budget",3000));r.Engine.Tick(3000);
         Check(r.Sound.Playing && r.Motors.Left[0]==0 && r.Logs.Exists(line=>line.Contains("motorWindowMs=0")));
+    }
+    private static void UnboundNegative()
+    {
+        var r=new Rig();r.Coordinator.SetMode(StarFeedbackMode.AudioOnly,0);
+        Check(r.Emit(E(GameEventType.StarMilestone4,0),"audio-unbound",0,output:-1));Check(r.Sound.Playing);
+        Check(r.Emit(E(GameEventType.DeliveryFailure,100),"later-rejection",100,output:-1));
+        Check(!r.Sound.Playing && r.Motors.Writes==0);
+    }
+    private static void CancelledBudget()
+    {
+        var r=new Rig();r.Coordinator.SetMode(StarFeedbackMode.HapticsOnly,0);
+        var old=HapticPattern.Celebration(new HapticSegment(.5f,0,500));
+        Check(r.Emit(E(GameEventType.StarMilestone3,0),"old-star",0,old));r.Engine.Tick(0);
+        Check(!r.Coordinator.Emit(E(GameEventType.StarMilestone4,20),new ControllerBinding(0,0),"invalid-higher",null,20,1,1,true));r.Engine.Tick(20);Check(r.Motors.Left[0]==0);
+        Check(r.Preview(0,"after-cancel-a",Pulse(500),1000));r.Engine.Tick(1500);
+        Check(r.Preview(0,"after-cancel-b",Pulse(500),2000));r.Engine.Tick(2500);
+        Check(r.Preview(0,"remaining180",Pulse(180),3000));r.Engine.Tick(3180);
+        Check(!r.Preview(0,"budget-now-full",Pulse(1),3500));
     }
 }
