@@ -1,0 +1,14 @@
+0.6.1 joined-client native calibration,2026-11-22.
+User: not a controlled sequence; one local chef/controller, rumble remains rare. Diagnostic build did not change routing.
+Own-plugin hooks installed and produced2310 plate-related carry observations,581 kitchen Delivery results,587 plate-station receipts. No personal observer fault line found in preserved log.
+581 kitchen results each had one matching-station receipt, with no unmatched kitchen result in this dataset.183 receipt plates had preceding local-chef release records;398 had remote-chef release records. These are ownership-link candidates, NOT verified personal intent.
+6 additional receipts were non-plate station rejections, without kitchen result; no actual wrong-recipe kitchen-failure coverage was established.
+Kitchen-to-plate gap for local candidates: median0.8ms,max35.3ms; remote median0.8ms,max35.6ms. Local release-to-receipt median1ms,max36ms; remote max407ms. These observations do not establish all future network ordering or physical latency.
+Local ownership candidates included milestone1/2/3 counts5/7/7; remote ownership candidates included12/10/7 and two four-star crossings. Without explicit local request the new strict tracker must emit zero from this old trace.
+Full logs remain ignored locally; public excerpts contain own-plugin numeric IDs, not other MOD/network/player details.
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=155263 round=-76896:-93718:2 event=carry-applied chef=-83034 local=False player=11 gamePad=-1 keyboard=False team=0 target=Default oldPlate=0 newPlate=-113274 messageItem=281
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=157053 round=-76896:-93718:2 event=carry-applied chef=-83034 local=False player=11 gamePad=-1 keyboard=False team=0 target=Default oldPlate=-113274 newPlate=0 messageItem=0
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=157063 round=-76896:-93718:2 event=plate-applied station=-77790 deliveredObject=-113274 deliveredPlate=-113274 stationAccepted=True orderResult=not-in-this-message
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=169380 round=-76896:-93718:2 event=carry-applied chef=-92212 local=True player=0 gamePad=0 keyboard=False team=0 target=Default oldPlate=0 newPlate=-107884 messageItem=201
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=171650 round=-76896:-93718:2 event=carry-applied chef=-92212 local=True player=0 gamePad=0 keyboard=False team=0 target=Default oldPlate=-107884 newPlate=0 messageItem=0
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=171652 round=-76896:-93718:2 event=plate-applied station=-89546 deliveredObject=-107884 deliveredPlate=-107884 stationAccepted=True orderResult=not-in-this-message

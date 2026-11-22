@@ -11,7 +11,8 @@ Version note: 0.1 baseline and all four 0.2 added events have user/runtime evide
 | Steam Input on/off | No assumption | Pending | Pending |
 | Keyboard input | Core routing rejects | Pending | Must remain silent |
 | Multiple local controllers / mixed input | Deferred by user | Unverified | Unverified |
-| Online host / client | Deferred | Unverified | Unverified |
+| Joined online client, one local controller/chef |0.6.2 strict personal candidate compiled;140 core/20 cfg/11 API+projection |0.6.1 native observation581 unique kitchen/station pairs; fresh request Hook pending | Personal output candidate pending; old rare team milestones are not personal acceptance |
+| Online host / multiple local outputs | Deferred | Unverified | Unverified |
 | Epic / Proton / other devices | Outside first test scope | Unverified | Unverified |
 
 Existing loader-version warnings alone do not establish broken compatibility. This plugin does not upgrade or replace existing dependencies.

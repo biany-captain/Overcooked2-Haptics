@@ -29,7 +29,7 @@ foreach($file in @('test-report-0.4.md','test-report-0.4.1.md','design-ultra-v3.
     'haptic-redesign-v1.6.md','codex-v1.6-incremental.md','audit-v1.6.md','design-v1.6.md','backend-extension.md','batch-test-v1.6.md','review-v1.6.md',
     'test-report-0.5.md','design-feature-switches.md','batch-test-0.5.1.md','review-feature-switches.md',
     'test-report-0.5.1.md','requirements-star-feedback-v1.7.md','codex-star-feedback-v1.7.md','audit-star-feedback-v1.7.md','design-star-feedback-v1.7.md','batch-test-v1.7.md','review-star-feedback-v1.7.md',
-    'test-report-0.6.md','investigation-online-feedback.md')) {
+    'test-report-0.6.md','investigation-online-feedback.md','test-report-0.6.1.md','design-personal-feedback.md','review-personal-feedback.md')) {
     Copy-Item -LiteralPath (Join-Path $projectRoot ('docs\'+$file)) -Destination $docsDir
 }
 if (Test-Path -LiteralPath $evidenceDir) { Copy-Item -LiteralPath $evidenceDir -Destination (Join-Path $docsDir 'evidence') -Recurse }

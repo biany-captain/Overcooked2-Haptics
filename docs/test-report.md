@@ -1,24 +1,27 @@
-# Test report — 0.6.1-alpha / personal attribution diagnostics
+# Test report —0.6.2-alpha / strict personal feedback candidate
 
-2026-11-22. Incremental on0a0db2f, not a new project. User rejects team feedback and requests personal events. This build only collects attribution evidence; output policy and v1.7 stars/music remain unchanged. No personal online fix or native acceptance is claimed.
+2026-11-22. User approved strict personal delivery/Combo/star output; unattributed danger/expiry are silent. No team feedback fallback. Incremental on5eda7ec, reviewed candidate08ea2f0 plus focused rejection fix. New physical personal output is not yet accepted.
 
-## New native finding
+## Native evidence before this candidate
 
-User joined another host with one local controller/chef; menu tests normal, actual rumble rare. Preserved own-plugin evidence in evidence/runtime-online-0.6.txt:125 delivery/Combo/rejection observations unresolved before output;11 accepted automatic events were star1/2/3 milestones (4/4/3). Hazards also could not prove a local target. Throw/catch automatic switches remain off as previously approved.
+User reports0.6.1 menu works but rumble remains rare, with an uncontrolled online sequence. Actual probes ran without a recorded observer fault. Preserved own-plugin trace has2310 plate carry observations,581 kitchen results with unique station receipts,183 preceding local-chef release candidates and398remote, plus6 non-plate station rejections. Kitchen-to-receipt median0.8ms,max35.6ms. The old probe lacked explicit placement requests, so none of these is proof that personal output worked. See evidence/runtime-personal-probe-0.6.1.txt. No real failed-recipe coverage was established.
 
-The strict LocalOutputMap.IsSoleOutput predicate rejects same-team remote participants; stars use the existing local-team score route. Thus intermittent star feedback does not demonstrate successful personal attribution. Read-only inspection confirms the current score message has team/station/result, not a chef. ChefCarryMessage and PlateStationMessage provide candidate item linkage. Station acceptance alone is not successful recipe submission.
+## Implemented candidate
 
-## New software checks
+Read-only exact local Place request plus same-chef plate release, unique trusted kitchen result and same-plate/station receipt. Bind the expected plate when the result arrives, never guess from last holder at receipt time. Native pickup/transfer/re-target invalidates intent; conflicting/reversed/missing/stale streams stay silent. Pairing reuses existing180ms freshness without a fixed wait. Root runtime gate rejects team events even if legacy fallback configuration is true. All team score/Combo/star progression is consumed before personal filtering, so peer milestones do not replay on a later own action.
 
-- Core125/125 existing regressions, evidence/core-tests-0.6.1.txt. No routing, waveform, budget or output logic change.
-- Actual game metadata/data9/9, evidence/probe-tests-0.6.1.txt. New contract covers client carry/station sync signatures, attach target/item fields, delivered object and kitchen station fields. Static compatibility checks do not execute Unity or prove event ordering.
-- Actual Unity2017/net35/x86 build0warnings/errors, assembly0.6.1.0, evidence/build-0.6.1.txt.
-- Configuration and audio assets unchanged. Previous actual cfg20/20 evidence remains with0.6.0; it was not rerun or relabelled for an unrelated diagnostic change.
+Existing modes/profiles/music/masters/sliders/feature controls and previews remain. Unknown hazards/expiry and client rejection without reliable station identity do not emit or stop music. The latter protocol omission was found during review: failed messages reuse preceding success fields. Snapshot now ignores unsent fields, silently drains rejection receipt and does not poison later same/previous-station valid successes. Manual negative profiles and the generic fully attributed rejection contract remain; no native rejection support is implied.
 
-Two optional read-only client sync observers, gated by existing Diagnostics.ScoreSourceProbe, record chef locality/pad and old/new plate/station identities. No output calls, game-state writes, new dependency or per-frame searches. Observer failures are logged explicitly and disable these diagnostics without disabling other feedback. Full stack logs are local; public evidence contains own-plugin numeric IDs, without player names or network addresses.
+## Software verification
 
-## Pending and delivery
+- Core140/140, evidence/core-tests-0.6.2.txt: all125 previous regressions plus15 personal tests including actual old trace without request yielding zero, remote/keyboard/wrong team, transfer/re-pickup/retarget, unique pairing, conflicts/reverse/late/reset, rejection, strict runtime scope, peer progression consumption and unscoped-rejection recovery.
+- Actual BepInEx configuration20/20, evidence/config-tests-0.6.2.txt. No personal values migrated or new settings introduced; only legacy fallback descriptions updated.
+- Actual game API/data and failed-message projection11/11, evidence/probe-tests-0.6.2.txt. New request overload/helper signature checked; stale failure fields are ignored without Unity execution. This is not native Hook or transport acceptance. Linked diagnostic-source fields may produce test-project unused-field notices; the actual MOD target below has no warning.
+- Actual Unity2017/net35/x86 target build0warnings/errors, assembly0.6.2.0, evidence/build-0.6.2.txt.
+- New pipeline first REDmissingAPI then GREEN. Reviewer Important reproduced with two RED regressions (unsent fields and following success quarantine), fixed GREEN. No fix re-review; rulings in review-personal-feedback.md.
 
-With the game stopped, backed up the installed0.6.0 own DLL/cfg and replaced only the DLL with0.6.1.0; installed artifact hash matches and personal cfg bytes remain unchanged. No audio or other MOD files written. New Hook installation/execution, own versus teammate delivery, plate transfer, rejected dishes and same-station concurrency require the user's controlled comparison. Do not use temporal proximity or last ownership alone as proof. Global milestone/danger/expiry semantics in personal mode have been asked separately and not silently changed. Multi-controller/host/SDL and complete physical comfort/performance acceptance remain pending.
+## Pending / delivery
 
-See investigation-online-feedback.md for the test sequence. Historical0.6.0/v1.7 software and native boundaries are retained in test-report-0.6.md. All existing star music, sound choices, controls and v1.6 logic remain present.
+With the game stopped, cold-backed up0.6.1 ownDLL/cfg and installed only the verified0.6.2.0 DLL. Installed hash matches the final tested artifact; cfg bytes unchanged, no audio or other MOD files written. Fresh request Hook, own-versus-peer physical output, plate transfer, real personally caused star, host/local-multiple controllers and uncalibrated contexts remain unverified. User does not need to follow a rigid action order; normal own/peer play plus optional handoff is sufficient to gather new evidence. Default focus/stop/round/config/binding changes clear associations; existing RespectGameFocus=false advanced opt-out semantics are preserved, with independent BGM focus release.
+
+Audio assets and personal configuration remain unchanged. No new runtime dependency, game-state writes, per-frame scene search, driver/backend, autoplay or game-window automation.

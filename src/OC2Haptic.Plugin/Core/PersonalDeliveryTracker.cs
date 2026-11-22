@@ -53,6 +53,7 @@ namespace OC2Haptic.Core
         private readonly Dictionary<int,Pending> pending=new Dictionary<int,Pending>();
         private readonly HashSet<int> blocked=new HashSet<int>();
         private readonly List<int> finished=new List<int>();
+        private int unscopedRejections;
         public string LastReason {get;private set;}
         public void Request(PersonalActor actor,int plate,int station,double now)
         {
@@ -73,7 +74,14 @@ namespace OC2Haptic.Core
         }
         public void Commit(PersonalDeliveryDecision decision)
         {
-            if(decision==null || decision.Station==0 || !ValidTime(decision.Timestamp))return;
+            if(decision==null || !ValidTime(decision.Timestamp))return;
+            if(decision.Station==0 && decision.Type==GameEventType.DeliveryFailure)
+            {
+                // The actual client protocol omits the failed order's station. Drain
+                // its following plate receipt silently, without poisoning a station.
+                requests.Clear();pending.Clear();unscopedRejections++;return;
+            }
+            if(decision.Station==0 || unscopedRejections>0)return;
             Expire(decision.Timestamp);
             if(blocked.Contains(decision.Station))return;
             if(pending.ContainsKey(decision.Station)){Quarantine(decision.Station,"multiple unmatched kitchen results");return;}
@@ -88,6 +96,11 @@ namespace OC2Haptic.Core
         {
             LastReason="";
             if(station==0 || !ValidTime(now))return Drop("invalid native station receipt");
+            if(unscopedRejections>0 && plate!=0)
+            {
+                unscopedRejections--;requests.Remove(plate);pending.Remove(station);
+                return Drop("unattributed client rejection drained; no personal feedback");
+            }
             Expire(now);
             RequestState request;requests.TryGetValue(plate,out request);requests.Remove(plate);
             Pending observation;pending.TryGetValue(station,out observation);pending.Remove(station);
@@ -113,7 +126,7 @@ namespace OC2Haptic.Core
         private void Quarantine(int station,string reason){blocked.Add(station);pending.Remove(station);LastReason=reason;}
         private PersonalDeliveryConfirmation Drop(string reason){LastReason=reason;return null;}
         private static bool ValidTime(double now){return now>=0 && !double.IsNaN(now) && !double.IsInfinity(now);}
-        public void Reset(){requests.Clear();pending.Clear();blocked.Clear();finished.Clear();LastReason="";}
+        public void Reset(){requests.Clear();pending.Clear();blocked.Clear();finished.Clear();unscopedRejections=0;LastReason="";}
         private sealed class RequestState
         {internal PersonalActor Actor;internal int Plate,Station;internal double Timestamp;internal double? ReleasedAt;}
         private sealed class Pending {internal PersonalDeliveryDecision Decision;internal RequestState Expected;}

@@ -19,7 +19,8 @@ internal static class Program
             { "actual music and SFX mixer controls have separate names", MusicControls },
             { "actual game audio sources use known shared parent and music group", MusicSourceBindings },
             { "personal attribution probe has actual chef item and delivery station fields", PersonalAttributionSignatures },
-            { "actual local placement sends the typed chef and station request", PersonalPlacementSignature }
+            { "actual local placement sends the typed chef and station request", PersonalPlacementSignature },
+            { "failed kitchen observation never reads unsent stale Unity station or success fields", FailedKitchenObservation }
         };
         int failed = 0;
         foreach (var test in tests)
@@ -76,6 +77,16 @@ internal static class Program
         Check(messenger.GetMethod("ChefEventMessage",flags,null,new[]{type,typeof(UnityEngine.GameObject),typeof(UnityEngine.MonoBehaviour)},null)!=null);
         Check(typeof(PlayerControlsHelper).GetMethod("PlaceHeldItem_Client",flags,null,new[]{typeof(PlayerControls)},null)!=null);
         Check(typeof(ClientPlayerAttachmentCarrier).GetMethod("InspectCarriedItem",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic,null,Type.EmptyTypes,null).ReturnType==typeof(UnityEngine.GameObject));
+    }
+    private static void FailedKitchenObservation()
+    {
+        // Failure wire payload omits these fields. A stale Unity reference must not be touched.
+        var message=new KitchenFlowMessage();
+        message.m_msgType=KitchenFlowMessage.MsgType.Delivery;message.m_teamID=TeamID.One;message.m_success=false;
+        message.m_plateStation=(UnityEngine.GameObject)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(UnityEngine.GameObject));
+        message.m_orderID.m_id=777;message.m_wasCombo=true;message.m_tip=63;
+        var observation=new ScoreSourceProbe.Observation(1,1,1,0,message,null,null,null);
+        Check(observation.StationId==0 && observation.OrderId==0 && !observation.WasCombo && observation.Tip==0);
     }
     private static void MissingDirectory()
     {

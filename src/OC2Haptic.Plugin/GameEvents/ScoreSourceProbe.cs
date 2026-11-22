@@ -163,8 +163,12 @@ namespace OC2Haptic.GameEvents
             {
                 Sequence = sequence; Generation = generation; FlowId = flowId; Timestamp = timestamp;
                 Team = message.m_teamID; Kind = message.m_msgType; Success = message.m_success;
-                OrderId = message.m_orderID.m_id; WasCombo = message.m_wasCombo; Tip = message.m_tip;
-                StationId = Kind != KitchenFlowMessage.MsgType.Delivery || message.m_plateStation == null ? 0 : message.m_plateStation.GetInstanceID();
+                // Failed delivery wire messages omit station/order/combo/tip and reuse the
+                // same message object. Never interpret the preceding success's fields.
+                bool successfulDelivery=Kind==KitchenFlowMessage.MsgType.Delivery && Success;
+                OrderId=successfulDelivery || Kind==KitchenFlowMessage.MsgType.OrderExpired?message.m_orderID.m_id:0;
+                WasCombo=successfulDelivery && message.m_wasCombo;Tip=successfulDelivery?message.m_tip:0;
+                StationId=!successfulDelivery || message.m_plateStation==null?0:message.m_plateStation.GetInstanceID();
                 Before = before; Payload = payload; Context = context;
             }
         }

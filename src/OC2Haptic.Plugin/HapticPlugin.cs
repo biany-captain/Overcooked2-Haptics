@@ -298,6 +298,11 @@ namespace OC2Haptic
                     " wasCombo="+observation.WasCombo+" tip="+observation.Tip+" rawMultiplier="+(after==null?-1:after.Multiplier)+
                     " rawStreak="+(after==null?-1:after.Combo)+" tier="+(result==null?null:result.Tier)+
                     " selected="+selected+" star="+milestone+" confidence="+(trusted?"VerifiedClientState":"Unknown")+" arbitration=SameClientMessage");
+            if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && !observation.Success && !personalDeliveryFaulted)
+            {
+                personalDeliveries.Commit(new PersonalDeliveryDecision(team,0,GameEventType.DeliveryFailure,key,observation.Timestamp,false));
+                LogUnresolved(GameEventType.DeliveryFailure,"strict personal: client rejection wire has no station identity; drain without output");return;
+            }
             if(!selected.HasValue)return;
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && !personalDeliveryFaulted)
                 personalDeliveries.Commit(new PersonalDeliveryDecision(team,observation.StationId,selected,key,observation.Timestamp,trusted));

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.2-alpha — 2026-11-22 · strict personal candidate
+
+- Adopt the user's strict personal rule: only attributed own delivery/Combo/star feedback. Unattributed danger/expiry remain silent without interrupting music; preserve all profiles, music and explicit tests.
+- Require explicit local Place request, same-chef native plate release, unique trusted kitchen result and same-plate/same-station receipt. Consume transfer/re-pickup/re-targeted requests; quarantine conflicting/reversed/missing/stale station association instead of guessing. No fixed wait; reuse existing180ms confirmed-result freshness.
+- Continue consuming real team Combo/star progression without emitting peer feedback or replaying peer milestones on the next own action. Runtime personal gate blocks legacy team fallbacks; preserve configuration values and current XInput binding/preferences.
+-0.6.1 native calibration yielded581 unique kitchen/station pairs,183 local ownership candidates and398remote; no request proof was captured in that diagnostic version. Fresh request Hook and physical personal output remain to be validated.
+- Single review found an Important protocol issue: failed kitchen messages omit station/order/combo/tip and reuse the prior message. Normalize unavailable fields and silently drain rejection receipt without quarantining later valid successes; RED→GREEN projection/recovery regressions. Finalcore140/config20/API+projection11 and targetbuild0warnings/errors; ownDLL-only cold installation, native validation pending.
+
 ## 0.6.1-alpha — 2026-11-22 · personal attribution diagnostics
 
 - Preserve joined-client failure evidence:125 unresolved delivery/Combo/rejection events; all11 accepted automatic cues were team score milestones. No personal attribution success is inferred. User rejects team feedback.

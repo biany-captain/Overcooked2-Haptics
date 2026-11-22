@@ -17,6 +17,7 @@ internal static class PersonalDeliveryTests
         tests.Add("personal late confirmed pair and reverse order cannot become a later delivery", Late);
         tests.Add("personal reset drops all pending attribution without replay", Reset);
         tests.Add("personal authoritative rejection keeps the existing negative category", Rejection);
+        tests.Add("personal unscoped client rejection drains silently without poisoning next success", UnscopedRejection);
         tests.Add("personal runtime policy rejects team fallback danger expiry and unknown stars", StrictGate);
         tests.Add("personal remote star crossing is consumed instead of replayed on own delivery", StarProgress);
         tests.Add("personal remote combo upgrade is consumed before own same-tier delivery", ComboProgress);
@@ -92,6 +93,15 @@ internal static class PersonalDeliveryTests
     {var t=Ready();t.Commit(D());t.Reset();Check(t.ReceivePlate(20,11,true,12)==null);t.Reset();t.Request(A(),11,20,20);t.Carry(A(),11,0,21);t.Commit(D(at:22));Check(t.ReceivePlate(20,11,true,23)!=null);}
     private static void Rejection()
     {var t=Ready();t.Commit(D(GameEventType.DeliveryFailure));var result=t.ReceivePlate(20,11,true,12);Check(result!=null && result.ToEvent().EventType==GameEventType.DeliveryFailure && EventFeedback.For(result.ToEvent().EventType).Category==FeedbackCategory.Negative);}
+    private static void UnscopedRejection()
+    {
+        var t=Ready();t.Commit(D(GameEventType.DeliveryFailure,station:0));Check(t.ReceivePlate(20,11,true,12)==null);
+        t.Request(A(),12,20,20);t.Carry(A(),12,0,21);t.Commit(D(at:22));Check(t.ReceivePlate(20,12,true,23)!=null);
+        t.Request(A(),14,21,30);t.Carry(A(),14,0,31);t.Commit(D(station:21,at:32));Check(t.ReceivePlate(21,14,true,33)!=null);
+        t.Reset();t.Commit(D(GameEventType.DeliveryFailure,station:0));t.Commit(D(GameEventType.DeliveryFailure,station:0,at:12));
+        Check(t.ReceivePlate(21,31,true,13)==null && t.ReceivePlate(22,32,true,14)==null);
+        t.Request(A(),13,21,20);t.Carry(A(),13,0,21);t.Commit(D(station:21,at:22));Check(t.ReceivePlate(21,13,true,23)!=null);
+    }
     private static GameEvent E(GameEventType type,EventScope scope=EventScope.LocalPlayer)
     {return new GameEvent(type,scope,0,0,0,11,true,false,EventConfidence.ConfirmedState,"fixture",0,0);}
     private static void StrictGate()
