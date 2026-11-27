@@ -1,0 +1,21 @@
+0.6.2-alpha joined-client personal-feedback session, reviewed2026-11-27.
+Environment: joins another host; one local chef and one controller, gamePad0 to XInput0. User did not follow a controlled action sequence.
+User reports: "现在自己上菜手柄有触发震动了"; separately confirms "队友上菜时保持安静".
+
+Own-plugin trace initializes0.6.2 and reports strict personal attribution installed.583 placement/Take requests,1299 plate-related carry observations,225 kitchen Delivery results and226 plate-station receipts.
+217 successful kitchen results each pair with a same-station plate receipt:40 local-release results receive explicit personal confirmation and accepted output;177 remote-release successes stay silent. No unmatched successful result in this saved dataset.
+The40 accepted outputs:DeliveryOrdered5,DeliveryOutOfOrder7,DeliveryUnclassified20,ComboLevel2=4,ComboLevel3=3,ComboLevel4=1. All target player0/gamePad0/XInput0 via PersonalDelivery:request+release+kitchen+plate. No confirmed personal event lacks an accepted-output line. These are logged scheduling counts, not independent physical pulse counts or per-profile comfort measurements.
+Five milestone selections pair with remote releases:Star1=3,Star2=1,Star3=1; all remain silent. No personally caused star output is covered. This does not verify own star music or BGM muting.
+Eight kitchen rejections have no wire station identity and silently drain their receipts; one additional receipt has no plate and remains silent. Two rejected receipts have preceding local-release records, which alone do not establish personal delivery.183 total remote-release receipts (177 successes plus6 rejected receipts) remain silent.
+One OrderExpired result is recorded; strict unknown-attribution policy remains silent. Hazard outputs remain blocked by the same approved policy. No own-plugin Error/Fatal or personal observer-fault line found.
+User physical acceptance covers basic own-delivery rumble and teammate silence. Controlled plate handoff, own-caused stars, host/local multiple controllers, other builds/modes/devices and end-to-end physical latency remain unverified. No product/config/audio change or reinstall for this evidence update; previous software verification retained separately.
+Raw logs and analysis JSON remain ignored locally. Public excerpt below includes only this plugin's numeric identities and event fields.
+
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.6.2-alpha strict personal feedback candidate | x86/net35 | F6 / F10
+[Info   :OC2 Haptic] Strict personal attribution installed: explicit placement request plus confirmed carry/kitchen/plate; no team fallback.
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=540881 round=-51420:-64054:1 event=placement-request chef=-58810 local=True player=0 gamePad=0 keyboard=False team=0 plate=-71696 station=-61260 request=Place
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=540942 round=-51420:-64054:1 event=carry-applied chef=-58810 local=True player=0 gamePad=0 keyboard=False team=0 target=Default oldPlate=-71696 newPlate=0 messageItem=0
+[Info   :OC2 Haptic] Reward decision | session=-51420:-64054:1 team=0 order=3 wasCombo=True tip=10 rawMultiplier=3 rawStreak=3 tier=3 selected=ComboLevel3 star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Personal delivery probe | timestampMs=540944 round=-51420:-64054:1 event=plate-applied station=-61260 deliveredObject=-71696 deliveredPlate=-71696 stationAccepted=True orderResult=not-in-this-message
+[Info   :OC2 Haptic] Personal delivery decision | station=-61260 plate=-71696 attributed=True type=ComboLevel3 reason=
+[Info   :OC2 Haptic] Event probe | type=ComboLevel3 observed=1 scheduled=1 | player=0 gamePad=0 keyboard=False team=0 localTeam=0 entity=-71696 source=PersonalDelivery:request+release+kitchen+plate | XInput=0 allowed=True accepted=True reason=
