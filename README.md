@@ -2,7 +2,7 @@
 
 Windows《胡闹厨房2》XInput触觉增强MOD。在原项目上增量开发，保留Combo A、长低频负反馈、危险协调器、F6/F10和已验收的精简控制。
 
-**当前状态（2026-11-27）：按用户新决定，日常上菜/传菜/Combo只反馈本人，星级、真正拒单、订单超时和危险提醒改为本队共享。0.6.3已编码，核心143/配置20/实际接口11项检查及游戏目标编译通过，新的共享行为尚待实机验收。** 此前0.6.2本人上菜/队友普通上菜静默已获用户确认；40次个人调度与177次远端静默是旧版运行证据，不代替本版验收。见[新范围](docs/design-team-stars.md)、[报告](docs/test-report.md)及[原个人方案](docs/design-personal-feedback.md)。
+**当前状态（2026-11-27）：按用户新决定，日常上菜/传菜/Combo只反馈本人，星级、真正拒单、订单超时和危险提醒改为本队共享。0.6.3已编码，核心144/配置20/实际接口11项检查及游戏目标编译通过，新的共享行为尚待实机验收。** 此前0.6.2本人上菜/队友普通上菜静默已获用户确认；40次个人调度与177次远端静默是旧版运行证据，不代替本版验收。见[新范围](docs/design-team-stars.md)、[报告](docs/test-report.md)及[原个人方案](docs/design-personal-feedback.md)。
 
 [仓库](https://github.com/biany-captain/Overcooked2-Haptics) · [v1.7需求](docs/requirements-star-feedback-v1.7.md) · [已确认增量方案](docs/design-star-feedback-v1.7.md) · [审计](docs/audit-star-feedback-v1.7.md) · [报告](docs/test-report.md) · [测试清单](docs/batch-test-v1.7.md) · [路线图](docs/roadmap.md)
 

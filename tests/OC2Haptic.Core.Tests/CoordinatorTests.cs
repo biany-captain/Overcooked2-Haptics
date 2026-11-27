@@ -25,6 +25,7 @@ internal static class CoordinatorTests
         tests.Add("feature switches do not block explicit previews or bypass global masters", FeaturePreviews);
         tests.Add("feature switches audio-only team dedup never restores star motors", FeatureTeamAudio);
         tests.Add("v17 exhausted negative budget cannot block immediate celebration stop", BudgetAudioStop);
+        tests.Add("shared expiry semantic dedup preserves later music but distinct orders still interrupt", ExpiryIdentity);
     }
     private static GameEvent E(GameEventType type,double at,int pad=0,int entity=1)
     {return new GameEvent(type,EventScope.LocalTeam,at,pad,pad,entity,true,false,EventConfidence.ConfirmedState,"fixture",0,0);}
@@ -55,6 +56,21 @@ internal static class CoordinatorTests
         var e=E(GameEventType.DeliveryOrdered,200,1);
         Check(!r.Coordinator.Emit(e,new ControllerBinding(0,0),"wrong-pad",EventFeedback.For(e.EventType).Pattern,200,1,1,true));
         Check(r.Motors.Writes==0);Check(r.Emit(E(GameEventType.DeliveryFailure,0),"negative-not-stale",500));
+    }
+    private static void ExpiryIdentity()
+    {
+        var r=new Rig();
+        Check(r.Emit(E(GameEventType.OrderExpired,0,entity:42),"round:0:score:1",0));
+        Check(r.Emit(E(GameEventType.StarMilestone4,1000),"later-star",1000) && r.Sound.Playing);
+        Check(!r.Emit(E(GameEventType.OrderExpired,1100,entity:42),"round:0:score:3",1100));
+        Check(r.Sound.Playing);
+        Check(r.Emit(E(GameEventType.OrderExpired,1150,entity:43),"round:0:score:4",1150) && !r.Sound.Playing);
+        Check(r.Emit(E(GameEventType.StarMilestone4,15000),"much-later-star",15000) && r.Sound.Playing);
+        // Native order IDs use an8-bit wire representation and may be reused;
+        // retain the existing cooldown window rather than locking an ID for the round.
+        Check(r.Emit(E(GameEventType.OrderExpired,15100,entity:42),"round:0:score:5",15100) && !r.Sound.Playing);
+        r.Coordinator.Reset(16000);
+        Check(r.Emit(E(GameEventType.OrderExpired,16001,entity:42),"new-round:0:score:1",16001));
     }
     private static void Cooldown()
     {

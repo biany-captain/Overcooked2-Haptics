@@ -6,7 +6,8 @@
 - Dispatch shared score results through existing trusted applied-state messages and the bound-chef team resolver, independently of personal carry/request observer availability. Drain matching star receipts without a second personal output; retain silent unscoped rejection receipt cleanup so later personal successes are not poisoned.
 - Restore existing fire/cooking state routing, danger priority and negative celebration interruption. Keep existing cooldowns/budgets, aggregate fire edges and5-second reminder floor. Danger haptics off still permits celebration audio interruption; FoodBurned default remains off.
 - Preserve every waveform, audio asset, gain, menu control, F6/F10 and v1.7 once/highest/baseline rules. Update only explanatory menu text and legacy routing descriptions; no configuration schema/dependency change.
-- Three new scope/receipt regressions RED→GREEN; core143/143, actual configuration20/20, API/data11/11, Unity/net35/x86 target build0warnings/errors. New shared native behavior remains pending;0.6.2 basic own/peer acceptance is retained separately.
+- Three new scope/receipt regressions RED→GREEN; core144/144, actual configuration20/20, API/data11/11, Unity/net35/x86 target build0warnings/errors. New shared native behavior remains pending;0.6.2 basic own/peer acceptance is retained separately.
+- Single review found one Important: a repeated expiry with a fresh capture sequence could interrupt later celebration audio. Normalize expiry to team/order identity before the existing cooldown dedup; preserve distinct-order interruption, ID reuse and round reset. Added fourth regression RED→GREEN; final core144/144/build rerun green. No new Critical/Minor or fix re-review.
 
 ## 0.6.2-alpha — 2026-11-22 · strict personal candidate
 

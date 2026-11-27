@@ -11,7 +11,7 @@ Version note: 0.1 baseline and all four 0.2 added events have user/runtime evide
 | Steam Input on/off | No assumption | Pending | Pending |
 | Keyboard input | Core routing rejects | Pending | Must remain silent |
 | Multiple local controllers / mixed input | Deferred by user | Unverified | Unverified |
-| Joined online client, one local controller/chef |0.6.3 personal actions/shared alerts compiled;143 core/20 cfg/11 API+projection |0.6.2 request Hook ran;40 personal accepted outputs,177 remote successes silent. New0.6.3 shared scope pending |0.6.2 user confirms own delivery rumbles and peer routine delivery silent;0.6.3 team stars/negative/danger and controlled handoff remain pending |
+| Joined online client, one local controller/chef |0.6.3 personal actions/shared alerts compiled;144 core/20 cfg/11 API+projection |0.6.2 request Hook ran;40 personal accepted outputs,177 remote successes silent. New0.6.3 shared scope pending |0.6.2 user confirms own delivery rumbles and peer routine delivery silent;0.6.3 team stars/negative/danger and controlled handoff remain pending |
 | Online host / multiple local outputs | Deferred | Unverified | Unverified |
 | Epic / Proton / other devices | Outside first test scope | Unverified | Unverified |
 

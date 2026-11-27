@@ -117,6 +117,7 @@ PASS feature switches block hazards without suppressing rejection or music
 PASS feature switches do not block explicit previews or bypass global masters
 PASS feature switches audio-only team dedup never restores star motors
 PASS v17 exhausted negative budget cannot block immediate celebration stop
+PASS shared expiry semantic dedup preserves later music but distinct orders still interrupt
 PASS v16 fire spread is one incident and reminders have five second floor
 PASS v16 fire clear removes queued relevance and no resume replay
 PASS v16 cooking warning burned and removal are separate edges
@@ -141,4 +142,4 @@ PASS shared star receipt cannot duplicate celebration or poison next personal de
 PASS shared rare alerts allow same-team scope without sharing routine actions
 PASS personal remote star crossing is consumed instead of replayed on own delivery
 PASS personal remote combo upgrade is consumed before own same-tier delivery
-RESULT 143/143 passed
+RESULT 144/144 passed

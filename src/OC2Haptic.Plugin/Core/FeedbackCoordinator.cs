@@ -22,6 +22,8 @@ namespace OC2Haptic.Core
             EventFeedback f=EventFeedback.For(e.EventType);
             if(f.Category!=FeedbackCategory.Negative && f.Category!=FeedbackCategory.Emergency &&
                 (now<e.TimestampMs || now-e.TimestampMs>V16Preset.StaleNormalMs))return Drop("stale normal feedback");
+            // Expiry carries a stable order identity; capture sequence is not event identity.
+            if(e.EventType==GameEventType.OrderExpired)key=e.EventType+":"+e.TeamIdentity+":"+e.EntityIdentity;
             return EmitCore(EventRouter.Resolve(e,binding),e.EventType,key??f.Key(e),e.EntityIdentity,pattern,now,intensity,volume,null,false);
         }
         public bool Preview(GameEventType type,int index,string key,HapticPattern pattern,double now,float intensity,float volume,StarFeedbackMode? mode)
