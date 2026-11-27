@@ -1,35 +1,30 @@
-# Test report —0.6.2-alpha / strict personal feedback candidate
+# 测试报告 — 0.6.3-alpha：个人动作与本队提醒
 
-Updated2026-11-27; software candidate built2026-11-22. User approved strict personal delivery/Combo/star output; unattributed danger/expiry are silent. No team feedback fallback. Incremental on5eda7ec, reviewed candidate08ea2f0 plus focused rejection fix5140e61. User now confirms own-delivery rumble and peer-delivery silence when joining another host with one local chef/controller. This is limited native acceptance, not all-event or all-context acceptance.
+2026-11-27。用户已确认日常上菜/传菜/Combo针对本人，星级、真正拒单、订单超时与危险提醒本队共享；覆盖0.6.2对所有事件的严格个人范围。已实现候选，新的共享实机行为尚未验收。
 
-## Native0.6.2 session
+## 本轮实现
 
-The preserved log initializes0.6.2 and installs the explicit placement Hook. User reports “现在自己上菜手柄有触发震动了” and separately confirms “队友上菜时保持安静”. Own-plugin evidence contains225 kitchen Delivery results:217 successes pair uniquely with plate receipts, including40 local-confirmed deliveries with matching accepted output and177 remote-release successes with no output. The40 accepted events are ordered5, out-of-order7, unclassified20 and Combo×2/3/4 upgrades4/3/1; all target player0/gamePad0/XInput0. These are scheduler/log counts, not independently counted physical pulses or a new comfort assessment.
+- 可信已应用比分选出星级/负反馈后，经绑定厨师确定接收队伍，输出到现有绑定设备；接收者不冒充上菜者。队伍未知/不匹配、不可信比分或暂停/菜单状态不自动输出。
+- 达星无需个人盘子归属；对应盘子回执只消费，禁止再输出个人星级/上菜/Combo，下一次个人成功仍可反馈。普通动作继续要求本人请求、同盘释放、订单及同台回执。
+- 拒单消息仍忽略未序列化的台/订单/Combo/小费残留，清理其无归属回执；本队负反馈直接使用可信消息，与个人观察器是否可用分开。
+- 危险恢复已有协作模式状态Hook、火灾聚合与5秒提醒下限；保留边沿/冷却/预算/抢占/停止。危险马达关闭仍可中断庆祝声音；FoodBurned保持原配置默认关闭。
+- 所有波形、音频、增益、v1.7星级一次/最高档/中途加入基线、BGM音源静音、F6/F10与三个功能开关保留。无新配置键、依赖、后端或网络/游戏状态写入。
 
-Five star selections (one-star3, two-star1, three-star1) pair with remote releases and remain silent. No own-caused star output was recorded, so personal star/music acceptance remains pending. Eight client rejections and one non-plate receipt remain silent under the approved unknown-attribution policy. Two rejected receipts have prior local release records; that alone is not reliable personal proof. No own-plugin Error/Fatal or personal observer-fault line appears in the saved session. See[evidence/runtime-personal-0.6.2.txt](evidence/runtime-personal-0.6.2.txt).
+## 软件验证
 
-## Native evidence before this candidate
+- 新增3项范围/回执测试先RED 0/3，再GREEN 3/3：四档星级允许本队、拒绝错误/未知/远端/键盘/意图映射；稀有提醒共享且日常动作不共享；星级回执不重复且下一次个人交付恢复。
+- 核心143/143通过，见evidence/core-tests-0.6.3.txt；包含原140项及以上3项。旧个人星级拒绝断言按本轮正式范围更新。
+- 实际BepInEx配置20/20，见evidence/config-tests-0.6.3.txt；无个人值迁移或配置结构变化，仅旧路由字段说明更新。
+- 实际游戏API/数据与失败消息投影11/11，见evidence/probe-tests-0.6.3.txt。这是元数据/数据验证，不是游戏内Hook验收。
+- Unity2017/net35/x86实际目标编译零警告、零错误，程序集0.6.3.0，见evidence/build-0.6.3.txt。
+- 单次新增范围独立只读审查待完成，见review-shared-team-feedback.md。
 
-User reports0.6.1 menu works but rumble remains rare, with an uncontrolled online sequence. Actual probes ran without a recorded observer fault. Preserved own-plugin trace has2310 plate carry observations,581 kitchen results with unique station receipts,183 preceding local-chef release candidates and398remote, plus6 non-plate station rejections. Kitchen-to-receipt median0.8ms,max35.6ms. The old probe lacked explicit placement requests, so none of these is proof that personal output worked. See evidence/runtime-personal-probe-0.6.1.txt. No real failed-recipe coverage was established.
+## 实机证据与剩余项目
 
-## Implemented candidate
+0.6.2用户已确认本人上菜有震动、队友普通上菜静默；对应日志40次个人接受、177次远端成功静默，新请求Hook实际运行。该轮5次远端星级静默符合当时规则，不能作为0.6.3共享星级的验收。原记录保存在test-report-0.6.2.md和evidence/runtime-personal-0.6.2.txt。
 
-Read-only exact local Place request plus same-chef plate release, unique trusted kitchen result and same-plate/station receipt. Bind the expected plate when the result arrives, never guess from last holder at receipt time. Native pickup/transfer/re-target invalidates intent; conflicting/reversed/missing/stale streams stay silent. Pairing reuses existing180ms freshness without a fixed wait. Root runtime gate rejects team events even if legacy fallback configuration is true. All team score/Combo/star progression is consumed before personal filtering, so peer milestones do not replay on a later own action.
+0.6.3队友促成达星、共享拒单/超时/危险、同单不叠加、控制项与真实庆祝抢占仍待新实测。盘子转手、房主/本地多手柄、其他设备/模式/版本及端到端物理延迟另行覆盖。无需固定顺序或次数，未遇到可直接记未测，见batch-test-0.6.3.md。
 
-Existing modes/profiles/music/masters/sliders/feature controls and previews remain. Unknown hazards/expiry and client rejection without reliable station identity do not emit or stop music. The latter protocol omission was found during review: failed messages reuse preceding success fields. Snapshot now ignores unsent fields, silently drains rejection receipt and does not poison later same/previous-station valid successes. Manual negative profiles and the generic fully attributed rejection contract remain; no native rejection support is implied.
+## 交付
 
-## Software verification — retained2026-11-22 results
-
-- Core140/140, evidence/core-tests-0.6.2.txt: all125 previous regressions plus15 personal tests including actual old trace without request yielding zero, remote/keyboard/wrong team, transfer/re-pickup/retarget, unique pairing, conflicts/reverse/late/reset, rejection, strict runtime scope, peer progression consumption and unscoped-rejection recovery.
-- Actual BepInEx configuration20/20, evidence/config-tests-0.6.2.txt. No personal values migrated or new settings introduced; only legacy fallback descriptions updated.
-- Actual game API/data and failed-message projection11/11, evidence/probe-tests-0.6.2.txt. New request overload/helper signature checked; stale failure fields are ignored without Unity execution. This is not native Hook or transport acceptance. Linked diagnostic-source fields may produce test-project unused-field notices; the actual MOD target below has no warning.
-- Actual Unity2017/net35/x86 target build0warnings/errors, assembly0.6.2.0, evidence/build-0.6.2.txt.
-- New pipeline first REDmissingAPI then GREEN. Reviewer Important reproduced with two RED regressions (unsent fields and following success quarantine), fixed GREEN. No fix re-review; rulings in review-personal-feedback.md.
-
-## Pending / delivery
-
-With the game stopped, cold-backed up0.6.1 ownDLL/cfg and installed only the verified0.6.2.0 DLL. Installed hash matched the final tested artifact; cfg bytes unchanged, no audio or other MOD files written. Fresh request Hook and basic own-versus-peer physical behavior now have native evidence above. Controlled plate handoff, real personally caused star, host/local-multiple controllers and uncalibrated contexts remain unverified. No rigid action order or repeat of the whole music suite is required; optional handoff and a naturally occurring own star can extend coverage. Default focus/stop/round/config/binding changes clear associations; existing RespectGameFocus=false advanced opt-out semantics are preserved, with independent BGM focus release.
-
-Audio assets and personal configuration remain unchanged. No new runtime dependency, game-state writes, per-frame scene search, driver/backend, autoplay or game-window automation.
-
-This2026-11-27 update records user/runtime evidence only. No product code, configuration, waveform, installed DLL or audio was changed; previous software tests/build were not rerun for this documentation update.
+当前已编译产物待审查后打包检查与冷安装；游戏必须正常退出才替换自身DLL，保留配置、音频和其他MOD。PR保持草稿，不合并主分支或发布正式版。

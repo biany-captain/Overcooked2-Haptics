@@ -60,9 +60,9 @@ namespace OC2Haptic.Config
                 "Automatic burn-warning, burned and fire haptics as a group. Individual Events switches still apply; excludes rejected/expired orders. Explicit previews remain available."));
             config.Remove(config.Bind("Combo","TriggerMode",ComboTriggerMode.OnLevelUp,"Retired selector; v1.6 requires upgrade-only mode A.").Definition);
             TeamDeliveryFallback=Output(config.Bind("Routing","AllowTeamDeliveryFallback",false,
-                "Legacy preference retained; strict personal feedback ignores team delivery fallback. No guessed actor or broadcast."));
+                "Legacy preference retained; routine delivery/Combo remain personal. Stars, rejection and expiry are explicitly team-shared."));
             TeamHazardFallback=Output(config.Bind("Routing","AllowTeamHazardFallback",false,
-                "Legacy preference retained; strict personal feedback ignores unattributed team hazard fallback. Explicit previews remain available."));
+                "Legacy preference retained; supported co-op hazard alerts use the bound local team independently of this flag. No device broadcast."));
             MaxHapticTier = Output(config.Bind("Combo", "MaxHapticTier", 4,
                 new ConfigDescription("Haptic ceiling only; raw streak is never truncated.", new AcceptableValueRange<int>(1, 4))));
             config.Remove(config.Bind("Combo","ComboMasterIntensity",.85f,"Retired multiplier; v1.6 commands use the single master intensity.").Definition);

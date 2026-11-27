@@ -18,7 +18,10 @@ internal static class PersonalDeliveryTests
         tests.Add("personal reset drops all pending attribution without replay", Reset);
         tests.Add("personal authoritative rejection keeps the existing negative category", Rejection);
         tests.Add("personal unscoped client rejection drains silently without poisoning next success", UnscopedRejection);
-        tests.Add("personal runtime policy rejects team fallback danger expiry and unknown stars", StrictGate);
+        tests.Add("personal runtime policy rejects team delivery fallback danger and expiry", StrictGate);
+        tests.Add("shared star policy allows only confirmed same-team recipients", SharedStarGate);
+        tests.Add("shared star receipt cannot duplicate celebration or poison next personal delivery", SharedStarReceipt);
+        tests.Add("shared rare alerts allow same-team scope without sharing routine actions", SharedAlertGate);
         tests.Add("personal remote star crossing is consumed instead of replayed on own delivery", StarProgress);
         tests.Add("personal remote combo upgrade is consumed before own same-tier delivery", ComboProgress);
     }
@@ -107,11 +110,51 @@ internal static class PersonalDeliveryTests
     private static void StrictGate()
     {
         Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(GameEventType.DeliveryOrdered,EventScope.LocalTeam)));
-        Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(GameEventType.StarMilestone3,EventScope.LocalTeam)));
         foreach(var type in new[]{GameEventType.OrderExpired,GameEventType.FireStart,GameEventType.BurnWarning,GameEventType.FireReminder})
         {Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(type)));var t=Ready();t.Commit(D(type));Check(t.ReceivePlate(20,11,true,12)==null);}
         Check(PersonalFeedbackPolicy.AllowsAutomatic(E(GameEventType.ThrowSuccess)) && PersonalFeedbackPolicy.AllowsAutomatic(E(GameEventType.CatchSuccess)));
         Check(!PersonalFeedbackPolicy.AllowsAutomatic(new GameEvent(0,0,0,1,false,false,EventConfidence.ConfirmedState,"remote")));
+    }
+    private static void SharedStarGate()
+    {
+        for(int level=1;level<=4;level++)
+        {
+            var type=(GameEventType)((int)GameEventType.StarMilestone1+level-1);
+            Check(PersonalFeedbackPolicy.AllowsAutomatic(E(type,EventScope.LocalTeam)));
+            Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(type)));
+        }
+        foreach(var e in new[]{
+            new GameEvent(GameEventType.StarMilestone3,EventScope.LocalTeam,0,0,0,1,true,false,EventConfidence.ConfirmedState,"team-star",1,0),
+            new GameEvent(GameEventType.StarMilestone3,EventScope.LocalTeam,0,0,0,1,true,false,EventConfidence.ConfirmedState,"team-star"),
+            new GameEvent(GameEventType.StarMilestone3,EventScope.LocalTeam,0,0,0,1,false,false,EventConfidence.ConfirmedState,"team-star",0,0),
+            new GameEvent(GameEventType.StarMilestone3,EventScope.LocalTeam,0,0,0,1,true,true,EventConfidence.ConfirmedState,"team-star",0,0),
+            new GameEvent(GameEventType.StarMilestone3,EventScope.LocalTeam,0,0,0,1,true,false,EventConfidence.InputIntent,"team-star",0,0),
+            E(GameEventType.StarMilestone3,EventScope.AllLocal)})
+            Check(!PersonalFeedbackPolicy.AllowsAutomatic(e));
+        Check(EventRouter.Resolve(E(GameEventType.StarMilestone3,EventScope.LocalTeam),new ControllerBinding(1,0))==-1);
+    }
+    private static void SharedStarReceipt()
+    {
+        for(int level=1;level<=4;level++)
+        {
+            var selected=CelebrationCoordinator.Select(GameEventType.ComboLevel2,level);
+            var t=Ready();t.Commit(D(selected));
+            Check(t.ReceivePlate(20,11,true,12)==null);
+            t.Request(A(),12,20,20);t.Carry(A(),12,0,21);t.Commit(D(at:22));
+            var next=t.ReceivePlate(20,12,true,23);
+            Check(next!=null && next.ToEvent().EventType==GameEventType.DeliveryOrdered);
+        }
+    }
+    private static void SharedAlertGate()
+    {
+        foreach(var type in new[]{GameEventType.DeliveryFailure,GameEventType.OrderExpired,GameEventType.BurnWarning,GameEventType.FoodBurned,GameEventType.FireStart,GameEventType.FireReminder})
+        {
+            Check(PersonalFeedbackPolicy.AllowsAutomatic(E(type,EventScope.LocalTeam)));
+            Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(type)));
+        }
+        foreach(var type in new[]{GameEventType.ThrowSuccess,GameEventType.CatchSuccess,GameEventType.DeliveryOrdered,
+            GameEventType.DeliveryOutOfOrder,GameEventType.DeliveryUnclassified,GameEventType.ComboLevel2,GameEventType.ComboLevel3,GameEventType.ComboLevel4})
+            Check(!PersonalFeedbackPolicy.AllowsAutomatic(E(type,EventScope.LocalTeam)));
     }
     private static void StarProgress()
     {

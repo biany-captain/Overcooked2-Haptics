@@ -38,10 +38,15 @@ namespace OC2Haptic.Core
     {
         public static bool IsDelivery(GameEventType type)
         {return type==GameEventType.DeliverySuccess || type==GameEventType.DeliveryFailure ||
-            (type>=GameEventType.DeliveryOrdered && type<=GameEventType.StarMilestone4);}
+            (type>=GameEventType.DeliveryOrdered && type<=GameEventType.ComboLevel4);}
+        public static bool IsTeamShared(GameEventType type)
+        {return GameEventTypes.IsStar(type) || type==GameEventType.DeliveryFailure ||
+            type==GameEventType.OrderExpired || GameEventTypes.IsHazard(type);}
         public static bool AllowsAutomatic(GameEvent e)
         {
-            if(e==null || e.Scope!=EventScope.LocalPlayer || !EventRouter.IsLocalTarget(e,e.LocalPad))return false;
+            if(e==null || !EventRouter.IsLocalTarget(e,e.LocalPad))return false;
+            if(IsTeamShared(e.EventType))return e.Scope==EventScope.LocalTeam;
+            if(e.Scope!=EventScope.LocalPlayer)return false;
             return e.EventType==GameEventType.ThrowSuccess || e.EventType==GameEventType.CatchSuccess || IsDelivery(e.EventType);
         }
     }
@@ -108,6 +113,8 @@ namespace OC2Haptic.Core
             if(plate==0)
             {if(observation!=null)Quarantine(station,"kitchen result without a plate");return Drop("non-plate station receipt");}
             if(observation==null){Quarantine(station,"plate receipt without prior kitchen result");return null;}
+            if(observation.Decision.Type.HasValue && GameEventTypes.IsStar(observation.Decision.Type.Value))
+                return Drop("star feedback handled by shared team route; no personal duplicate");
             if(observation.Expected==null)return Drop("no explicit local request and matching native release");
             if(!object.ReferenceEquals(request,observation.Expected) || request.Plate!=plate)
             {Quarantine(station,"plate or ownership differs from committed personal candidate");return null;}

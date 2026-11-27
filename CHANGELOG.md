@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.3-alpha — 2026-11-27 · personal actions / shared team alerts
+
+- Adopt the user's revised scope: routine delivery/out-of-order/Combo/throw/catch remain personal; stars, actual rejection, expiry and supported co-op danger alerts are shared by the local team. Only the configured bound output receives them; no device broadcast or guessed delivery author.
+- Dispatch shared score results through existing trusted applied-state messages and the bound-chef team resolver, independently of personal carry/request observer availability. Drain matching star receipts without a second personal output; retain silent unscoped rejection receipt cleanup so later personal successes are not poisoned.
+- Restore existing fire/cooking state routing, danger priority and negative celebration interruption. Keep existing cooldowns/budgets, aggregate fire edges and5-second reminder floor. Danger haptics off still permits celebration audio interruption; FoodBurned default remains off.
+- Preserve every waveform, audio asset, gain, menu control, F6/F10 and v1.7 once/highest/baseline rules. Update only explanatory menu text and legacy routing descriptions; no configuration schema/dependency change.
+- Three new scope/receipt regressions RED→GREEN; core143/143, actual configuration20/20, API/data11/11, Unity/net35/x86 target build0warnings/errors. New shared native behavior remains pending;0.6.2 basic own/peer acceptance is retained separately.
+
 ## 0.6.2-alpha — 2026-11-22 · strict personal candidate
 
 - Adopt the user's strict personal rule: only attributed own delivery/Combo/star feedback. Unattributed danger/expiry remain silent without interrupting music; preserve all profiles, music and explicit tests.

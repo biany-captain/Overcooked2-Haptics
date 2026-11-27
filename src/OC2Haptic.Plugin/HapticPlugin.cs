@@ -15,7 +15,7 @@ using UnityEngine.SceneManagement;
 
 namespace OC2Haptic
 {
-    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.6.2")]
+    [BepInPlugin("dev.oc2haptic.feedback", "OC2 Haptic", "0.6.3")]
     [BepInProcess("Overcooked2.exe")]
     public sealed class HapticPlugin : BaseUnityPlugin
     {
@@ -86,7 +86,7 @@ namespace OC2Haptic
                 menu = new HapticMenu(this, settings, engine, message => Logger.LogInfo(message),PreviewEvent,StopOutput,rewardAudio.Packs);
                 settings.WatchOutputChanges(OnOutputSettingsChanged);
                 ready = true;
-                Logger.LogInfo("OC2Haptic initialized | 0.6.2-alpha strict personal feedback candidate | x86/net35 | F6 / F10");
+                Logger.LogInfo("OC2Haptic initialized | 0.6.3-alpha personal actions and shared team alerts | x86/net35 | F6 / F10");
                 Logger.LogInfo("Explicit binding required: Devices.XInputIndex and Devices.LocalGamePadSlot default to -1. No slot is guessed.");
             }
             catch (Exception error) { Logger.LogError("OC2 Haptic disabled during initialization: " + error); }
@@ -298,15 +298,28 @@ namespace OC2Haptic
                     " wasCombo="+observation.WasCombo+" tip="+observation.Tip+" rawMultiplier="+(after==null?-1:after.Multiplier)+
                     " rawStreak="+(after==null?-1:after.Combo)+" tier="+(result==null?null:result.Tier)+
                     " selected="+selected+" star="+milestone+" confidence="+(trusted?"VerifiedClientState":"Unknown")+" arbitration=SameClientMessage");
-            if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && !observation.Success && !personalDeliveryFaulted)
+            if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && !observation.Success)
             {
-                personalDeliveries.Commit(new PersonalDeliveryDecision(team,0,GameEventType.DeliveryFailure,key,observation.Timestamp,false));
-                LogUnresolved(GameEventType.DeliveryFailure,"strict personal: client rejection wire has no station identity; drain without output");return;
+                if(!personalDeliveryFaulted)
+                    personalDeliveries.Commit(new PersonalDeliveryDecision(team,0,GameEventType.DeliveryFailure,key,observation.Timestamp,false));
+                DispatchSharedResult(GameEventType.DeliveryFailure,team,0,observation.Timestamp,key,trusted);return;
             }
             if(!selected.HasValue)return;
+            if(PersonalFeedbackPolicy.IsTeamShared(selected.Value))
+                DispatchSharedResult(selected.Value,team,unchecked((int)observation.OrderId),observation.Timestamp,key,trusted);
             if(observation.Kind==KitchenFlowMessage.MsgType.Delivery && !personalDeliveryFaulted)
                 personalDeliveries.Commit(new PersonalDeliveryDecision(team,observation.StationId,selected,key,observation.Timestamp,trusted));
-            else LogUnresolved(selected.Value,"strict personal: no directly attributed delivery for this score/expiry event");
+            else if(!PersonalFeedbackPolicy.IsTeamShared(selected.Value))
+                LogUnresolved(selected.Value,"personal action: no directly attributed delivery for this score event");
+        }
+        private void DispatchSharedResult(GameEventType type,int team,int entity,double timestamp,string key,bool trusted)
+        {
+            if(!trusted){LogUnresolved(type,"shared team result: unverified applied score state");return;}
+            // The selected chef identifies the recipient/team, not the author of this delivery.
+            var gameEvent=PlayerResolver.FromTeam(type,team,entity,settings.LocalPadSlot.Value,timestamp,"TeamFeedback:verified-score");
+            if(!EventRouter.IsLocalTarget(gameEvent,settings.LocalPadSlot.Value))
+            {LogUnresolved(type,"shared team result: bound local team or recipient unavailable");return;}
+            Dispatch(gameEvent,key);
         }
         internal void ObserveFire(ClientFlammable source,bool active)
         {
@@ -333,7 +346,11 @@ namespace OC2Haptic
         }
         private void DispatchHazard(GameEventType type,int entity,string source)
         {
-            LogUnresolved(type,"strict personal: hazard has no reliable actor attribution; no automatic output");
+            var gameEvent=PlayerResolver.FromHazard(type,entity,settings.LocalPadSlot.Value,clock.Elapsed.TotalMilliseconds,
+                "TeamHazard:"+source,true);
+            if(!EventRouter.IsLocalTarget(gameEvent,settings.LocalPadSlot.Value))
+            {LogUnresolved(type,"shared hazard: supported co-op context or bound local team unavailable");return;}
+            Dispatch(gameEvent);
         }
         internal void StopFaultedHazards(Exception error)
         {if(hazardFaulted)return;hazardFaulted=true;hazards.Reset();cookingProbeStates.Clear();StopOutput();Logger.LogError("Hazard candidates disabled after adapter error; other events continue: "+error);}
