@@ -1,0 +1,74 @@
+[
+  {
+    "preset": "turbo_swing",
+    "star": 1,
+    "sec": 1.05,
+    "peak": 0.5947
+  },
+  {
+    "preset": "turbo_swing",
+    "star": 2,
+    "sec": 1.57,
+    "peak": 0.6461
+  },
+  {
+    "preset": "turbo_swing",
+    "star": 3,
+    "sec": 2.3,
+    "peak": 0.7183
+  },
+  {
+    "preset": "turbo_swing",
+    "star": 4,
+    "sec": 3.85,
+    "peak": 0.81
+  },
+  {
+    "preset": "champion_fanfare",
+    "star": 1,
+    "sec": 1.13,
+    "peak": 0.5636
+  },
+  {
+    "preset": "champion_fanfare",
+    "star": 2,
+    "sec": 1.7,
+    "peak": 0.81
+  },
+  {
+    "preset": "champion_fanfare",
+    "star": 3,
+    "sec": 2.48,
+    "peak": 0.7538
+  },
+  {
+    "preset": "champion_fanfare",
+    "star": 4,
+    "sec": 4.05,
+    "peak": 0.7742
+  },
+  {
+    "preset": "kitchen_rock",
+    "star": 1,
+    "sec": 1.01,
+    "peak": 0.6458
+  },
+  {
+    "preset": "kitchen_rock",
+    "star": 2,
+    "sec": 1.53,
+    "peak": 0.7271
+  },
+  {
+    "preset": "kitchen_rock",
+    "star": 3,
+    "sec": 2.35,
+    "peak": 0.7382
+  },
+  {
+    "preset": "kitchen_rock",
+    "star": 4,
+    "sec": 3.8,
+    "peak": 0.7629
+  }
+]

@@ -1,0 +1,2 @@
+OC2Haptic-0.6.3-alpha.zip: verified own DLL count 1, exact14 WAV/12 MIDI, credits, controls design/checklist/review and canonical JSON; no cache/private/game binaries.
+OC2Haptic-0.6.3-alpha-source.zip: verified own DLL count 0, exact14 WAV/12 MIDI, credits, controls design/checklist/review and canonical JSON; no cache/private/game binaries.

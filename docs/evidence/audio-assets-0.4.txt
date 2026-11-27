@@ -1,0 +1,5 @@
+Offline asset inspection 2026-11-21; no human audition or physical latency measurement.
+star_1_playful_spark.wav source-identical=True SHA256=d9096d80851e7880e7b2b231bb7e4eaf7b2c265e2f099c49341bbee03fa994e8 durationMs=980 rate=48000 channels=2 bits=16 peakDBFS=-7.35 rmsDBFS=-23.68 clippedSamples=0 finalSamplePeak=0/32768
+star_2_bouncy_skip.wav source-identical=True SHA256=a64bc6ae976226aeb442bd015ee1217865c3a980cd3d25fb633d6657cd859615 durationMs=1490 rate=48000 channels=2 bits=16 peakDBFS=-8.13 rmsDBFS=-21.78 clippedSamples=0 finalSamplePeak=1/32768
+star_3_brass_victory.wav source-identical=True SHA256=8a9bb63564fe146fc112fd2b077a6ab4f566c50b9f9ca0da416799384b043e6a durationMs=2160 rate=48000 channels=2 bits=16 peakDBFS=-4.07 rmsDBFS=-19.13 clippedSamples=0 finalSamplePeak=0/32768
+star_4_grand_kitchen_party.wav source-identical=True SHA256=11fbaf581ec97c066b3adec7c15414024ac52de55c2d152e3f2cc34d73ac38bd durationMs=3250 rate=48000 channels=2 bits=16 peakDBFS=-2.38 rmsDBFS=-18.26 clippedSamples=0 finalSamplePeak=0/32768

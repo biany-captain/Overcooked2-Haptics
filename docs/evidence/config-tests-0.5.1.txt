@@ -1,0 +1,19 @@
+PASS migration 0 -> F6
+PASS migration 1 -> None
+PASS migration 2 -> F7
+PASS migration 3 -> F8
+PASS legacy coarse preference migrates to cfg event switches 0
+PASS legacy coarse preference migrates to cfg event switches 1
+PASS retired gains reset while master volume and mode migrate
+PASS retired nonfinite gain cannot affect output
+PASS v14 defaults migrate while custom profiles and pack preference survive
+PASS v14 migration preserves submilliscale custom motor values
+PASS retired selections migrate and relative gameSFX gain defaults100percent
+PASS legacy modes migrate to independent master channels
+PASS explicit channel precedence F10 and persistence
+PASS v16 defaults known profiles and Combo A migrate without resetting global preferences
+PASS v16 exact custom and invalid patterns preserved independently
+PASS legacy star switch migrates with explicit channel precedence
+PASS feature modes masters F10 persistence and disabled milestone fallback
+PASS hazard group preserves individual switches and negative deliveries
+RESULT 18/18 config migration passed

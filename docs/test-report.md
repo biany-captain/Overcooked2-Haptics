@@ -1,10 +1,30 @@
-# Test report — 0.2.2-alpha (2026-11-21, Asia/Shanghai)
+# 测试报告 — 0.6.3-alpha：个人动作与本队提醒
 
-| Check | Result | Evidence |
-|---|---|---|
-| Layout defect reproduction | Confirmed | User screenshot: clipped second explanatory line and scene showing through panel |
-| Layout-only fix build | PASS | net35/x86,0 warnings/errors; evidence/build-0.2.2.txt |
-| Core/input/config behavior | Unchanged | Existing40 core /4 config tests and0.2.1 user functional checks preserved; test-report-0.2.1.md |
-| Updated visual acceptance | PASS by user observation | User reloaded0.2.2 and confirmed all text complete / obstruction resolved; runtime layout metrics in evidence/runtime-menu-layout-0.2.2.txt |
+2026-11-27。用户已确认日常上菜/传菜/Combo针对本人，星级、真正拒单、订单超时与危险提醒本队共享；覆盖0.6.2对所有事件的严格个人范围。已实现候选，新的共享实机行为尚未验收。
 
-Only UI height/spacing/background drawing changed. Text height is measured from actual GUIStyle/font at runtime; smaller resolutions scroll the event list instead of overlapping labels. No extra gameplay effects, pause policy, input ownership or settings behavior changed. The user-provided screenshot supplied actual visual evidence after assistant read-only capture was unavailable.
+## 本轮实现
+
+- 可信已应用比分选出星级/负反馈后，经绑定厨师确定接收队伍，输出到现有绑定设备；接收者不冒充上菜者。队伍未知/不匹配、不可信比分或暂停/菜单状态不自动输出。
+- 达星无需个人盘子归属；对应盘子回执只消费，禁止再输出个人星级/上菜/Combo，下一次个人成功仍可反馈。普通动作继续要求本人请求、同盘释放、订单及同台回执。
+- 拒单消息仍忽略未序列化的台/订单/Combo/小费残留，清理其无归属回执；本队负反馈直接使用可信消息，与个人观察器是否可用分开。
+- 危险恢复已有协作模式状态Hook、火灾聚合与5秒提醒下限；保留边沿/冷却/预算/抢占/停止。危险马达关闭仍可中断庆祝声音；FoodBurned保持原配置默认关闭。
+- 所有波形、音频、增益、v1.7星级一次/最高档/中途加入基线、BGM音源静音、F6/F10与三个功能开关保留。无新配置键、依赖、后端或网络/游戏状态写入。
+
+## 软件验证
+
+- 新增3项范围/回执测试先RED 0/3，再GREEN 3/3：四档星级允许本队、拒绝错误/未知/远端/键盘/意图映射；稀有提醒共享且日常动作不共享；星级回执不重复且下一次个人交付恢复。
+- 核心144/144通过，见evidence/core-tests-0.6.3.txt；包含原140项、以上3项和1项审查复现。旧个人星级拒绝断言按本轮正式范围更新。
+- 实际BepInEx配置20/20，见evidence/config-tests-0.6.3.txt；无个人值迁移或配置结构变化，仅旧路由字段说明更新。
+- 实际游戏API/数据与失败消息投影11/11，见evidence/probe-tests-0.6.3.txt。这是元数据/数据验证，不是游戏内Hook验收。
+- Unity2017/net35/x86实际目标编译零警告、零错误，程序集0.6.3.0，见evidence/build-0.6.3.txt。
+- 单次新增范围独立只读审查发现1项Important、无Critical/Minor：同一超时的新捕获序号可能再次打断庆祝。协调器按队伍/订单归一化超时身份，沿用既有1800ms窗口并由回合重置清理，不给可复用订单ID加整局锁。新增复现先RED后GREEN：重复超时不打断、不同订单仍可打断、稍后ID复用及回合重置正常。最终核心144/144及目标编译重新通过；配置20/接口11保留同轮先前通过结果，未重复无关检查。无二次审查，完整裁定见review-shared-team-feedback.md。
+
+## 实机证据与剩余项目
+
+0.6.2用户已确认本人上菜有震动、队友普通上菜静默；对应日志40次个人接受、177次远端成功静默，新请求Hook实际运行。该轮5次远端星级静默符合当时规则，不能作为0.6.3共享星级的验收。原记录保存在test-report-0.6.2.md和evidence/runtime-personal-0.6.2.txt。
+
+0.6.3队友促成达星、共享拒单/超时/危险、同单不叠加、控制项与真实庆祝抢占仍待新实测。盘子转手、房主/本地多手柄、其他设备/模式/版本及端到端物理延迟另行覆盖。无需固定顺序或次数，未遇到可直接记未测，见batch-test-0.6.3.md。
+
+## 交付
+
+单次审查及修复已完成。在游戏退出时冷备份0.6.2自身DLL/配置，仅安装最终验证的0.6.3.0 DLL，安装文件与产物一致；配置字节不变，音频和其他MOD未写入。回退目录为artifacts/rollback/0.6.2-before-shared-alerts-8db305e740b045bbaec1d639967c04aa。安装不等于实机验收；PR保持草稿，不合并主分支或发布正式版。

@@ -1,6 +1,7 @@
 param([string]$GameRoot = '')
 . (Join-Path $PSScriptRoot 'environment.ps1')
 try {
+& (Join-Path $PSScriptRoot 'generate-haptic-preset.ps1') -Check
 $resolvedGameRoot = Get-OC2GameRoot $GameRoot
 $pluginProject = Join-Path $projectRoot 'src\OC2Haptic.Plugin\OC2Haptic.Plugin.csproj'
 dotnet restore $pluginProject --configfile (Join-Path $projectRoot 'NuGet.Config') "-p:GameRoot=$resolvedGameRoot" -p:NuGetAudit=false --verbosity quiet

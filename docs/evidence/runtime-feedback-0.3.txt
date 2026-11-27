@@ -1,0 +1,30 @@
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.3.0-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=1 wasCombo=True tip=8 rawMultiplier=1 rawStreak=1 tier=1 selected=DeliveryOrdered star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=2 wasCombo=True tip=8 rawMultiplier=2 rawStreak=2 tier=2 selected=ComboLevel2 star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=3 wasCombo=True tip=16 rawMultiplier=3 rawStreak=3 tier=3 selected=ComboLevel3 star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=4 wasCombo=True tip=24 rawMultiplier=4 rawStreak=4 tier=4 selected=ComboLevel4 star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=7 wasCombo=False tip=32 rawMultiplier=0 rawStreak=0 tier= selected=DeliveryOutOfOrder star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=5 wasCombo=True tip=3 rawMultiplier=1 rawStreak=1 tier=1 selected=DeliveryOrdered star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=5 wasCombo=True tip=3 rawMultiplier=0 rawStreak=0 tier= selected= star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-37200:-38566:1 team=0 order=5 wasCombo=True tip=3 rawMultiplier=0 rawStreak=0 tier= selected= star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward decision | session=-74384:-75634:2 team=0 order=1 wasCombo=True tip=8 rawMultiplier=1 rawStreak=1 tier=1 selected=StarMilestone1 star=1 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward audio | clip=CrispReward1 volume=0.7006757 manual=False accepted=True
+[Info   :OC2 Haptic] Reward decision | session=-74384:-75634:2 team=0 order=2 wasCombo=True tip=8 rawMultiplier=2 rawStreak=2 tier=2 selected=StarMilestone3 star=3 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] Reward audio | clip=CrispReward3 volume=0.7006757 manual=False accepted=True
+[Info   :OC2 Haptic] Reward decision | session=-74384:-75634:2 team=0 order=3 wasCombo=True tip=16 rawMultiplier=3 rawStreak=3 tier=3 selected=ComboLevel3 star=0 confidence=VerifiedClientState arbitration=SameClientMessage
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=15 scheduled=15
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=2 scheduled=2
+[Info   :OC2 Haptic] Event totals | type=DeliverySuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryFailure observed=2 scheduled=2
+[Info   :OC2 Haptic] Event totals | type=OrderExpired observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryOrdered observed=2 scheduled=2
+[Info   :OC2 Haptic] Event totals | type=DeliveryOutOfOrder observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=DeliveryUnclassified observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel2 observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=ComboLevel3 observed=2 scheduled=2
+[Info   :OC2 Haptic] Event totals | type=ComboLevel4 observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=StarMilestone1 observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=StarMilestone2 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone3 observed=1 scheduled=1
+[Info   :OC2 Haptic] Event totals | type=StarMilestone4 observed=0 scheduled=0

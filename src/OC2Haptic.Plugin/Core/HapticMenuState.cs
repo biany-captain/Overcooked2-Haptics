@@ -3,18 +3,19 @@ namespace OC2Haptic.Core
     public sealed class HapticMenuState
     {
         private readonly HapticEngine engine;
+        private readonly System.Action stop;
         private readonly HapticPattern generic = new HapticPattern(new HapticSegment(.22f, .28f, 80));
         public bool IsOpen { get; private set; }
-        public HapticMenuState(HapticEngine engine) { this.engine = engine; }
+        public HapticMenuState(HapticEngine engine,System.Action stop=null) { this.engine = engine;this.stop=stop??engine.StopAll; }
         public void Toggle()
         {
-            engine.StopAll();
+            stop();
             IsOpen = !IsOpen;
         }
         public void Close()
         {
             if (!IsOpen) return;
-            engine.StopAll();
+            stop();
             IsOpen = false;
         }
         public bool Preview(GameEventType? type, int index, bool globallyEnabled, float intensity, double nowMs)

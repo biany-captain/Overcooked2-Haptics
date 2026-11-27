@@ -1,0 +1,126 @@
+{
+  "pack": "Overcooked2-Haptics Ultra Victory Music Expansion",
+  "version": "3.0",
+  "description": "12 additional original ultra-energetic star victory jingles",
+  "defaultVolume": 0.65,
+  "effectsBundled": false,
+  "presets": {
+    "turbo_swing": {
+      "name": "超燃卡通大乐队",
+      "nameEn": "Turbo Swing",
+      "desc": "闪亮小号、长号与萨克斯，急促的爵士鼓填充；最贴近胡闹厨房的欢乐热闹氛围",
+      "bpm": 208,
+      "stars": {
+        "1": {
+          "wav": "presets/turbo_swing/wav/star_1_turbo_swing.wav",
+          "ogg": "presets/turbo_swing/ogg/star_1_turbo_swing.ogg",
+          "midi": "presets/turbo_swing/midi/star_1_turbo_swing.mid",
+          "duration": 1.05,
+          "containsCheerApplause": false
+        },
+        "2": {
+          "wav": "presets/turbo_swing/wav/star_2_turbo_swing.wav",
+          "ogg": "presets/turbo_swing/ogg/star_2_turbo_swing.ogg",
+          "midi": "presets/turbo_swing/midi/star_2_turbo_swing.mid",
+          "duration": 1.57,
+          "containsCheerApplause": false
+        },
+        "3": {
+          "wav": "presets/turbo_swing/wav/star_3_turbo_swing.wav",
+          "ogg": "presets/turbo_swing/ogg/star_3_turbo_swing.ogg",
+          "midi": "presets/turbo_swing/midi/star_3_turbo_swing.mid",
+          "duration": 2.3,
+          "containsCheerApplause": false
+        },
+        "4": {
+          "wav": "presets/turbo_swing/wav/star_4_turbo_swing.wav",
+          "ogg": "presets/turbo_swing/ogg/star_4_turbo_swing.ogg",
+          "midi": "presets/turbo_swing/midi/star_4_turbo_swing.mid",
+          "duration": 3.85,
+          "containsCheerApplause": false
+        }
+      },
+      "preview": "previews/turbo_swing_stars_1_to_4.wav"
+    },
+    "champion_fanfare": {
+      "name": "冠军加冕号角",
+      "nameEn": "Champion Fanfare",
+      "desc": "大铜管胜利号角、定音鼓与军鼓滚奏，接近闯关夺冠庆典",
+      "bpm": 188,
+      "stars": {
+        "1": {
+          "wav": "presets/champion_fanfare/wav/star_1_champion_fanfare.wav",
+          "ogg": "presets/champion_fanfare/ogg/star_1_champion_fanfare.ogg",
+          "midi": "presets/champion_fanfare/midi/star_1_champion_fanfare.mid",
+          "duration": 1.13,
+          "containsCheerApplause": false
+        },
+        "2": {
+          "wav": "presets/champion_fanfare/wav/star_2_champion_fanfare.wav",
+          "ogg": "presets/champion_fanfare/ogg/star_2_champion_fanfare.ogg",
+          "midi": "presets/champion_fanfare/midi/star_2_champion_fanfare.mid",
+          "duration": 1.7,
+          "containsCheerApplause": false
+        },
+        "3": {
+          "wav": "presets/champion_fanfare/wav/star_3_champion_fanfare.wav",
+          "ogg": "presets/champion_fanfare/ogg/star_3_champion_fanfare.ogg",
+          "midi": "presets/champion_fanfare/midi/star_3_champion_fanfare.mid",
+          "duration": 2.48,
+          "containsCheerApplause": false
+        },
+        "4": {
+          "wav": "presets/champion_fanfare/wav/star_4_champion_fanfare.wav",
+          "ogg": "presets/champion_fanfare/ogg/star_4_champion_fanfare.ogg",
+          "midi": "presets/champion_fanfare/midi/star_4_champion_fanfare.mid",
+          "duration": 4.05,
+          "containsCheerApplause": false
+        }
+      },
+      "preview": "previews/champion_fanfare_stars_1_to_4.wav"
+    },
+    "kitchen_rock": {
+      "name": "厨房摇滚派对",
+      "nameEn": "Kitchen Rock Party",
+      "desc": "电吉他、合成器、摇滚鼓组，跳跃而具有冲击力的胜利短曲",
+      "bpm": 214,
+      "stars": {
+        "1": {
+          "wav": "presets/kitchen_rock/wav/star_1_kitchen_rock.wav",
+          "ogg": "presets/kitchen_rock/ogg/star_1_kitchen_rock.ogg",
+          "midi": "presets/kitchen_rock/midi/star_1_kitchen_rock.mid",
+          "duration": 1.01,
+          "containsCheerApplause": false
+        },
+        "2": {
+          "wav": "presets/kitchen_rock/wav/star_2_kitchen_rock.wav",
+          "ogg": "presets/kitchen_rock/ogg/star_2_kitchen_rock.ogg",
+          "midi": "presets/kitchen_rock/midi/star_2_kitchen_rock.mid",
+          "duration": 1.53,
+          "containsCheerApplause": false
+        },
+        "3": {
+          "wav": "presets/kitchen_rock/wav/star_3_kitchen_rock.wav",
+          "ogg": "presets/kitchen_rock/ogg/star_3_kitchen_rock.ogg",
+          "midi": "presets/kitchen_rock/midi/star_3_kitchen_rock.mid",
+          "duration": 2.35,
+          "containsCheerApplause": false
+        },
+        "4": {
+          "wav": "presets/kitchen_rock/wav/star_4_kitchen_rock.wav",
+          "ogg": "presets/kitchen_rock/ogg/star_4_kitchen_rock.ogg",
+          "midi": "presets/kitchen_rock/midi/star_4_kitchen_rock.mid",
+          "duration": 3.8,
+          "containsCheerApplause": false
+        }
+      },
+      "preview": "previews/kitchen_rock_stars_1_to_4.wav"
+    }
+  },
+  "rules": {
+    "sameFrameStar": "highest_only",
+    "starVsCombo": "star_priority",
+    "emergency": "preempt_or_duck",
+    "resetOnLevelRestart": true
+  }
+}

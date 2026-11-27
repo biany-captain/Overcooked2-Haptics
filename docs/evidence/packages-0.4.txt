@@ -1,0 +1,2 @@
+OC2Haptic-0.4.0-alpha-source.zip: WAV=4; MIDI=4; GPL/source=present; DLL=0; no caches/OGG/internal notes.
+OC2Haptic-0.4.0-alpha.zip: WAV=4; MIDI=4; GPL/source=present; own DLL matches current artifact; installed audio copies match sources; no caches/OGG/internal notes.

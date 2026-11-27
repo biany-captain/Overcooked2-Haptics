@@ -1,0 +1,38 @@
+[Info   :OC2 Haptic] Reward audio prepared | pack=joyful-cartoon-jazz star=1 durationMs=980 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=joyful-cartoon-jazz star=2 durationMs=1490 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=joyful-cartoon-jazz star=3 durationMs=2160 rate=48000 channels=2
+[Info   :OC2 Haptic] Reward audio prepared | pack=joyful-cartoon-jazz star=4 durationMs=3250 rate=48000 channels=2
+[Info   :OC2 Haptic] OC2Haptic initialized | 0.4.0-alpha | x86/net35 | F6 management menu / F10 global toggle (configurable)
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Stop: scene changed
+[Info   :OC2 Haptic] Haptic menu opened; local input suppressed, no automatic vibration.
+[Info   :OC2 Haptic] Stop: output settings changed
+[Info   :OC2 Haptic] XInput 0 connected | code=0
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone1 mode=HapticsOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone2 mode=HapticsOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone3 mode=HapticsOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone4 mode=HapticsOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone4 mode=HapticsOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Reward audio | pack=joyful-cartoon-jazz star=1 durationMs=980 volume=0.7006757 manual=True accepted=True
+[Info   :OC2 Haptic] Menu preview | type=StarMilestone1 mode=AudioOnly accepted=True XInput=0 master=1 gain=1
+[Info   :OC2 Haptic] Haptic menu closed; local input and cursor restored.
+[Info   :OC2 Haptic] Stop: application quit
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] Stop: plugin disabled
+[Info   :OC2 Haptic] OC2 Haptic shutdown
+[Info   :OC2 Haptic] Event totals | type=ThrowSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=CatchSuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliverySuccess observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryFailure observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=OrderExpired observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryOrdered observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryOutOfOrder observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=DeliveryUnclassified observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel2 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel3 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=ComboLevel4 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone1 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone2 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone3 observed=0 scheduled=0
+[Info   :OC2 Haptic] Event totals | type=StarMilestone4 observed=0 scheduled=0

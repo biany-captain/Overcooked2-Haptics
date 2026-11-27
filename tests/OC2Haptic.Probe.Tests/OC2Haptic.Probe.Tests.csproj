@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable>
+    <GameRoot Condition="'$(GameRoot)' == ''">$(OC2_GAME_DIR)</GameRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/OC2Haptic.Plugin/Core/GameEvent.cs" Link="Core/GameEvent.cs" />
+    <Compile Include="../../src/OC2Haptic.Plugin/Core/ScoreThresholds.cs" Link="ScoreThresholds.cs" />
+    <Compile Include="../../src/OC2Haptic.Plugin/GameEvents/ScoreSourceProbe.cs" Link="ScoreSourceProbe.cs" />
+    <Compile Include="../../src/OC2Haptic.Plugin/GameEvents/ScoreProbeMetadata.cs" Link="ScoreProbeMetadata.cs" />
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.AudioModule"><HintPath>$(GameRoot)/Overcooked2_Data/Managed/UnityEngine.AudioModule.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

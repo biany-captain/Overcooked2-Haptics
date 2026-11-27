@@ -1,5 +1,104 @@
 # Changelog
 
+## 0.6.3-alpha — 2026-11-27 · personal actions / shared team alerts
+
+- Adopt the user's revised scope: routine delivery/out-of-order/Combo/throw/catch remain personal; stars, actual rejection, expiry and supported co-op danger alerts are shared by the local team. Only the configured bound output receives them; no device broadcast or guessed delivery author.
+- Dispatch shared score results through existing trusted applied-state messages and the bound-chef team resolver, independently of personal carry/request observer availability. Drain matching star receipts without a second personal output; retain silent unscoped rejection receipt cleanup so later personal successes are not poisoned.
+- Restore existing fire/cooking state routing, danger priority and negative celebration interruption. Keep existing cooldowns/budgets, aggregate fire edges and5-second reminder floor. Danger haptics off still permits celebration audio interruption; FoodBurned default remains off.
+- Preserve every waveform, audio asset, gain, menu control, F6/F10 and v1.7 once/highest/baseline rules. Update only explanatory menu text and legacy routing descriptions; no configuration schema/dependency change.
+- Three new scope/receipt regressions RED→GREEN; core144/144, actual configuration20/20, API/data11/11, Unity/net35/x86 target build0warnings/errors. New shared native behavior remains pending;0.6.2 basic own/peer acceptance is retained separately.
+- Single review found one Important: a repeated expiry with a fresh capture sequence could interrupt later celebration audio. Normalize expiry to team/order identity before the existing cooldown dedup; preserve distinct-order interruption, ID reuse and round reset. Added fourth regression RED→GREEN; final core144/144/build rerun green. No new Critical/Minor or fix re-review.
+
+## 0.6.2-alpha — 2026-11-22 · strict personal candidate
+
+- Adopt the user's strict personal rule: only attributed own delivery/Combo/star feedback. Unattributed danger/expiry remain silent without interrupting music; preserve all profiles, music and explicit tests.
+- Require explicit local Place request, same-chef native plate release, unique trusted kitchen result and same-plate/same-station receipt. Consume transfer/re-pickup/re-targeted requests; quarantine conflicting/reversed/missing/stale station association instead of guessing. No fixed wait; reuse existing180ms confirmed-result freshness.
+- Continue consuming real team Combo/star progression without emitting peer feedback or replaying peer milestones on the next own action. Runtime personal gate blocks legacy team fallbacks; preserve configuration values and current XInput binding/preferences.
+-0.6.1 native calibration yielded581 unique kitchen/station pairs,183 local ownership candidates and398remote; no request proof was captured in that diagnostic version.
+- Single review found an Important protocol issue: failed kitchen messages omit station/order/combo/tip and reuse the prior message. Normalize unavailable fields and silently drain rejection receipt without quarantining later valid successes; RED→GREEN projection/recovery regressions. Finalcore140/config20/API+projection11 and targetbuild0warnings/errors; ownDLL-only cold installation.
+-2026-11-27 native follow-up: user confirms own-delivery rumble and peer-delivery silence on a joined client with one local chef/controller. Saved0.6.2 log confirms request Hook,40 accepted personal delivery/Combo outputs and177 silent remote successes;5 remote star selections also silent. No own-plugin error/observer fault recorded. Personal star output, controlled handoff, host and local multiple controllers remain pending. Documentation/evidence only; no new binary or configuration change.
+
+## 0.6.1-alpha — 2026-11-22 · personal attribution diagnostics
+
+- Preserve joined-client failure evidence:125 unresolved delivery/Combo/rejection events; all11 accepted automatic cues were team score milestones. No personal attribution success is inferred. User rejects team feedback.
+- Add optional read-only client chef carry/plate-station message observations and station identity to existing score diagnostics, gated by ScoreSourceProbe. No motor/audio calls, game state writes, new input polling, routing fallback or waveform changes.
+- Keep all v1.7 star/music and v1.6 feedback functionality. This is an attribution calibration build, not a personal multiplayer fix. The relationship between plate, actor, station and authoritative order result still needs native verification; station acceptance is not recipe success.
+- Core125/125, actual API/data9/9, Unity/net35/x86 build0warnings/errors. Configuration unchanged; no redundant configuration run. Native own/teammate/transfer comparison pending.
+
+## 0.6.0-alpha — 2026-11-22 · v1.7 candidate
+
+- First/second stars are always silent,55/145ms light haptics; third250ms plus supplied900ms simple sound; fourth630ms plus supplied10.667s cool music. Preserve actual thresholds, per-round/team once, highest-only crossing and same-delivery star/Combo/success selection.
+- Keep minimal controls,100% gain initially, immediate arbitration and danger/independent-negative stop. Four-star sound dropdown retains customcool plus original three shorter choices, explicitly permitted by user; third sound has its own cfg path. Old12 files remain; old1/2/3 music no longer preloads/plays automatically.
+- Bounded PCM11s with per-policy custom duration checks; no new runtime decoder/dependency. Hard silence in core/player, missing files mute only audio,0ms star cooldown retains commit dedup. Per-level audio-only1/2 fallback avoids swallowing delivery; known defaults migrate exactly with logs and preserve custom values/preferences.
+- New asset condition is user-stated noncommercial use, separately recorded pending source/full license. Not covered by old asset GPL record. No trimming/looping/volume edits.
+- Four-star playback temporarily mutes only native Music-source mute flags, tracking new/departing/destroyed sources and restoring independently on completion/interruption/focus/cleanup; game volume parameters/settings and SFX remain untouched. Preserve pending failed restores for bounded main-thread retry. BGM focus cleanup is independent of background-feedback opt-out.
+- Core125/125, actual cfg20/20, metadata8/8, actual game build0warnings/errors. Independent review findings fixed via RED→GREEN; new native star/music/source binding acceptance pending. No new multiplayer/SDL/HUD scope.
+
+## 0.5.1-alpha — 2026-11-22
+
+- Add the three approved F6 automatic-feature switches: star haptics, star audio and grouped hazard haptics. Keep global masters/sliders, all explicit previews and all music/waveforms.
+- Intersect star channels with their masters; disabled stars no longer take precedence over ordinary delivery/Combo. Stop only the affected active channel, without replay. Explicit previews bypass features while obeying masters/cooldowns/budgets; F10 preserves feature preferences.
+- Group burn-warning/burned/fire/reminders without enabling default-off FoodBurned or suppressing rejected/expired orders. Defer recurring fire reminders on group change. Migrate legacy Stars.Enabled with explicit new-key precedence; preserve personal settings.
+- Software: core110/110, actual cfg18/18, Unity/net35/x86 build0 warnings/errors. User subsequently confirmed all four native controls checks normal; retained logs partially corroborate toggles/previews, not every gameplay step. Retain0.5.0 user preview/comfort acceptance separately from unobserved real automatic events. v1.7 is under requirements audit only.
+
+## 0.5.0-alpha — 2026-11-22 · v1.6 candidate
+
+- Adopt confirmed Combo A: trusted upgrades only; same-tier/capped or unclassified success uses one90ms cue. Out-of-order requires a previously confirmed combo; actual rejection remains separate.
+- Import validated/generated balanced v1.6 defaults: out-of-order315ms, rejection430ms, expiry505ms, burn-warning450ms, fire820ms and470ms reminders. Negative/emergency ceiling950ms; action500ms/star850ms retained. Exact old defaults migrate; custom precision, invalid-profile mute and personal settings remain.
+- Centralize routing, staleness, dedup, per-device cooldown/active-time budgets, preemption/cancellation and stop. Hooks enqueue; no stale replay. Same-message arbitration stays immediate. One team audio emission can accompany separately mapped outputs in core tests.
+- Retain1–4-star haptics and all12 music files. Same-delivery star replaces ordinary/Combo; independent later rejection/expiry can interrupt celebration, as user confirmed. Positive success no longer uses a numeric-priority audio interruption threshold.
+- Add inspected-build-only client fire/cooking candidate hooks, aggregate incident edges, max5-second reminder frequency, clear/cancel and applied-state probe. FoodBurned remains defaultoff. Real hook/comfort acceptance is pending; no new game mechanism or score changes.
+- Default automatic throw/catch off, keep hooks/previews. Keep F6 two masters/two sliders; fine switches in cfg. Preserve gameSFX following/current relative100%, overriding stale65% source wording. Uninstalled0.4.3 left-fill/unified-motor drafts superseded by user's v1.6 dual-channel choice.
+- Add future backend descriptor/verified-identity exclusivity contract and fake SDL descriptor test; no SDL native/Steam Input runtime or broad multiplayer claim. Unknown multi/online owner never gets guessed Combo.
+
+## 0.4.2-alpha — 2026-11-21
+
+- Simplify F6 to independent haptic/audio masters with master intensity/relative volume. Keep pack selection and all event/star previews; remove per-event toggles/gains and the redundant four-mode selector.
+- Both automatic feedback and explicit previews respect the channel masters. Disabling one channel stops only that channel; enabling does not replay. F10 remains all-off/all-on, including mixed channel states.
+- Retire old per-event keys and extra gains; migrate legacy combined switch/mode once, honoring explicit new keys. Preserve custom patterns, binding, master intensity, relative volume and selected pack. Keep original Combo baseline and all waveform timing/priorities.
+- User confirms G star feedback/music works; record the actual0.4.1 TurboSwing1–4 preview log separately from unobserved real NGP milestones. Roadmap now maps every A–G stage and later optional scope.
+
+## 0.4.1-alpha — 2026-11-21
+
+- Remove both rejected shipped sound sets and generated-tone fallback. AddUltra Victory v3: TurboSwing(default), ChampionFanfare and KitchenRock,12uneditedPCM WAVs with sourceMIDI/scripts/credits.
+- Preserve full3.80–4.05s four-star tracks; decoder bound5s, haptic profiles remain180/285/425/660ms with850ms ceiling. No mixed-star selector or unbundled crowd layers.
+- Default relative gain100% through existing gameSFX group; keep user volume slider and game mute/master behavior. Existing custom gains remain; local user explicitly approved .7006757->1.
+- Migrate only retiredpack selections; keep unknown/custom IDs, other preferences and user-owned packs. Empty catalog safely has no audio. Remove obsolete generated-tone duration key and tests tied only to the removed feature.
+- Retain0.4 functional/user evidence separately from rejected audio quality. New native music/volume acceptance remains pending.
+
+## 0.4.0-alpha — 2026-11-21
+
+- Adopt formalv1.4 star haptics180/285/425/660ms within850ms; migrate only known old defaults, retaining custom profiles and user gains/volume/binding.
+- Preload four supplied unedited PCM16 WAV jingles and retain original generated crisp rewards. Add persistent all-star sound-pack dropdown to the existing star test tab; new local pack manifests are discovered on restart.
+- User approved retaining3.25s four-star audio. Include supplied GPL-2.0 notices/attribution, source MIDI and generation script, without SoundFont/OGG duplicates/cache or runtime dependencies.
+- Hooks queue feedback; Update plays prepared clips and schedules motors. Higher stars replace existing celebration, failure/expiry can preempt; switching/close/pause/focus/round/disconnect/disable stop own outputs without replay.
+- Include approved0.3.1 intensity controls/two tabs and short-window whole-body scroll. New game/UI/music comfort and hardware synchronization remain pending user acceptance; no real fire/multiplayer Hook is added.
+
+## 0.3.1-alpha — 2026-11-21
+
+- Add F6 master intensity0–100% and individual event gain0–200%, default100% retaining existing profiles. Scale uniformly within motor limits, preserving timings/balance; zero gain never owns a motor task.
+- Split the existing panel into event settings and explicit star tests. Each star has audio-only/haptics-only/combined manual buttons and its own gain; auto mode is not mutated.
+- Preserve existing user intensity/audio/binding values and source/counters/input/cursor behavior. New gain/mode tests and actual config integration pass; new layout awaits game acceptance.
+- 0.3 actual user report/log confirms one selected feedback per delivery, Combo progression/out-of-order/recovery, star1/3 audio. Unobserved cases remain pending.
+
+## 0.3.0-alpha — candidate delivery/Combo/star feedback
+
+- Implement runtime-calibrated client delivery classification and authoritative ×1–×4 feedback, preserving raw streak and per-team/session state. Retain disabled legacy success preference during configuration migration.
+- Add first committed-score threshold milestones from current-level data, no retroactive/repeated star celebration, highest-only for multiple crossings. Real NGP gates still determine fourth availability.
+- User approved immediate arbitration within the verified single client message, replacing the proposed fixed120ms wait. One final waveform, no old generic double-pulse duplicate.
+- Add original generated PCM reward sounds, independent2D source routed through game SFX mixer, four output modes and gain0.65 applied once. Audio exceptions cannot break haptics or menu/input cleanup.
+- Add editable candidate patterns, approved two-part115ms catch and145ms one-star haptics-only tail; four-star default500ms. Extend the existing measured/scrolled F6 page with category/Combo/star controls, previews, audio modes and volume.
+- Manual audio previews in menu/pause approved; automatic feedback is gated there. Focus/pause/scene/disable stop own outputs. No new danger hooks, multiplayer mapping, custom music or animation.
+- Compilation and shared-core/config/game-data tests pass; actual0.3 interaction, audio, waveform quality and star events remain pending. Current source calibration is documented separately from new feature acceptance.
+
+## 0.2.3-alpha — 2026-11-21 · score source calibration
+
+- Add opt-in, read-only Prefix/Postfix capture around client score synchronization. Freeze before/payload/after score values and log actual multiplier, raw Combo, delivery metadata and observation context.
+- Read current session/platform/player-count thresholds and both game's four-star NGP gates; reject invalid/mismatched threshold candidates. No hardcoded score tables.
+- Add immutable threshold boundary tests. Probe failure is isolated from existing feedback.
+- Preserve 0.2.2 haptic patterns and F6/F10 behavior. New classified delivery/Combo/star/audio effects remain pending actual data calibration; static inspection/build are not game verification.
+- Add public README, ignore rules and latest formal v1.3 requirements to the GitHub repository. Exclude game DLLs, build output, caches and local configuration.
+
 ## 0.2.2-alpha — 2026-11-21
 
 - Fixed screenshot-confirmed clipping caused by fixed-height Chinese explanatory labels.

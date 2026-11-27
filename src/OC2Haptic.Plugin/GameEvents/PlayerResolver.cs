@@ -1,10 +1,22 @@
 using OC2Haptic.Core;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace OC2Haptic.GameEvents
 {
     internal static class PlayerResolver
     {
+        internal static PersonalActor ReadPersonalActor(Component chef)
+        {
+            if(chef==null)return null;
+            var identity=chef.GetComponent<PlayerIDProvider>();
+            if(identity==null)return null;
+            bool local=identity.IsLocallyControlled();int pad=-1;bool keyboard=false;
+            var controls=chef.GetComponent<PlayerControls>();
+            if(local && controls!=null && controls.ControlScheme!=null)
+            {var input=PlayerInputLookup.GetPadForPlayer(controls.ControlScheme.Player);pad=(int)input;keyboard=PCPadInputProvider.IsKeyboard(input);}
+            return new PersonalActor(chef.gameObject.GetInstanceID(),(int)identity.GetID(),pad,(int)identity.GetTeam(),local,keyboard);
+        }
         internal static GameEvent FromFlight(Component item, object thrower, double nowMs)
         {
             if (item == null) return null;
@@ -28,7 +40,7 @@ namespace OC2Haptic.GameEvents
         }
 
         internal static GameEvent FromTeam(GameEventType type, int eventTeam, int orderId, int boundPad,
-            double nowMs, string source)
+            double nowMs, string source,bool requireSingleDevice=false)
         {
             var providers = PlayerIDProvider.s_AllProviders;
             if (providers == null || boundPad < 0) return null;
@@ -51,8 +63,30 @@ namespace OC2Haptic.GameEvents
                 player = (int)candidate;
             }
             if (localTeam < 0) return null;
+            if(requireSingleDevice)
+            {
+                var participants=new List<OutputParticipant>();
+                for(int index=0;index<providers.Count;index++)
+                {
+                    var provider=providers._items[index];if(provider==null)continue;
+                    var controls=provider.GetComponent<PlayerControls>();int pad=-1;bool keyboard=false;
+                    if(controls!=null && controls.ControlScheme!=null)
+                    {var input=PlayerInputLookup.GetPadForPlayer(controls.ControlScheme.Player);pad=(int)input;keyboard=PCPadInputProvider.IsKeyboard(input);}
+                    participants.Add(new OutputParticipant((int)provider.GetTeam(),pad,provider.IsLocallyControlled(),keyboard));
+                }
+                if(!LocalOutputMap.IsSoleOutput(participants,eventTeam,boundPad))return null;
+            }
             return new GameEvent(type, EventScope.LocalTeam, nowMs, player, boundPad, orderId, true, false,
                 EventConfidence.ConfirmedState, source, eventTeam, localTeam);
+        }
+        internal static GameEvent FromHazard(GameEventType type,int entity,int boundPad,double nowMs,string source,bool allowTeamFallback)
+        {
+            var session=GameUtils.GetGameSession();if(session==null || session.GameModeKind!=GameModes.Kind.Campaign)return null;
+            // Only a local team confirmed from the selected chef, never a world-object name or slot number.
+            for(int team=0;team<=1;team++)
+            {var result=FromTeam(type,team,entity,boundPad,nowMs,source,!allowTeamFallback);
+                if(result!=null && result.TeamIdentity==result.LocalTeamIdentity)return result;}
+            return null;
         }
     }
 }

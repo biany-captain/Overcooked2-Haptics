@@ -19,7 +19,7 @@ namespace OC2Haptic.Core
         public bool Play(int index, string eventKey, HapticPattern pattern, int priority,
             int cooldownMs, double nowMs, float masterIntensity)
         {
-            if (index < 0 || index > 3 || string.IsNullOrEmpty(eventKey) || pattern == null ||
+            if (index < 0 || index > 3 || string.IsNullOrEmpty(eventKey) || pattern == null || !pattern.HasMotorOutput ||
                 cooldownMs < 0 || double.IsNaN(nowMs) || double.IsInfinity(nowMs) || nowMs < 0 ||
                 float.IsNaN(masterIntensity) || float.IsInfinity(masterIntensity) || masterIntensity <= 0 || masterIntensity > 1)
                 return false;
@@ -35,6 +35,7 @@ namespace OC2Haptic.Core
             if (state.Pattern != null && nowMs - state.StartedMs >= state.Pattern.TotalDurationMs) Finish(index);
             if (state.Pattern != null && priority <= state.Priority) return false;
             state.Pattern = pattern;
+            state.Key = eventKey;
             state.StartedMs = nowMs;
             state.Priority = priority;
             state.Intensity = masterIntensity;
@@ -83,10 +84,24 @@ namespace OC2Haptic.Core
             }
         }
 
+        // Replace one owned task even when the incoming event intentionally has no motors.
+        // Keep recent event keys: cancellation must not bypass action cooldowns.
+        public void Cancel(int index){if(index>=0 && index<outputs.Length)Finish(index);}
+
+        public bool IsBusyAtOrAbove(int index, int priority, double nowMs)
+        {
+            if (index < 0 || index > 3) return false;
+            OutputState state = outputs[index];
+            return state.Pattern != null && nowMs - state.StartedMs < state.Pattern.TotalDurationMs && state.Priority >= priority;
+        }
+        public bool IsPlaying(int index,string key,double nowMs)
+        {return index>=0 && index<outputs.Length && outputs[index].Pattern!=null && outputs[index].Key==key && nowMs-outputs[index].StartedMs<outputs[index].Pattern.TotalDurationMs;}
+
         private void Finish(int index)
         {
             OutputState state = outputs[index];
             state.Pattern = null;
+            state.Key = null;
             if (state.Touched) backend.SetMotors(index, 0, 0);
             state.Touched = false;
             state.LastLeft = 0; state.LastRight = 0;
@@ -109,6 +124,7 @@ namespace OC2Haptic.Core
             internal int Priority;
             internal float Intensity;
             internal bool Touched;
+            internal string Key;
             internal float LastLeft;
             internal float LastRight;
             internal readonly Dictionary<string, double> RecentEvents = new Dictionary<string, double>();
